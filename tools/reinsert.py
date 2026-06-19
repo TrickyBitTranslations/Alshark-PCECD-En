@@ -1,12 +1,14 @@
-"""Reinsert translated tier-1 script into a patched disc.
+"""Reinsert translated script into a patched disc.
 
-Rebuilds each block from script/system1.tsv (english where present, original bytes
-otherwise), repoints the table, splices it back into the cooked data track, recomputes
-Mode-1 EDC/ECC, and (optionally) builds the CHD.
+Rebuilds each block from its TSV (english where present, original bytes otherwise),
+repoints the table, splices it into the cooked data track, recomputes Mode-1 EDC/ECC,
+and (optionally) builds the CHD. Handles both tiers:
+  system1.tsv   relative-pointer blocks, 0x00-terminated entries
+  cutscene.tsv  $C000 absolute-pointer blocks (#-engine)
 
 With no translations the output is byte-identical to the source (lossless round-trip).
 A block whose rebuilt size exceeds its original byte slot is flagged, not forced; those
-get relocated (see noredist reloc notes) once their loader is mapped.
+get relocated (proven recno-patch, see noredist reloc notes) once their loader is mapped.
 """
 import argparse
 import collections
@@ -15,17 +17,26 @@ import shutil
 import subprocess
 
 import tsv
-from alshark import blocks, textcodec
+from alshark import blocks, textcodec, dialogcodec
 from alshark.cdecc import fix_mode1
 
 SEC = 2352
 DATA = 16
 TRACK2 = 3590
 
+# tsv name -> (rebuild fn, codec, append 0x00 terminator)
+TIERS = {
+    'system1.tsv': (blocks.rebuild, textcodec, True),
+    'cutscene.tsv': (blocks.rebuild_c000, dialogcodec, False),
+}
+
+
+def tier_for(tsv_path):
+    return TIERS.get(os.path.basename(tsv_path), TIERS['system1.tsv'])
+
 
 def load_blocks(tsv_path):
-    """Return {base:int -> [(english, raw_bytes)] in entry order} from the TSV.
-    File order is the block's entry order, so rows are kept as read."""
+    """{base:int -> [(english, raw_bytes)] in entry order}. File order is entry order."""
     out = collections.OrderedDict()
     for r in tsv.read(tsv_path):
         out.setdefault(int(r['block_off'], 16), []).append(
@@ -33,23 +44,24 @@ def load_blocks(tsv_path):
     return out
 
 
-def entry_bytes(english, raw):
+def entry_bytes(english, raw, codec, auto_term):
     if not english:
         return raw
-    b = textcodec.encode(english)
-    if not b.endswith(b'\x00'):
-        b += b'\x00'          # entries are 0x00-terminated; keep that invariant
+    b = codec.encode(english)
+    if auto_term and not b.endswith(b'\x00'):
+        b += b'\x00'
     return b
 
 
 def build(work, tsv_path):
     """Return (patches, flagged). patches = [(cooked_off, new_bytes)]."""
+    rebuild, codec, auto_term = tier_for(tsv_path)
     cooked = open(os.path.join(work, 'track02.iso'), 'rb').read()
     patches, flagged = [], []
     for base, items in sorted(load_blocks(tsv_path).items()):
-        orig = blocks.rebuild([raw for _, raw in items])
+        orig = rebuild([raw for _, raw in items])
         assert cooked[base:base + len(orig)] == orig, f"block {base:#x} not as extracted"
-        new = blocks.rebuild([entry_bytes(en, raw) for en, raw in items])
+        new = rebuild([entry_bytes(en, raw, codec, auto_term) for en, raw in items])
         if new == orig:
             continue
         if len(new) > len(orig):
@@ -92,13 +104,15 @@ def main():
     args = ap.parse_args()
 
     if args.check:                       # CI backstop: fit check from the TSV alone
+        _, codec, auto_term = tier_for(args.tsv)
         bad = 0
         for base, items in sorted(load_blocks(args.tsv).items()):
-            new = 2 * len(items) + sum(len(entry_bytes(en, raw)) for en, raw in items)
+            new = 2 * len(items) + sum(
+                len(entry_bytes(en, raw, codec, auto_term)) for en, raw in items)
             if new > 0x2000:
                 print(f"OVERFLOW block {base:08x}: {new} bytes > 8192 page cap")
                 bad += 1
-        print(f"check: {bad} block(s) over the 8KB page cap")
+        print(f"check {os.path.basename(args.tsv)}: {bad} block(s) over the 8KB page cap")
         raise SystemExit(1 if bad else 0)
 
     patches, flagged = build(args.work, args.tsv)

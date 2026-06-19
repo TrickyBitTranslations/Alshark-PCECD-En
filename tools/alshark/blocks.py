@@ -134,6 +134,23 @@ def split_c000(data, base, ptrs, blocklen):
     return out
 
 
+def rebuild_c000(entries):
+    """entries: list of raw bytes. Rebuilt $C000 block (absolute $C000-based pointer
+    table + entries); like rebuild() but pointers carry the $C000 load base."""
+    table_size = 2 * len(entries)
+    offs = []
+    cur = table_size
+    for r in entries:
+        offs.append(cur)
+        cur += len(r)
+    out = bytearray()
+    for o in offs:
+        out += struct.pack('<H', 0xC000 + o)
+    for r in entries:
+        out += r
+    return bytes(out)
+
+
 def layout(data):
     """Return per-block layout info: base, used length, gap to next block.
     The gap is occupied by unrelated map data, so it is NOT growth headroom."""

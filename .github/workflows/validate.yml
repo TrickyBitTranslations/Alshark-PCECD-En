@@ -16,4 +16,6 @@ jobs:
         with:
           python-version: "3.12"
       - name: Fit-check the script (no game dump needed; uses raw_hex in the TSV)
-        run: python tools/reinsert.py --check
+        run: |
+          python tools/reinsert.py --check --tsv script/system1.tsv
+          python tools/reinsert.py --check --tsv script/cutscene.tsv
