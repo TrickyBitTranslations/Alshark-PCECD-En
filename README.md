@@ -3,6 +3,8 @@
 Tooling and translation data for an English patch of **Alshark** (アルシャーク), a
 PC Engine Super CD-ROM2 RPG (Right Stuff / Victor Entertainment, 1994).
 
+**Progress and how to help: https://trickybittranslations.github.io/Alshark-PCECD-En/**
+
 No game data is included. Bring your own `Alshark (Japan).chd` and a PC Engine Super
 System Card BIOS. This repo holds only original tooling, the translation script, and
 the site.

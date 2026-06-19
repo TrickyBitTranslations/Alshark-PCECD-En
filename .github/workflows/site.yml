@@ -3,7 +3,7 @@ name: deploy-site
 on:
   push:
     branches: [main]
-    paths: ["script/**", "site/**", "tools/**"]
+    paths: ["script/**", "site/**", "tools/**", ".github/scripts/**"]
   issues:
     types: [opened, edited, closed, reopened, labeled, unlabeled]
   schedule:
