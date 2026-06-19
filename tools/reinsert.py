@@ -18,7 +18,7 @@ import shutil
 import subprocess
 
 import tsv
-from alshark import blocks, textcodec, dialogcodec
+from alshark import blocks, textcodec, dialogcodec, fontpatch
 from alshark.cdecc import fix_mode1
 
 SEC = 2352
@@ -93,12 +93,12 @@ def apply(patches, extracted, out_bin, out_cue):
     affected = set()
     with open(out_bin, 'r+b') as f:
         for off, new in patches:
-            for i in range(len(new)):
-                csec, _ = divmod(off + i, 2048)
-                affected.add(TRACK2 + csec)
-            csec, ci = divmod(off, 2048)
-            f.seek((TRACK2 + csec) * SEC + DATA + ci)
-            f.write(new)                  # contiguous; never spans a block past its slot
+            for i, b in enumerate(new):   # per-byte: a patch may span 2048-byte sectors
+                csec, ci = divmod(off + i, 2048)
+                rs = TRACK2 + csec
+                affected.add(rs)
+                f.seek(rs * SEC + DATA + ci)
+                f.write(bytes([b]))
         for rs in sorted(affected):
             f.seek(rs * SEC)
             s = bytearray(f.read(SEC))
@@ -134,14 +134,13 @@ def main():
         print(f"check {os.path.basename(args.tsv)}: {bad} block(s) over budget")
         raise SystemExit(1 if bad else 0)
 
-    patches, flagged = build(args.work, args.tsv)
-    print(f"{len(patches)} block(s) changed, {len(flagged)} flagged for relocation")
+    block_patches, flagged = build(args.work, args.tsv)
+    print(f"{len(block_patches)} block(s) changed, {len(flagged)} flagged for relocation")
     for base, o, n in flagged:
         print(f"  OVERFLOW block {base:08x}: {o} -> {n} bytes (+{n - o})")
-    if not patches:
-        print("no in-place changes (lossless round-trip)")
-        return
 
+    # the font patch (single-byte ASCII -> text) is always part of a built disc
+    patches = block_patches + fontpatch.patches()
     os.makedirs(args.out, exist_ok=True)
     out_bin = os.path.join(args.out, 'Alshark.bin')
     out_cue = os.path.join(args.out, 'Alshark.cue')

@@ -5,14 +5,50 @@ the half-width-katakana codes with the font remapped to hiragana glyphs, so they
 to hiragana. Control bytes are kept as [XX] tokens; the #/$/% grammar is not decoded yet.
 Every row also stores raw_hex, so untranslated lines round-trip byte-exact regardless.
 
-English is written as full-width Shift-JIS (encode emits text as-is); avoid a bare # $ %
-in english since those are the engine's control bytes.
+English is written as plain ASCII (1 byte per char); the font patch (alshark.fontpatch)
+renders 0x20-0x7E as text, and encode() word-wraps it to the dialogue box. Avoid a bare
+# $ % @ in english since those are the engine's control bytes.
 """
 import re
 import unicodedata
 
 LEAD = lambda c: (0x81 <= c <= 0x9F) or (0xE0 <= c <= 0xEF)
 _TOKEN = re.compile(r'<([0-9a-fA-F]{2})>')
+
+BOX_CELLS = 18                       # the dialogue box is 18 full-width glyphs wide
+_WTOK = re.compile(r'<[0-9a-fA-F]{2}>|[#%$@<>]|\s+|[^\s#%$@<>]+')
+
+
+def wrap(s, width=BOX_CELLS, name_w=6):
+    """Insert @ line-breaks at word boundaries so each rendered line fits the box; the
+    engine otherwise hard-wraps mid-word. Markup (<XX>, # % < >) counts as zero width,
+    $ name inserts as an approximate width, <05> (text start) and an existing @ reset the
+    line. A line already under width keeps any author-placed @, so manual wrapping wins."""
+    out, col, space = [], 0, ''
+    for a in _WTOK.findall(s):
+        if a == '@':
+            out.append('@'); col = 0; space = ''
+        elif a == '$':
+            if space and col:
+                out.append(space); col += len(space)
+            space = ''
+            out.append('$'); col += name_w
+        elif _TOKEN.fullmatch(a):
+            out.append(a)
+            if a == '<05>':              # text-start marker begins a fresh line
+                col = 0; space = ''
+        elif a in ('#', '%', '<', '>'):
+            out.append(a)
+        elif a.isspace():
+            space = a
+        else:                            # a visible word
+            if col and col + len(space) + len(a) > width:
+                out.append('@'); col = 0; space = ''
+            elif space:
+                out.append(space); col += len(space)
+            space = ''
+            out.append(a); col += len(a)
+    return ''.join(out)
 
 
 def _sb_hira(b):
@@ -66,6 +102,7 @@ def _enc_text(seg):
 
 
 def encode(s):
+    s = wrap(s)
     out = bytearray()
     pos = 0
     for m in _TOKEN.finditer(s):
