@@ -1,0 +1,66 @@
+name: apply-suggestion
+
+# Maintainers comment "/apply" on a validated suggestion issue to commit the
+# translation into the TSV. Permission is enforced by author_association.
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  apply:
+    if: >
+      startsWith(github.event.comment.body, '/apply') &&
+      contains(github.event.issue.labels.*.name, 'suggestion') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'),
+               github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Re-validate against current TSV state
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          python .github/scripts/validate_suggestion.py > report.md
+          ok=$?
+          cat report.md
+          if [ "$ok" != "0" ]; then
+            { echo "### Could not apply"; echo ""; cat report.md; } > fail.md
+            gh issue comment ${{ github.event.issue.number }} \
+              --repo ${{ github.repository }} --body-file fail.md
+            exit 1
+          fi
+      - name: Apply to the TSV
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: python .github/scripts/apply_suggestion.py
+      - name: Fit check
+        run: python tools/reinsert.py --check
+      - name: Commit
+        run: |
+          git config user.name "trickybit-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add script/
+          git commit -m "Apply suggestion #${{ github.event.issue.number }}"
+          git push
+      - name: Refresh the site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-site --repo ${{ github.repository }} || true
+      - name: Close and thank
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} \
+            --repo ${{ github.repository }} \
+            --body "Applied to the script in $(git rev-parse --short HEAD). Thanks!"
+          gh issue close ${{ github.event.issue.number }} --repo ${{ github.repository }}

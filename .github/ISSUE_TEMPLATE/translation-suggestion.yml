@@ -1,0 +1,41 @@
+name: Translation suggestion
+description: Propose an English translation for one line of the script
+title: "[tl] "
+labels: ["suggestion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Suggest a translation for **one line**. Find the line in `script/*.tsv`
+        (or the web UI) and copy its identifiers below. Syntax & style rules:
+        see [CONTRIBUTING.md](https://github.com/TrickyBitTranslations/Alshark-PCECD-En/blob/main/CONTRIBUTING.md). A bot will
+        validate your suggestion (markup, control codes, scene byte budget) and
+        comment the result here.
+  - type: input
+    id: file
+    attributes:
+      label: Script file
+      description: "The TSV the line lives in (auto-filled from the site). One of: system1.tsv, cutscene.tsv"
+      placeholder: cutscene.tsv
+    validations:
+      required: true
+  - type: input
+    id: line
+    attributes:
+      label: Line ID
+      description: "block_off and str_off from the TSV row, e.g.: 0x785000 0x54a"
+      placeholder: "0x785000 0x54a"
+    validations:
+      required: true
+  - type: textarea
+    id: original
+    attributes:
+      label: Original Japanese
+      description: The line being translated (auto-filled when you come from the site; otherwise paste it from the TSV).
+  - type: textarea
+    id: translation
+    attributes:
+      label: Proposed translation
+      description: "Keep any <XX> control codes from the original. See CONTRIBUTING.md."
+    validations:
+      required: true

@@ -1,0 +1,33 @@
+# Game data is NOT distributed here - bring your own copies. These names are
+# ignored so they can never be committed by accident.
+*.img
+*.D88
+*.cue
+*.ccd
+*.sub
+*.iso
+*.TState
+*.sav
+
+# Derived / build outputs
+floppy_files/
+extracted/
+work/
+build/
+*_EN.D88
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Editor/OS noise
+.DS_Store
+
+# Site data is generated at deploy time (tools/make_site_data.py)
+site/data/
+
+# Release patches built by build.ps1 -Release
+dist/
+noredist/

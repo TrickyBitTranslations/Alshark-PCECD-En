@@ -1,0 +1,19 @@
+name: validate-translations
+
+on:
+  push:
+    paths: ["script/**", "tools/**"]
+  pull_request:
+    paths: ["script/**", "tools/**"]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fit-check the script (no game dump needed; uses raw_hex in the TSV)
+        run: python tools/reinsert.py --check
