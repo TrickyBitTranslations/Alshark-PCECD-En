@@ -44,19 +44,24 @@ def main():
         block_entries = defaultdict(list)
         for r in tsv.read(path):
             bo, en, st = r["block_off"], r["english"].strip(), r["status"].strip()
+            raw = bytes.fromhex(r["raw_hex"])
             line = {"id": r["str_off"], "sp": r["speaker"], "jp": r["text"], "en": en}
             if st:
                 line["st"] = st
+            structural = raw == b"\x00"      # pure terminator/padding, nothing to translate
+            if structural:
+                line["x"] = 1                # dimmed on the site, excluded from all counts
             blocks[bo].append(line)
-            block_entries[bo].append((en, bytes.fromhex(r["raw_hex"])))
-            t = tally[path.name]
-            t["lines"] += 1
-            if en:
-                t["done"] += 1
-            if st == "human":
-                t["human"] += 1
-            elif st == "ignore":
-                t["ignore"] += 1
+            block_entries[bo].append((en, raw))
+            if not structural:
+                t = tally[path.name]
+                t["lines"] += 1
+                if en:
+                    t["done"] += 1
+                if st == "human":
+                    t["human"] += 1
+                elif st == "ignore":
+                    t["ignore"] += 1
         files[path.name] = dict(blocks)
         for bo, entries in block_entries.items():
             budgets[f"{path.name}:{bo}"] = {"used": block_used(codec, entries), "limit": PAGE}
