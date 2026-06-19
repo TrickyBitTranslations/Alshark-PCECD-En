@@ -12,6 +12,7 @@ get relocated (proven recno-patch, see noredist reloc notes) once their loader i
 """
 import argparse
 import collections
+import json
 import os
 import shutil
 import subprocess
@@ -23,6 +24,20 @@ from alshark.cdecc import fix_mode1
 SEC = 2352
 DATA = 16
 TRACK2 = 3590
+PAGE = 0x2000
+
+
+def load_budgets():
+    """{tsvname:0xblock -> max in-place bytes} committed by export_script (the trailing
+    free padding before scene code / next data). Falls back to the 8KB page."""
+    try:
+        return json.load(open('script/budgets.json'))
+    except OSError:
+        return {}
+
+
+def budget_for(budgets, tsv_path, base):
+    return budgets.get('%s:0x%x' % (os.path.basename(tsv_path), base), PAGE)
 
 # tsv name -> (rebuild fn, codec, append 0x00 terminator)
 TIERS = {
@@ -56,6 +71,7 @@ def entry_bytes(english, raw, codec, auto_term):
 def build(work, tsv_path):
     """Return (patches, flagged). patches = [(cooked_off, new_bytes)]."""
     rebuild, codec, auto_term = tier_for(tsv_path)
+    budgets = load_budgets()
     cooked = open(os.path.join(work, 'track02.iso'), 'rb').read()
     patches, flagged = [], []
     for base, items in sorted(load_blocks(tsv_path).items()):
@@ -64,10 +80,11 @@ def build(work, tsv_path):
         new = rebuild([entry_bytes(en, raw, codec, auto_term) for en, raw in items])
         if new == orig:
             continue
-        if len(new) > len(orig):
-            flagged.append((base, len(orig), len(new)))
+        limit = budget_for(budgets, tsv_path, base)
+        if len(new) > limit:
+            flagged.append((base, limit, len(new)))
             continue
-        patches.append((base, new))      # shorter is fine; original tail left untouched
+        patches.append((base, new))      # grows only into free padding; never past it
     return patches, flagged
 
 
@@ -105,14 +122,16 @@ def main():
 
     if args.check:                       # CI backstop: fit check from the TSV alone
         _, codec, auto_term = tier_for(args.tsv)
+        budgets = load_budgets()
         bad = 0
         for base, items in sorted(load_blocks(args.tsv).items()):
             new = 2 * len(items) + sum(
                 len(entry_bytes(en, raw, codec, auto_term)) for en, raw in items)
-            if new > 0x2000:
-                print(f"OVERFLOW block {base:08x}: {new} bytes > 8192 page cap")
+            limit = budget_for(budgets, args.tsv, base)
+            if new > limit:
+                print(f"OVERFLOW block {base:08x}: {new} bytes > {limit} budget")
                 bad += 1
-        print(f"check {os.path.basename(args.tsv)}: {bad} block(s) over the 8KB page cap")
+        print(f"check {os.path.basename(args.tsv)}: {bad} block(s) over budget")
         raise SystemExit(1 if bad else 0)
 
     patches, flagged = build(args.work, args.tsv)

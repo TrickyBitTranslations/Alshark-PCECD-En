@@ -9,10 +9,13 @@ Re-running carries over english + status keyed on (block_off, str_off), so it ne
 wipes translator work.
 """
 import argparse
+import json
 import os
 
 import tsv
 from alshark import blocks, textcodec, dialogcodec
+
+PAGE = 0x2000   # a block loads into one 8KB logical page
 
 # (output, block finder, entry splitter, codec, str_off bias)
 TIERS = [
@@ -21,7 +24,18 @@ TIERS = [
 ]
 
 
-def export(data, out, find, split, codec, bias):
+def block_budget(data, base, blen):
+    """Max in-place size for a block: its bytes plus the trailing zero padding before
+    the next data (scene code / map data), capped at the 8KB page. Needs the disc, so
+    it is computed here and committed (script/budgets.json) for the CI checks."""
+    e = base + blen
+    z = 0
+    while e + z < len(data) and data[e + z] == 0:
+        z += 1
+    return min(blen + z, PAGE)
+
+
+def export(data, out, find, split, codec, bias, budgets):
     carry = {}
     if os.path.exists(out):
         for r in tsv.read(out):
@@ -29,6 +43,7 @@ def export(data, out, find, split, codec, bias):
     rows = []
     bs = find(data)
     for base, ptrs, blen in bs:
+        budgets['%s:0x%x' % (os.path.basename(out), base)] = block_budget(data, base, blen)
         for i, raw in enumerate(split(data, base, ptrs, blen)):
             bo, so = '0x%x' % base, '0x%x' % (ptrs[i] - bias)
             en, st = carry.get((bo, so), ('', ''))
@@ -46,8 +61,12 @@ def main():
     ap.add_argument('--work', default='work')
     args = ap.parse_args()
     data = open(os.path.join(args.work, 'track02.iso'), 'rb').read()
+    budgets = {}
     for out, find, split, codec, bias in TIERS:
-        export(data, out, find, split, codec, bias)
+        export(data, out, find, split, codec, bias, budgets)
+    with open('script/budgets.json', 'w') as f:
+        json.dump(budgets, f, separators=(',', ':'), sort_keys=True)
+    print(f"wrote script/budgets.json: {len(budgets)} block budgets")
 
 
 if __name__ == '__main__':

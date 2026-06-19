@@ -34,6 +34,8 @@ def block_used(codec, entries):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
+    budget_file = ROOT / "script" / "budgets.json"
+    committed = json.loads(budget_file.read_text()) if budget_file.exists() else {}
     files = {}
     tally = defaultdict(lambda: {"lines": 0, "done": 0, "human": 0, "ignore": 0})
     budgets = {}
@@ -64,7 +66,9 @@ def main():
                     t["ignore"] += 1
         files[path.name] = dict(blocks)
         for bo, entries in block_entries.items():
-            budgets[f"{path.name}:{bo}"] = {"used": block_used(codec, entries), "limit": PAGE}
+            key = f"{path.name}:{bo}"
+            budgets[key] = {"used": block_used(codec, entries),
+                            "limit": committed.get(key, PAGE)}
 
     (OUT / "script.json").write_text(
         json.dumps(files, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
