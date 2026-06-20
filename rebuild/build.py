@@ -52,6 +52,26 @@ def blob_patches():
     return [(off, open(os.path.join(HERE, 'incbin', n), 'rb').read()) for off, n in BLOBS]
 
 
+# Character/item name table (bank 0x7A $D066 = cooked 0x784066): NUL-terminated, scan-indexed
+# strings, edited via script/names.tsv (entries 0..25 are the cast; 26+ weapons/items). Scan
+# indexing needs no repointing, so entries grow/shrink freely; the table must fit before the
+# next block at 0x785000.
+NAME_TBL = 0x784066
+
+
+def name_patch(cooked):
+    import tsv
+    rows = list(tsv.read(os.path.join(ROOT, 'script', 'names.tsv')))
+    blob = bytearray()
+    for r in rows:
+        en = r.get('english', '')
+        blob += (en.encode('latin-1') if en else bytes.fromhex(r['raw_hex']))
+        blob += b'\x00'
+    if NAME_TBL + len(blob) > 0x785000:
+        raise SystemExit('name table overflow: %d > %d' % (len(blob), 0x785000 - NAME_TBL))
+    return [(NAME_TBL, bytes(blob))]
+
+
 def assemble(src):
     """Assemble one src/*.s -> build/<name>.bin, return the bytes."""
     name = os.path.splitext(src)[0]
@@ -167,6 +187,7 @@ def main():
         return
     patches = assemble_banks(cooked)
     patches += blob_patches()    # bake the VWF font at cooked 0xa1a000
+    patches += name_patch(cooked)   # English character names
     import reinsert               # splice English from cutscene.tsv into the #-engine blocks
     cut, flagged = reinsert.build(args.work, os.path.join(ROOT, 'script', 'cutscene.tsv'))
     for base, o, n in flagged:

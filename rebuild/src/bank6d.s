@@ -112,3 +112,27 @@ rh_loop:
   pla
   tam #$40                       ; restore MPR6
   rts
+
+; ---- name converter (sub-fn 0x1E): ASCII name byte -> our glyph, else original ($587E) ----
+.ORG nameDispatch - $4000        ; $401E (jump-table slot; was JMP $587E)
+  jmp name_conv
+
+.ORG $5F14 - $4000               ; proven-safe slack, after render_hook (ends $5F10)
+name_conv:
+  lda (scriptPtr)                ; the name byte ($16 = name-table pointer here)
+  cmp #$20
+  bcc nc_orig                    ; control byte
+  cmp #$7F
+  bcs nc_orig                    ; kana / 2-byte -> original name converter
+  sec
+  sbc #$20                       ; A = glyph index
+  sta glyphIdx
+  lda #$01
+  sta glyphFlag                  ; this glyph is ours -> render_hook draws it
+  lda #$60
+  sta fontCodeLo                 ; fullwidth 'A' (0x8260) for the cell; render hook overrides
+  lda #$82
+  sta fontCodeHi
+  jmp nameAdvRet                 ; $58F4: INC $16 (16-bit) + RTS
+nc_orig:
+  jmp nameConvOrig               ; $587E original name converter (kana)
