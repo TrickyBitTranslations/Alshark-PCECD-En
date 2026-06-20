@@ -131,3 +131,71 @@ def encode(s):
     if pos < len(s):
         out += _enc_text(s[pos:])
     return bytes(out)
+
+
+# --- cutscene merge ------------------------------------------------------------------
+# Scripted #-engine cutscenes carry control codes the interpreter navigates by (CD-stream
+# seeks `#<XX 00 YY>`, flow/inline-`%` codes, box `#` commands). Those code bytes are NOT
+# all round-trippable through the markup (e.g. a `#<` CD recno byte in 0xA1-0xDF decodes as
+# a hiragana), so re-encoding a whole entry from markup corrupts them. merge() instead keeps
+# every control-code byte from the original `raw` verbatim and takes ONLY the dialogue text
+# from `english`. See noredist/docs/findings/cutscene-engine.md.
+# Dialogue = the byte run after `#<05>` (23 05) up to the next `#`/`%`; in it, `$<XX>` name
+# inserts and `@` newlines are normal markup. The interpreter has no text-length field, so
+# dialogue may be any length as long as the code bytes around it are untouched.
+
+def _raw_segments(raw):
+    """Split raw entry bytes into [('op',bytes)|('dlg',bytes)]. A translatable run starts
+    after a speaker-open `#<04>` (23 04) or text-start `#<05>` (23 05) and ends at the next
+    #/% - so both the speaker name and the dialogue are translatable; codes are 'op'."""
+    segs, i, n = [], 0, len(raw)
+    while i < n:
+        if raw[i] == 0x23 and i + 1 < n and raw[i + 1] in (0x04, 0x05):
+            segs.append(('op', raw[i:i + 2]))
+            i += 2
+            j = i
+            while j < n and raw[j] not in (0x23, 0x25):
+                j += 1
+            segs.append(('dlg', raw[i:j]))
+            i = j
+        else:
+            segs.append(('op', raw[i:i + 1]))
+            i += 1
+    return segs
+
+
+def _english_runs(english):
+    """Translatable markup runs in an english entry: after each '#<04>'/'#<05>' to next #/%."""
+    runs, i, n = [], 0, len(english)
+    while i < n:
+        a = english.find('#<04>', i)
+        b = english.find('#<05>', i)
+        j = min(x for x in (a, b) if x >= 0) if (a >= 0 or b >= 0) else -1
+        if j < 0:
+            break
+        k = j + 5
+        e = k
+        while e < n and english[e] not in '#%':
+            e += 1
+        runs.append(english[k:e])
+        i = e
+    return runs
+
+
+def merge(english, raw):
+    """Cutscene-safe encode: control bytes from `raw`, dialogue text from `english`."""
+    segs = _raw_segments(raw)
+    runs = _english_runs(english)
+    n_dlg = sum(1 for t, _ in segs if t == 'dlg')
+    if len(runs) != n_dlg:
+        raise ValueError('cutscene merge: %d dialogue runs in raw, %d in english'
+                         % (n_dlg, len(runs)))
+    out = bytearray()
+    di = 0
+    for t, d in segs:
+        if t == 'op':
+            out += d
+        else:
+            out += encode(runs[di])      # encode = wrap + emit; codes already came from raw
+            di += 1
+    return bytes(out)
