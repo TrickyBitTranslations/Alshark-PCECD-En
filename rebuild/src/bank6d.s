@@ -113,26 +113,30 @@ rh_loop:
   tam #$40                       ; restore MPR6
   rts
 
-; ---- name converter (sub-fn 0x1E): ASCII name byte -> our glyph, else original ($587E) ----
-.ORG nameDispatch - $4000        ; $401E (jump-table slot; was JMP $587E)
+; ---- name converter: hook the converter ENTRY ($587E) so ASCII names render in our font in
+; BOTH the #-engine cutscenes (0x1E slot $401E -> $587E) and the menus (status/equip/item call
+; $587E directly). Original $587E sent ASCII (0x21-0x7E) to its 2-byte default -> garbage; we
+; intercept ASCII, everything else falls into the original body at $5882 (past our 3-byte JMP).
+.ORG nameConvOrig - $4000        ; $587E (was: LDA ($16) / CMP #$20)
   jmp name_conv
 
 .ORG $5F14 - $4000               ; proven-safe slack, after render_hook (ends $5F10)
 name_conv:
-  lda (scriptPtr)                ; the name byte ($16 = name-table pointer here)
+  lda (scriptPtr)                ; the name byte ($16 = name-table pointer)
   cmp #$20
-  bcc nc_orig                    ; control byte
+  bcc nc_orig                    ; control byte -> original
   cmp #$7F
-  bcs nc_orig                    ; kana / 2-byte -> original name converter
+  bcs nc_orig                    ; kana / 2-byte -> original
   sec
-  sbc #$20                       ; A = glyph index
+  sbc #$20                       ; A = glyph index (char - 0x20)
   sta glyphIdx
   lda #$01
-  sta glyphFlag                  ; this glyph is ours -> render_hook draws it
+  sta glyphFlag                  ; ours -> render_hook draws it
   lda #$60
-  sta fontCodeLo                 ; fullwidth 'A' (0x8260) for the cell; render hook overrides
+  sta fontCodeLo                 ; fullwidth cell (0x8260); render hook overrides the bitmap
   lda #$82
   sta fontCodeHi
   jmp nameAdvRet                 ; $58F4: INC $16 (16-bit) + RTS
 nc_orig:
-  jmp nameConvOrig               ; $587E original name converter (kana)
+  cmp #$20                       ; replay the CMP #$20 our JMP clobbered at $5880
+  jmp nameConvBody               ; $5882: rest of the original converter (BNE $588E ...)

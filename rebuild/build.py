@@ -59,17 +59,35 @@ def blob_patches():
 NAME_TBL = 0x784066
 
 
+# The menu reads weapon/armor/item names from a HARDCODED base pointer (original $7157 = the
+# offset of entry 28, the first item, right after the Japanese cast) loaded at code $4191/$4204
+# in bank 0x6D. Our English cast names are longer, so the item region shifts; we repoint that
+# base to entry 28's actual logical address. The cast itself is read from $7066 (table start,
+# scan-indexed) so it needs no fix-up. Both sites: A9 <lo> 85 16 A9 <hi> 85 17.
+ITEM_BASE_SITES = (0x191, 0x204)   # bank-0x6D offsets of the LDA #lo of each item-base load
+BANK6D_OFF = 0x15000               # cooked offset of bank 0x6D
+
+
 def name_patch(cooked):
     import tsv
     rows = list(tsv.read(os.path.join(ROOT, 'script', 'names.tsv')))
     blob = bytearray()
-    for r in rows:
+    off28 = None
+    for k, r in enumerate(rows):
+        if k == 28:
+            off28 = len(blob)               # byte offset of the first item entry in the table
         en = r.get('english', '')
         blob += (en.encode('latin-1') if en else bytes.fromhex(r['raw_hex']))
         blob += b'\x00'
     if NAME_TBL + len(blob) > 0x785000:
         raise SystemExit('name table overflow: %d > %d' % (len(blob), 0x785000 - NAME_TBL))
-    return [(NAME_TBL, bytes(blob))]
+    patches = [(NAME_TBL, bytes(blob))]
+    item_base = 0x7066 + off28              # table base $7066 (MPR3) + first-item offset
+    lo, hi = item_base & 0xff, item_base >> 8
+    for site in ITEM_BASE_SITES:
+        patches.append((BANK6D_OFF + site + 1, bytes([lo])))   # LDA #lo operand
+        patches.append((BANK6D_OFF + site + 5, bytes([hi])))   # LDA #hi operand
+    return patches
 
 
 def assemble(src):
