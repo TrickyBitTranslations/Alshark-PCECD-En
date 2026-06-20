@@ -1,0 +1,1172 @@
+{
+"00": {
+"tmpl": "BRK x",
+"type": 7,
+"len": 2
+},
+"01": {
+"tmpl": "ORA (x,X)",
+"type": 7,
+"len": 2
+},
+"02": {
+"tmpl": "SXY",
+"type": 0,
+"len": 1
+},
+"03": {
+"tmpl": "ST0 #x",
+"type": 7,
+"len": 2
+},
+"04": {
+"tmpl": "TSB x",
+"type": 7,
+"len": 2
+},
+"05": {
+"tmpl": "ORA x",
+"type": 7,
+"len": 2
+},
+"06": {
+"tmpl": "ASL x",
+"type": 7,
+"len": 2
+},
+"07": {
+"tmpl": "RMB0 x",
+"type": 7,
+"len": 2
+},
+"08": {
+"tmpl": "PHP",
+"type": 0,
+"len": 1
+},
+"09": {
+"tmpl": "ORA #x",
+"type": 7,
+"len": 2
+},
+"0A": {
+"tmpl": "ASL A",
+"type": 0,
+"len": 1
+},
+"0C": {
+"tmpl": "TSB ?",
+"type": 2,
+"len": 3
+},
+"0D": {
+"tmpl": "ORA ?",
+"type": 2,
+"len": 3
+},
+"0E": {
+"tmpl": "ASL ?",
+"type": 2,
+"len": 3
+},
+"0F": {
+"tmpl": "BBR0 x,x",
+"type": 8,
+"len": 3
+},
+"10": {
+"tmpl": "BPL x",
+"type": 9,
+"len": 2
+},
+"11": {
+"tmpl": "ORA (x),Y",
+"type": 7,
+"len": 2
+},
+"12": {
+"tmpl": "ORA (x)",
+"type": 7,
+"len": 2
+},
+"13": {
+"tmpl": "ST1 #x",
+"type": 7,
+"len": 2
+},
+"14": {
+"tmpl": "TRB x",
+"type": 7,
+"len": 2
+},
+"15": {
+"tmpl": "ORA x,X",
+"type": 7,
+"len": 2
+},
+"16": {
+"tmpl": "ASL x,X",
+"type": 7,
+"len": 2
+},
+"17": {
+"tmpl": "RMB1 x",
+"type": 7,
+"len": 2
+},
+"18": {
+"tmpl": "CLC",
+"type": 0,
+"len": 1
+},
+"19": {
+"tmpl": "ORA ?,Y",
+"type": 2,
+"len": 3
+},
+"1A": {
+"tmpl": "INA",
+"type": 0,
+"len": 1
+},
+"1C": {
+"tmpl": "TRB ?",
+"type": 2,
+"len": 3
+},
+"1D": {
+"tmpl": "ORA ?,X",
+"type": 2,
+"len": 3
+},
+"1E": {
+"tmpl": "ASL ?,X",
+"type": 2,
+"len": 3
+},
+"1F": {
+"tmpl": "BBR1 x,x",
+"type": 8,
+"len": 3
+},
+"20": {
+"tmpl": "JSR ?",
+"type": 2,
+"len": 3
+},
+"21": {
+"tmpl": "AND (x,X)",
+"type": 7,
+"len": 2
+},
+"22": {
+"tmpl": "SAX",
+"type": 0,
+"len": 1
+},
+"23": {
+"tmpl": "ST2 #x",
+"type": 7,
+"len": 2
+},
+"24": {
+"tmpl": "BIT x",
+"type": 7,
+"len": 2
+},
+"25": {
+"tmpl": "AND x",
+"type": 7,
+"len": 2
+},
+"26": {
+"tmpl": "ROL x",
+"type": 7,
+"len": 2
+},
+"27": {
+"tmpl": "RMB2 x",
+"type": 7,
+"len": 2
+},
+"28": {
+"tmpl": "PLP",
+"type": 0,
+"len": 1
+},
+"29": {
+"tmpl": "AND #x",
+"type": 7,
+"len": 2
+},
+"2A": {
+"tmpl": "ROL A",
+"type": 0,
+"len": 1
+},
+"2C": {
+"tmpl": "BIT ?",
+"type": 2,
+"len": 3
+},
+"2D": {
+"tmpl": "AND ?",
+"type": 2,
+"len": 3
+},
+"2E": {
+"tmpl": "ROL ?",
+"type": 2,
+"len": 3
+},
+"2F": {
+"tmpl": "BBR2 x,x",
+"type": 8,
+"len": 3
+},
+"30": {
+"tmpl": "BMI x",
+"type": 9,
+"len": 2
+},
+"31": {
+"tmpl": "AND (x),Y",
+"type": 7,
+"len": 2
+},
+"32": {
+"tmpl": "AND (x)",
+"type": 7,
+"len": 2
+},
+"34": {
+"tmpl": "BIT x,X",
+"type": 7,
+"len": 2
+},
+"35": {
+"tmpl": "AND x,X",
+"type": 7,
+"len": 2
+},
+"36": {
+"tmpl": "ROL x,X",
+"type": 7,
+"len": 2
+},
+"37": {
+"tmpl": "RMB3 x",
+"type": 7,
+"len": 2
+},
+"38": {
+"tmpl": "SEC",
+"type": 0,
+"len": 1
+},
+"39": {
+"tmpl": "AND ?,Y",
+"type": 2,
+"len": 3
+},
+"3A": {
+"tmpl": "DEA",
+"type": 0,
+"len": 1
+},
+"3C": {
+"tmpl": "BIT ?,X",
+"type": 2,
+"len": 3
+},
+"3D": {
+"tmpl": "AND ?,X",
+"type": 2,
+"len": 3
+},
+"3E": {
+"tmpl": "ROL ?,X",
+"type": 2,
+"len": 3
+},
+"3F": {
+"tmpl": "BBR3 x,x",
+"type": 8,
+"len": 3
+},
+"40": {
+"tmpl": "RTI",
+"type": 0,
+"len": 1
+},
+"41": {
+"tmpl": "EOR (x,X)",
+"type": 7,
+"len": 2
+},
+"42": {
+"tmpl": "SAY",
+"type": 0,
+"len": 1
+},
+"43": {
+"tmpl": "TMA #x",
+"type": 7,
+"len": 2
+},
+"44": {
+"tmpl": "BSR x",
+"type": 9,
+"len": 2
+},
+"45": {
+"tmpl": "EOR x",
+"type": 7,
+"len": 2
+},
+"46": {
+"tmpl": "LSR x",
+"type": 7,
+"len": 2
+},
+"47": {
+"tmpl": "RMB4 x",
+"type": 7,
+"len": 2
+},
+"48": {
+"tmpl": "PHA",
+"type": 0,
+"len": 1
+},
+"49": {
+"tmpl": "EOR #x",
+"type": 7,
+"len": 2
+},
+"4A": {
+"tmpl": "LSR A",
+"type": 0,
+"len": 1
+},
+"4C": {
+"tmpl": "JMP ?",
+"type": 2,
+"len": 3
+},
+"4D": {
+"tmpl": "EOR ?",
+"type": 2,
+"len": 3
+},
+"4E": {
+"tmpl": "LSR ?",
+"type": 2,
+"len": 3
+},
+"4F": {
+"tmpl": "BBR4 x,x",
+"type": 8,
+"len": 3
+},
+"50": {
+"tmpl": "BVC x",
+"type": 9,
+"len": 2
+},
+"51": {
+"tmpl": "EOR (x),Y",
+"type": 7,
+"len": 2
+},
+"52": {
+"tmpl": "EOR (x)",
+"type": 7,
+"len": 2
+},
+"53": {
+"tmpl": "TAM #x",
+"type": 7,
+"len": 2
+},
+"54": {
+"tmpl": "CSL",
+"type": 0,
+"len": 1
+},
+"55": {
+"tmpl": "EOR x,X",
+"type": 7,
+"len": 2
+},
+"56": {
+"tmpl": "LSR x,X",
+"type": 7,
+"len": 2
+},
+"57": {
+"tmpl": "RMB5 x",
+"type": 7,
+"len": 2
+},
+"58": {
+"tmpl": "CLI",
+"type": 0,
+"len": 1
+},
+"59": {
+"tmpl": "EOR ?,Y",
+"type": 2,
+"len": 3
+},
+"5A": {
+"tmpl": "PHY",
+"type": 0,
+"len": 1
+},
+"5D": {
+"tmpl": "EOR ?,X",
+"type": 2,
+"len": 3
+},
+"5E": {
+"tmpl": "LSR ?,X",
+"type": 2,
+"len": 3
+},
+"5F": {
+"tmpl": "BBR5 x,x",
+"type": 8,
+"len": 3
+},
+"60": {
+"tmpl": "RTS",
+"type": 0,
+"len": 1
+},
+"61": {
+"tmpl": "ADC (x,X)",
+"type": 7,
+"len": 2
+},
+"62": {
+"tmpl": "CLA",
+"type": 0,
+"len": 1
+},
+"64": {
+"tmpl": "STZ x",
+"type": 7,
+"len": 2
+},
+"65": {
+"tmpl": "ADC x",
+"type": 7,
+"len": 2
+},
+"66": {
+"tmpl": "ROR x",
+"type": 7,
+"len": 2
+},
+"67": {
+"tmpl": "RMB6 x",
+"type": 7,
+"len": 2
+},
+"68": {
+"tmpl": "PLA",
+"type": 0,
+"len": 1
+},
+"69": {
+"tmpl": "ADC #x",
+"type": 7,
+"len": 2
+},
+"6A": {
+"tmpl": "ROR A",
+"type": 0,
+"len": 1
+},
+"6C": {
+"tmpl": "JMP (?)",
+"type": 2,
+"len": 3
+},
+"6D": {
+"tmpl": "ADC ?",
+"type": 2,
+"len": 3
+},
+"6E": {
+"tmpl": "ROR ?",
+"type": 2,
+"len": 3
+},
+"6F": {
+"tmpl": "BBR6 x,x",
+"type": 8,
+"len": 3
+},
+"70": {
+"tmpl": "BVS x",
+"type": 9,
+"len": 2
+},
+"71": {
+"tmpl": "ADC (x),Y",
+"type": 7,
+"len": 2
+},
+"72": {
+"tmpl": "ADC (x)",
+"type": 7,
+"len": 2
+},
+"73": {
+"tmpl": "TII ?,?,?",
+"type": 4,
+"len": 7
+},
+"74": {
+"tmpl": "STZ x,X",
+"type": 7,
+"len": 2
+},
+"75": {
+"tmpl": "ADC x,X",
+"type": 7,
+"len": 2
+},
+"76": {
+"tmpl": "ROR x,X",
+"type": 7,
+"len": 2
+},
+"77": {
+"tmpl": "RMB7 x",
+"type": 7,
+"len": 2
+},
+"78": {
+"tmpl": "SEI",
+"type": 0,
+"len": 1
+},
+"79": {
+"tmpl": "ADC ?,Y",
+"type": 2,
+"len": 3
+},
+"7A": {
+"tmpl": "PLY",
+"type": 0,
+"len": 1
+},
+"7C": {
+"tmpl": "JMP (?,X)",
+"type": 2,
+"len": 3
+},
+"7D": {
+"tmpl": "ADC ?,X",
+"type": 2,
+"len": 3
+},
+"7E": {
+"tmpl": "ROR ?,X",
+"type": 2,
+"len": 3
+},
+"7F": {
+"tmpl": "BBR7 x,x",
+"type": 8,
+"len": 3
+},
+"80": {
+"tmpl": "BRA x",
+"type": 9,
+"len": 2
+},
+"81": {
+"tmpl": "STA (x,X)",
+"type": 7,
+"len": 2
+},
+"82": {
+"tmpl": "CLX",
+"type": 0,
+"len": 1
+},
+"83": {
+"tmpl": "TST #x,x",
+"type": 5,
+"len": 3
+},
+"84": {
+"tmpl": "STY x",
+"type": 7,
+"len": 2
+},
+"85": {
+"tmpl": "STA x",
+"type": 7,
+"len": 2
+},
+"86": {
+"tmpl": "STX x",
+"type": 7,
+"len": 2
+},
+"87": {
+"tmpl": "SMB0 x",
+"type": 7,
+"len": 2
+},
+"88": {
+"tmpl": "DEY",
+"type": 0,
+"len": 1
+},
+"89": {
+"tmpl": "BIT #x",
+"type": 7,
+"len": 2
+},
+"8A": {
+"tmpl": "TXA",
+"type": 0,
+"len": 1
+},
+"8C": {
+"tmpl": "STY ?",
+"type": 2,
+"len": 3
+},
+"8D": {
+"tmpl": "STA ?",
+"type": 2,
+"len": 3
+},
+"8E": {
+"tmpl": "STX ?",
+"type": 2,
+"len": 3
+},
+"8F": {
+"tmpl": "BBS0 x,x",
+"type": 8,
+"len": 3
+},
+"90": {
+"tmpl": "BCC x",
+"type": 9,
+"len": 2
+},
+"91": {
+"tmpl": "STA (x),Y",
+"type": 7,
+"len": 2
+},
+"92": {
+"tmpl": "STA (x)",
+"type": 7,
+"len": 2
+},
+"93": {
+"tmpl": "TST #x,?",
+"type": 6,
+"len": 4
+},
+"94": {
+"tmpl": "STY x,X",
+"type": 7,
+"len": 2
+},
+"95": {
+"tmpl": "STA x,X",
+"type": 7,
+"len": 2
+},
+"96": {
+"tmpl": "STX x,Y",
+"type": 7,
+"len": 2
+},
+"97": {
+"tmpl": "SMB1 x",
+"type": 7,
+"len": 2
+},
+"98": {
+"tmpl": "TYA",
+"type": 0,
+"len": 1
+},
+"99": {
+"tmpl": "STA ?,Y",
+"type": 2,
+"len": 3
+},
+"9A": {
+"tmpl": "TXS",
+"type": 0,
+"len": 1
+},
+"9C": {
+"tmpl": "STZ ?",
+"type": 2,
+"len": 3
+},
+"9D": {
+"tmpl": "STA ?,X",
+"type": 2,
+"len": 3
+},
+"9E": {
+"tmpl": "STZ ?,X",
+"type": 2,
+"len": 3
+},
+"9F": {
+"tmpl": "BBS1 x,x",
+"type": 8,
+"len": 3
+},
+"A0": {
+"tmpl": "LDY #x",
+"type": 7,
+"len": 2
+},
+"A1": {
+"tmpl": "LDA (x,X)",
+"type": 7,
+"len": 2
+},
+"A2": {
+"tmpl": "LDX #x",
+"type": 7,
+"len": 2
+},
+"A3": {
+"tmpl": "TST #x,x,X",
+"type": 5,
+"len": 3
+},
+"A4": {
+"tmpl": "LDY x",
+"type": 7,
+"len": 2
+},
+"A5": {
+"tmpl": "LDA x",
+"type": 7,
+"len": 2
+},
+"A6": {
+"tmpl": "LDX x",
+"type": 7,
+"len": 2
+},
+"A7": {
+"tmpl": "SMB2 x",
+"type": 7,
+"len": 2
+},
+"A8": {
+"tmpl": "TAY",
+"type": 0,
+"len": 1
+},
+"A9": {
+"tmpl": "LDA #x",
+"type": 7,
+"len": 2
+},
+"AA": {
+"tmpl": "TAX",
+"type": 0,
+"len": 1
+},
+"AC": {
+"tmpl": "LDY ?",
+"type": 2,
+"len": 3
+},
+"AD": {
+"tmpl": "LDA ?",
+"type": 2,
+"len": 3
+},
+"AE": {
+"tmpl": "LDX ?",
+"type": 2,
+"len": 3
+},
+"AF": {
+"tmpl": "BBS2 x,x",
+"type": 8,
+"len": 3
+},
+"B0": {
+"tmpl": "BCS x",
+"type": 9,
+"len": 2
+},
+"B1": {
+"tmpl": "LDA (x),Y",
+"type": 7,
+"len": 2
+},
+"B2": {
+"tmpl": "LDA (x)",
+"type": 7,
+"len": 2
+},
+"B3": {
+"tmpl": "TST #x,?,X",
+"type": 6,
+"len": 4
+},
+"B4": {
+"tmpl": "LDY x,X",
+"type": 7,
+"len": 2
+},
+"B5": {
+"tmpl": "LDA x,X",
+"type": 7,
+"len": 2
+},
+"B6": {
+"tmpl": "LDX x,Y",
+"type": 7,
+"len": 2
+},
+"B7": {
+"tmpl": "SMB3 x",
+"type": 7,
+"len": 2
+},
+"B8": {
+"tmpl": "CLV",
+"type": 0,
+"len": 1
+},
+"B9": {
+"tmpl": "LDA ?,Y",
+"type": 2,
+"len": 3
+},
+"BA": {
+"tmpl": "TSX",
+"type": 0,
+"len": 1
+},
+"BC": {
+"tmpl": "LDY ?,X",
+"type": 2,
+"len": 3
+},
+"BD": {
+"tmpl": "LDA ?,X",
+"type": 2,
+"len": 3
+},
+"BE": {
+"tmpl": "LDX ?,Y",
+"type": 2,
+"len": 3
+},
+"BF": {
+"tmpl": "BBS3 x,x",
+"type": 8,
+"len": 3
+},
+"C0": {
+"tmpl": "CPY #x",
+"type": 7,
+"len": 2
+},
+"C1": {
+"tmpl": "CMP (x,X)",
+"type": 7,
+"len": 2
+},
+"C2": {
+"tmpl": "CLY",
+"type": 0,
+"len": 1
+},
+"C3": {
+"tmpl": "TDD ?,?,?",
+"type": 4,
+"len": 7
+},
+"C4": {
+"tmpl": "CPY x",
+"type": 7,
+"len": 2
+},
+"C5": {
+"tmpl": "CMP x",
+"type": 7,
+"len": 2
+},
+"C6": {
+"tmpl": "DEC x",
+"type": 7,
+"len": 2
+},
+"C7": {
+"tmpl": "SMB4 x",
+"type": 7,
+"len": 2
+},
+"C8": {
+"tmpl": "INY",
+"type": 0,
+"len": 1
+},
+"C9": {
+"tmpl": "CMP #x",
+"type": 7,
+"len": 2
+},
+"CA": {
+"tmpl": "DEX",
+"type": 0,
+"len": 1
+},
+"CC": {
+"tmpl": "CPY ?",
+"type": 2,
+"len": 3
+},
+"CD": {
+"tmpl": "CMP ?",
+"type": 2,
+"len": 3
+},
+"CE": {
+"tmpl": "DEC ?",
+"type": 2,
+"len": 3
+},
+"CF": {
+"tmpl": "BBS4 x,x",
+"type": 8,
+"len": 3
+},
+"D0": {
+"tmpl": "BNE x",
+"type": 9,
+"len": 2
+},
+"D1": {
+"tmpl": "CMP (x),Y",
+"type": 7,
+"len": 2
+},
+"D2": {
+"tmpl": "CMP (x)",
+"type": 7,
+"len": 2
+},
+"D3": {
+"tmpl": "TIN ?,?,?",
+"type": 4,
+"len": 7
+},
+"D4": {
+"tmpl": "CSH",
+"type": 0,
+"len": 1
+},
+"D5": {
+"tmpl": "CMP x,X",
+"type": 7,
+"len": 2
+},
+"D6": {
+"tmpl": "DEC x,X",
+"type": 7,
+"len": 2
+},
+"D7": {
+"tmpl": "SMB5 x",
+"type": 7,
+"len": 2
+},
+"D8": {
+"tmpl": "CLD",
+"type": 0,
+"len": 1
+},
+"D9": {
+"tmpl": "CMP ?,Y",
+"type": 2,
+"len": 3
+},
+"DA": {
+"tmpl": "PHX",
+"type": 0,
+"len": 1
+},
+"DD": {
+"tmpl": "CMP ?,X",
+"type": 2,
+"len": 3
+},
+"DE": {
+"tmpl": "DEC ?,X",
+"type": 2,
+"len": 3
+},
+"DF": {
+"tmpl": "BBS5 x,x",
+"type": 8,
+"len": 3
+},
+"E0": {
+"tmpl": "CPX #x",
+"type": 7,
+"len": 2
+},
+"E1": {
+"tmpl": "SBC (x,X)",
+"type": 7,
+"len": 2
+},
+"E3": {
+"tmpl": "TIA ?,?,?",
+"type": 4,
+"len": 7
+},
+"E4": {
+"tmpl": "CPX x",
+"type": 7,
+"len": 2
+},
+"E5": {
+"tmpl": "SBC x",
+"type": 7,
+"len": 2
+},
+"E6": {
+"tmpl": "INC x",
+"type": 7,
+"len": 2
+},
+"E7": {
+"tmpl": "SMB6 x",
+"type": 7,
+"len": 2
+},
+"E8": {
+"tmpl": "INX",
+"type": 0,
+"len": 1
+},
+"E9": {
+"tmpl": "SBC #x",
+"type": 7,
+"len": 2
+},
+"EA": {
+"tmpl": "NOP",
+"type": 0,
+"len": 1
+},
+"EC": {
+"tmpl": "CPX ?",
+"type": 2,
+"len": 3
+},
+"ED": {
+"tmpl": "SBC ?",
+"type": 2,
+"len": 3
+},
+"EE": {
+"tmpl": "INC ?",
+"type": 2,
+"len": 3
+},
+"EF": {
+"tmpl": "BBS6 x,x",
+"type": 8,
+"len": 3
+},
+"F0": {
+"tmpl": "BEQ x",
+"type": 9,
+"len": 2
+},
+"F1": {
+"tmpl": "SBC (x),Y",
+"type": 7,
+"len": 2
+},
+"F2": {
+"tmpl": "SBC (x)",
+"type": 7,
+"len": 2
+},
+"F3": {
+"tmpl": "TAI ?,?,?",
+"type": 4,
+"len": 7
+},
+"F4": {
+"tmpl": "SET",
+"type": 0,
+"len": 1
+},
+"F5": {
+"tmpl": "SBC x,X",
+"type": 7,
+"len": 2
+},
+"F6": {
+"tmpl": "INC x,X",
+"type": 7,
+"len": 2
+},
+"F7": {
+"tmpl": "SMB7 x",
+"type": 7,
+"len": 2
+},
+"F8": {
+"tmpl": "SED",
+"type": 0,
+"len": 1
+},
+"F9": {
+"tmpl": "SBC ?,Y",
+"type": 2,
+"len": 3
+},
+"FA": {
+"tmpl": "PLX",
+"type": 0,
+"len": 1
+},
+"FD": {
+"tmpl": "SBC ?,X",
+"type": 2,
+"len": 3
+},
+"FE": {
+"tmpl": "INC ?,X",
+"type": 2,
+"len": 3
+},
+"FF": {
+"tmpl": "BBS7 x,x",
+"type": 8,
+"len": 3
+}
+}
