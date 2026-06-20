@@ -15,14 +15,31 @@ import unicodedata
 LEAD = lambda c: (0x81 <= c <= 0x9F) or (0xE0 <= c <= 0xEF)
 _TOKEN = re.compile(r'<([0-9a-fA-F]{2})>')
 
-BOX_CELLS = 18                       # the dialogue box is 18 full-width glyphs wide
+# VWF advance widths (px) for ASCII 0x20-0x7E; the render hook advances the pen by these per
+# glyph (Japanese/full-width chars use FULL_PX). fontgen.py regenerates fontwidths.py whenever
+# the font is swapped; the fallback keeps wrap working if it hasn't been generated yet.
+try:
+    from alshark.fontwidths import WIDTHS as VWF_WIDTHS
+except ImportError:
+    VWF_WIDTHS = [4] * 95
+FULL_PX = 12                         # engine full-width advance (6A:$8115 += $0C)
+BOX_PX = 216                         # dialogue box width: 18 full-width cells x 12 px
 _WTOK = re.compile(r'<[0-9a-fA-F]{2}>|[#%$@<>]|\s+|[^\s#%$@<>]+')
 
 
-def wrap(s, width=BOX_CELLS, name_w=6):
-    """Insert @ line-breaks at word boundaries so each rendered line fits the box; the
+def _cpx(c):
+    o = ord(c)
+    return VWF_WIDTHS[o - 0x20] if 0x20 <= o <= 0x7E else FULL_PX
+
+
+def _wpx(seg):
+    return sum(_cpx(c) for c in seg)
+
+
+def wrap(s, width=BOX_PX, name_w=36):
+    """Insert @ line-breaks at word boundaries so each rendered line fits the box (px); the
     engine otherwise hard-wraps mid-word. Markup (<XX>, # % < >) counts as zero width,
-    $ name inserts as an approximate width, <05> (text start) and an existing @ reset the
+    $ name inserts as an approximate px width, <05> (text start) and an existing @ reset the
     line. A line already under width keeps any author-placed @, so manual wrapping wins."""
     out, col, space = [], 0, ''
     for a in _WTOK.findall(s):
@@ -30,7 +47,7 @@ def wrap(s, width=BOX_CELLS, name_w=6):
             out.append('@'); col = 0; space = ''
         elif a == '$':
             if space and col:
-                out.append(space); col += len(space)
+                out.append(space); col += _wpx(space)
             space = ''
             out.append('$'); col += name_w
         elif _TOKEN.fullmatch(a):
@@ -42,12 +59,13 @@ def wrap(s, width=BOX_CELLS, name_w=6):
         elif a.isspace():
             space = a
         else:                            # a visible word
-            if col and col + len(space) + len(a) > width:
+            wpx = _wpx(a)
+            if col and col + _wpx(space) + wpx > width:
                 out.append('@'); col = 0; space = ''
             elif space:
-                out.append(space); col += len(space)
+                out.append(space); col += _wpx(space)
             space = ''
-            out.append(a); col += len(a)
+            out.append(a); col += wpx
     return ''.join(out)
 
 

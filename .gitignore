@@ -16,6 +16,12 @@ work/
 build/
 *_EN.D88
 
+# Rebuild: the original banks are carved from your disc at build time (game bytes, never
+# committed); only the VWF font bins are tracked.
+rebuild/incbin/*.bin
+!rebuild/incbin/vwf_glyphs.bin
+!rebuild/incbin/vwf_widths.bin
+
 # Python
 __pycache__/
 *.pyc

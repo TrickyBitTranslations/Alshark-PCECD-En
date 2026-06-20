@@ -1,0 +1,33 @@
+; Alshark engine symbols used by the rebuild (bank 0x6D #-engine render path).
+; Logical addresses; bank 0x6D is mapped at $4000-$5FFF (MPR2) during dialogue.
+
+; zero page
+.define scriptPtr   $16     ; 16-bit script cursor ($16 lo / $17 hi)
+.define fontCodeLo  $F8     ; SJIS trail byte handed to the glyph drawer
+.define fontCodeHi  $F9     ; SJIS lead byte
+
+; bank 0x6D byte->SJIS conversion routine ($57D0, dispatch entry $401B)
+.define conv_entry    $57D0 ; first instr; the fontpatch hook overwrites it
+.define conv_origPath $57E0 ; original hiragana / 2-byte handler (entry after the hook)
+.define conv_advance  $5807 ; advance the cursor and return (RTS at $580D)
+
+; bank 0x6D free slack (was zeros) where the ASCII handler lives
+.define slack_5E81    $5E81
+.define slack_5EA0    $5EA0
+
+; #-engine glyph render (bank 0x6D)
+.define glyphBuf      $4EDA ; 12 rows x 2 bytes; the compositor ($50C0) blits this to VRAM
+.define drawHook      $500F ; `JSR $E060` that fills glyphBuf; we overwrite it
+.define digitFont     $5B19 ; resident 8x12 digit font, 12 bytes/glyph (0-9), bank 0x6D
+.define fontBank      $7F    ; card bank 0x7F (scene-load staging buffer; free mid-scene)
+.define fontBase      $CFA0  ; glyphs here when fontBank is in MPR6 (= card_ram 0x2EFA0)
+.define fontWidths    $D590  ; 95 advance-widths, right after the 1520B glyph table
+.define fontMark      $D600  ; marker byte after the width table (= 0x2F600)
+.define glyphRows     $0C    ; rows copied per glyph (full 12-row cell)
+.define glyphStride   $10    ; bytes per glyph in the font bank (16, power-of-2)
+; VWF advance: the engine tracks cumulative text X in $273F, advancing +$0C/char at 6A:$8115
+.define penX          $273F ; engine cumulative text X (work RAM, always mapped)
+.define boxAdv        $0C   ; engine's fixed per-char advance (fullwidth = 12 px)
+; render-hook scratch in the PROVEN-safe slack (the fontpatch region; $5F60+ is engine BSS)
+.define glyphFlag     $5F40 ; 1 = current glyph is ours (ASCII), 0 = let BIOS draw it
+.define glyphIdx      $5F41 ; ASCII index (char - 0x20) of the current glyph
