@@ -11,6 +11,12 @@
 .define conv_origPath $57E0 ; original hiragana / 2-byte handler (entry after the hook)
 .define conv_advance  $5807 ; advance the cursor and return (RTS at $580D)
 
+; bank 0x6D NAME converter (sub-fn 0x1E, dispatch entry $401E -> $587E). Names ($<XX> inserts)
+; are NUL-terminated strings read via ($16); $587E handles kana but not ASCII letters.
+.define nameDispatch  $401E ; jump-table slot for the name converter (was JMP $587E)
+.define nameConvOrig  $587E ; original name converter (kana / 2-byte)
+.define nameAdvRet    $58F4 ; its single-byte tail: INC $16 (16-bit) + RTS
+
 ; bank 0x6D free slack (was zeros) where the ASCII handler lives
 .define slack_5E81    $5E81
 .define slack_5EA0    $5EA0
