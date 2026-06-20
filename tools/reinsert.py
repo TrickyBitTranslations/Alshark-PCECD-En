@@ -62,6 +62,8 @@ def load_blocks(tsv_path):
 def entry_bytes(english, raw, codec, auto_term):
     if not english:
         return raw
+    if hasattr(codec, 'merge'):           # cutscene: keep control codes from raw verbatim
+        return codec.merge(english, raw)
     b = codec.encode(english)
     if auto_term and not b.endswith(b'\x00'):
         b += b'\x00'
