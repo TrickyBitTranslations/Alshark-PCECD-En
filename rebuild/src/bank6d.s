@@ -134,6 +134,12 @@ rh_loop:
   tam #$08
   rts
 
+; item-read glyph advance ($41E5): same +12 with no spare bytes after its branch -> redirect to its
+; own slack trampoline too (same proven pattern as the name advance). So English item names advance
+; proportionally and fit. Confirmed glyph advance (loop $41B7 reads/converts/draws each glyph).
+.ORG itemLoopAdv - $4000         ; $41E5 (was CLC / LDA #$0C / ADC $00 ...)
+  jmp itemAdvTramp
+
 .ORG $5F18 - $4000               ; proven-safe slack, after render_hook (now ends ~$5F17)
 name_conv:
   lda (scriptPtr)                ; the name byte ($16 = name-table pointer)
@@ -167,3 +173,12 @@ nc_orig:
   adc $01
   sta $01
   jmp nameLoopTop                ; $4080
+
+; ---- item-read advance trampoline (slack): $00 += menuWidth (VWF), then rejoin the original high-
+; byte handling at $41EC. Same pattern as nameAdvTramp; absolute menuWidth ($5F42, safe).
+.ORG itemAdvTramp - $4000        ; $5F53
+  clc
+  lda $00
+  adc menuWidth                  ; $00 += this glyph's real width instead of the fixed +12
+  sta $00
+  jmp itemLoopRejoin             ; $41EC: CLA / ADC $01 / STA $01 / BRA $41B7

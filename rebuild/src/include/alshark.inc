@@ -46,7 +46,13 @@
                             ; re-emit here is +3 bytes vs the original and overruns the loop's exit
                             ; at $40BC = PLA/TAM #$08/RTS, turning it into JMP $4080 = infinite loop)
 .define nameLoopExit  $40BC ; the loop's exit (orig PLA/TAM #$08/RTS); BEQ at $4082 targets it
-.define nameAdvTramp  $5F43 ; slack trampoline: $00 += menuWidth (VWF) then JMP nameLoopTop
+.define nameAdvTramp  $5F43 ; slack trampoline: $00 += menuWidth (VWF) then JMP nameLoopTop (16 bytes)
+; item-read ($417E, loop top $41B7) has the same +12 advance at $41E5 with no spare bytes after its
+; branch; redirect it to its own slack trampoline (the name fix proved this pattern). Confirmed
+; glyph advance - the loop reads/converts/draws each item-name glyph at $41B7.
+.define itemLoopAdv    $41E5 ; CLC of the item +12 advance; overwrite with JMP itemAdvTramp
+.define itemLoopRejoin $41EC ; original high-byte handling (CLA/ADC $01/STA $01/BRA $41B7)
+.define itemAdvTramp   $5F53 ; slack trampoline after nameAdvTramp (16 bytes from $5F43)
 ; render-hook scratch in the PROVEN-safe slack (the fontpatch region; $5F60+ is engine BSS)
 .define glyphFlag     $5F40 ; 1 = current glyph is ours (ASCII), 0 = let BIOS draw it
 .define glyphIdx      $5F41 ; ASCII index (char - 0x20) of the current glyph
