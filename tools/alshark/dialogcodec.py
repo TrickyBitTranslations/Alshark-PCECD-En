@@ -155,7 +155,7 @@ def _pct_len(d, i):
     s = d[i + 1]
     if s in (0x04, 0x1a, 0x1c):
         return 3 + d[i + 2]
-    if s == 0x14:
+    if s in (0x06, 0x14):                  # cursor/box positioning: % S 02 XX YY (measured 584x)
         return 5
     if s == 0x1f:
         return 4
