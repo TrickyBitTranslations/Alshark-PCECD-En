@@ -182,3 +182,46 @@ nc_orig:
   adc menuWidth                  ; $00 += this glyph's real width instead of the fixed +12
   sta $00
   jmp itemLoopRejoin             ; $41EC: CLA / ADC $01 / STA $01 / BRA $41B7
+
+; ---- field-menu LABEL ASCII path: intercept the $40 split in the label byte loop so English
+; labels (Status/Item/...) render in our VWF font. A is the label byte (still live from $5748).
+.ORG menuLabelSplit - $4000      ; $578C (was: CMP #$40 / BCC $57B5)
+  jmp menu_label_char
+
+.ORG menu_label_slack - $4000    ; $5CC0: free zero run in the bank 0x6D code region
+menu_label_char:
+  cmp #$20
+  bcc ml_1byte                   ; < $20 control -> original 1-byte path
+  cmp #$30
+  bcc ml_ours                    ; $20-$2F space/punct -> our font
+  cmp #$3A
+  bcc ml_1byte                   ; $30-$39 digits -> resident digit font (HP/MP numbers)
+  cmp #$7F
+  bcs ml_2byte                   ; >= $7F -> original 2-byte SJIS path (any kept Japanese)
+ml_ours:                         ; $20-$2F or $3A-$7E -> our VWF glyph (1 byte)
+  sec
+  sbc #$20                       ; A = glyph index (char - 0x20)
+  sta glyphIdx
+  lda #$01
+  sta glyphFlag                  ; ours -> render_hook draws it
+  lda #$60
+  sta fontCodeLo                 ; fullwidth cell (0x8260); render hook overrides the bitmap
+  lda #$82
+  sta fontCodeHi
+  jsr menuDraw                   ; $5003: render_hook fills our glyph, then the shared blit
+  inc scriptPtr                  ; advance source by 1 (ASCII is single-byte)
+  bne ml_nohi
+  inc $17
+ml_nohi:
+  clc
+  lda menuWidth                  ; pen $00 += this glyph's real width (proportional)
+  adc $00
+  sta $00
+  cla
+  adc $01
+  sta $01
+  jmp menuLabelLoop              ; $5748
+ml_1byte:
+  jmp menuLabel1byte             ; $57B5 (original digit / half-width path)
+ml_2byte:
+  jmp menuLabel2byte             ; $5790 (original SJIS 2-byte path)
