@@ -40,33 +40,80 @@ def wrap(s, width=BOX_PX, name_w=36):
     """Insert @ line-breaks at word boundaries so each rendered line fits the box (px); the
     engine otherwise hard-wraps mid-word. Markup (<XX>, # % < >) counts as zero width,
     $ name inserts as an approximate px width, <05> (text start) and an existing @ reset the
-    line. A line already under width keeps any author-placed @, so manual wrapping wins."""
-    out, col, space = [], 0, ''
+    line. A line already under width keeps any author-placed @, so manual wrapping wins.
+
+    Anti-widow: when a greedy auto-break leaves a single word alone on a line, the last word of
+    the line above is pulled down to join it (if both still fit), so proper nouns like
+    "Saxon Canyon" don't split. This only moves an @ and a space, so the byte count is unchanged."""
+    # Build lines as token lists. Each line records the separator BEFORE it ('@' or '' for the
+    # first line / a <05> reset), its visible px, visible word count, and whether the break that
+    # started it was an AUTO wrap (the only kind the anti-widow pass is allowed to rebalance).
+    lines = [{'sep': '', 'toks': [], 'px': 0, 'words': 0, 'auto': False}]
+    space = ''
+
+    def cur():
+        return lines[-1]
+
+    def newline(sep, auto):
+        lines.append({'sep': sep, 'toks': [], 'px': 0, 'words': 0, 'auto': auto})
+
     for a in _WTOK.findall(s):
         if a == '@':
-            out.append('@'); col = 0; space = ''
+            newline('@', False); space = ''
         elif a == '$':
-            if space and col:
-                out.append(space); col += _wpx(space)
+            c = cur()
+            if space and c['px']:
+                c['toks'].append(space); c['px'] += _wpx(space)
             space = ''
-            out.append('$'); col += name_w
+            c['toks'].append('$'); c['px'] += name_w; c['words'] += 1
         elif _TOKEN.fullmatch(a):
-            out.append(a)
-            if a == '<05>':              # text-start marker begins a fresh line
-                col = 0; space = ''
+            cur()['toks'].append(a)
+            if a == '<05>':              # text-start marker begins a fresh line (no @)
+                newline('', False); space = ''
         elif a in ('#', '%', '<', '>'):
-            out.append(a)
+            cur()['toks'].append(a)
         elif a.isspace():
             space = a
         else:                            # a visible word
             wpx = _wpx(a)
-            if col and col + _wpx(space) + wpx > width:
-                out.append('@'); col = 0; space = ''
-            elif space:
-                out.append(space); col += _wpx(space)
-            space = ''
-            out.append(a); col += wpx
-    return ''.join(out)
+            c = cur()
+            if c['px'] and c['px'] + _wpx(space) + wpx > width:
+                newline('@', True); space = ''
+                c = cur()
+                c['toks'].append(a); c['px'] += wpx; c['words'] += 1
+            else:
+                if space:
+                    c['toks'].append(space); c['px'] += _wpx(space)
+                space = ''
+                c['toks'].append(a); c['px'] += wpx; c['words'] += 1
+
+    # anti-widow: pull the previous line's last word down onto a lone-word auto line.
+    for i in range(1, len(lines)):
+        ln, prev = lines[i], lines[i - 1]
+        if not (ln['auto'] and ln['words'] == 1 and prev['words'] >= 2):
+            continue
+        # find prev's last visible word and the space token just before it
+        wi = max(j for j, t in enumerate(prev['toks']) if not _zero_w(t))
+        si = wi - 1 if wi > 0 and prev['toks'][wi - 1].isspace() else None
+        word = prev['toks'][wi]
+        if word == '$':
+            continue                     # never split a $<XX> name insert from its index token
+        gap = prev['toks'][si] if si is not None else ' '
+        if _wpx(word) + _wpx(gap) + ln['px'] > width:
+            continue                     # would overflow the joined line; leave the widow
+        del prev['toks'][wi]
+        if si is not None:
+            del prev['toks'][si]
+        prev['px'] -= _wpx(word) + _wpx(gap); prev['words'] -= 1
+        ln['toks'] = [word, gap] + ln['toks']
+        ln['px'] += _wpx(word) + _wpx(gap); ln['words'] += 1
+
+    return ''.join(ln['sep'] + ''.join(ln['toks']) for ln in lines)
+
+
+def _zero_w(t):
+    """A wrap token that occupies no line width (markup / control), so it isn't a 'word'."""
+    return t in ('#', '%', '<', '>') or bool(_TOKEN.fullmatch(t))
 
 
 def _sb_hira(b):
