@@ -26,6 +26,9 @@ GitHub account.
 
 - `system1.tsv` - map and event text.
 - `cutscene.tsv` - story and NPC dialogue.
+- `names.tsv` - character and item names (shown in cutscenes and the status/equip/item
+  menus). Entries 0-25 are the cast; 28+ are weapons/items. These render with the
+  proportional font and fit their slots, so English of normal length is fine.
 
 Each row is `block_off, str_off, speaker, text, raw_hex, english, status`. You only
 touch `english`. `status` is `human` (a person wrote or reviewed it) or `ignore` (too
