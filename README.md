@@ -12,8 +12,10 @@ the site.
 ## Status
 
 The edit pipeline round-trips byte-perfect on the main story script (32 blocks, 940
-strings) and English renders in-game via the existing font. What is left is mostly
-content: the other two text tiers, fitting longer lines, and the translation itself.
+strings), and English renders in-game with a proportional (variable-width) font: in
+field dialogue, in the `#` cutscene engine (intro translated, control codes preserved),
+and in the status/equip/item menus (character and item names fit their slots). What is
+left is mostly content: the translation itself, and fitting longer lines.
 
 ## How text is stored
 
