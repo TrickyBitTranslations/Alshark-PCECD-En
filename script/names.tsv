@@ -27,127 +27,127 @@ block_off	str_off	speaker	text	raw_hex	english	status
 0x784066	25		いーる・こせ王	b2b0d98145babe89a4	King Yle	human
 0x784066	26		ザーて・こせ<87><55>世	8355b0c38145babe875590a2		
 0x784066	27		−−−−−−	817c817c817c817c817c817c		
-0x784066	28		あいすにードる	b1b2bdc6b08368d9		
-0x784066	29		すたんなっくる	bdc0ddc5afb8d9		
-0x784066	30		さバいバるないふ	bb836fb2836fd9c5b2cc		
-0x784066	31		ひーとくろー	cbb0c4b8dbb0		
-0x784066	32		れいないふ	dab2c5b2cc		
-0x784066	33		ひーとうぃっプ	cbb0c4b3a8af8376		
-0x784066	34		Ｇ・なっくる	82668145c5afb8d9		
-0x784066	35		ちたんブれード	c1c0dd8375dab08368		
-0x784066	36		ベりりうむそード	8378d8d8b3d1bfb08368		
-0x784066	37		ひーとそード	cbb0c4bfb08368		
-0x784066	38		すたんそード	bdc0ddbfb08368		
-0x784066	39		さーめっとそード	bbb0d2afc4bfb08368		
-0x784066	40		あいすブれード	b1b2bd8375dab08368		
-0x784066	41		れいそード	dab2bfb08368		
-0x784066	42		ふれいむそード	ccdab2d1bfb08368		
-0x784066	43		そうるブれいかー	bfb3d98375dab2b6b0		
-0x784066	44		グれーとれい・Ｓ	834fdab0c4dab281458272		
-0x784066	45		ついんれいそード	c2b2dddab2bfb08368		
-0x784066	46		ザいザーそード	8355b28355b0bfb08368		
-0x784066	47		れいらんさー	dab2d7ddbbb0		
-0x784066	48		ないとブりんガー	c5b2c48375d8dd834bb0		
-0x784066	49		Ｇ・はんまー	82668145caddcfb0		
-0x784066	50		プらズまあっくす	8376d78359cfb1afb8bd		
+0x784066	28		あいすにードる	b1b2bdc6b08368d9	Ice Needle	human
+0x784066	29		すたんなっくる	bdc0ddc5afb8d9	Stun Knuckle	human
+0x784066	30		さバいバるないふ	bb836fb2836fd9c5b2cc	Survival Knife	human
+0x784066	31		ひーとくろー	cbb0c4b8dbb0	Heat Claw	human
+0x784066	32		れいないふ	dab2c5b2cc	Ray Knife	human
+0x784066	33		ひーとうぃっプ	cbb0c4b3a8af8376	Heat Whip	human
+0x784066	34		Ｇ・なっくる	82668145c5afb8d9	G. Knuckle	human
+0x784066	35		ちたんブれード	c1c0dd8375dab08368	Titan Blade	human
+0x784066	36		ベりりうむそード	8378d8d8b3d1bfb08368	Beryl Sword	human
+0x784066	37		ひーとそード	cbb0c4bfb08368	Heat Sword	human
+0x784066	38		すたんそード	bdc0ddbfb08368	Stun Sword	human
+0x784066	39		さーめっとそード	bbb0d2afc4bfb08368	Cermet Sword	human
+0x784066	40		あいすブれード	b1b2bd8375dab08368	Ice Blade	human
+0x784066	41		れいそード	dab2bfb08368	Ray Sword	human
+0x784066	42		ふれいむそード	ccdab2d1bfb08368	Flame Sword	human
+0x784066	43		そうるブれいかー	bfb3d98375dab2b6b0	Soul Breaker	human
+0x784066	44		グれーとれい・Ｓ	834fdab0c4dab281458272	Great Ray S	human
+0x784066	45		ついんれいそード	c2b2dddab2bfb08368	Twin Ray Sword	human
+0x784066	46		ザいザーそード	8355b28355b0bfb08368	Zaizer Sword	human
+0x784066	47		れいらんさー	dab2d7ddbbb0	Ray Lancer	human
+0x784066	48		ないとブりんガー	c5b2c48375d8dd834bb0	Night Bringer	human
+0x784066	49		Ｇ・はんまー	82668145caddcfb0	G. Hammer	human
+0x784066	50		プらズまあっくす	8376d78359cfb1afb8bd	Plasma Axe	human
 0x784066	51					
-0x784066	52		プらズまガん	8376d78359cf834bdd		
-0x784066	53		はんドガん	cadd8368834bdd		
-0x784066	54		ブろーにんグ	8375dbb0c6dd834f		
-0x784066	55		はんドブらすたー	cadd83688375d7bdc0b0		
-0x784066	56		さブましんガん	bb8375cfbcdd834bdd		
-0x784066	57		ビーむらいふる	8372b0d1d7b2ccd9		
-0x784066	58		対戦車らいふる	91ce90ed8ed4d7b2ccd9		
-0x784066	59		火炎放射器	89ce898a95fa8ecb8aed		
-0x784066	60		Ｆ・ブらすたー	826581458375d7bdc0b0		
-0x784066	61		さんダーボると	bbdd835fb0837bd9c4		
-0x784066	62		れいブらすたー	dab28375d7bdc0b0		
-0x784066	63		まいんドブれーく	cfb2dd83688375dab0b8		
-0x784066	64		Ｚ・ブらすたー	827981458375d7bdc0b0		
-0x784066	65		めガましんガん	d2834bcfbcdd834bdd		
-0x784066	66		バズーか	836f8359b0b6		
-0x784066	67		しょるダーかのん	bcaed9835fb0b6c9dd		
-0x784066	68		Ｆ・バすたー	82658145836fbdc0b0		
-0x784066	69		ふりーズきゃのん	ccd8b08359b7acc9dd		
-0x784066	70		えれきゅーと	b4dab7adb0c4		
-0x784066	71		れいバすたー	dab2836fbdc0b0		
-0x784066	72		れいすとーむ	dab2bdc4b0d1		
-0x784066	73		ふぉとんきゃのん	ccabc4ddb7acc9dd		
-0x784066	74		超重力きゃのん	92b48f6497cdb7acc9dd		
-0x784066	75		さいこすまっしゅ	bbb2babdcfafbcad		
-0x784066	76		ザいザーきゃのん	8355b28355b0b7acc9dd		
-0x784066	77		対戦車みさいる	91ce90ed8ed4d0bbb2d9		
-0x784066	78		Ｍ・らんちゃー	826c8145d7ddc1acb0		
-0x784066	79		なパーむみさいる	c58370b0d1d0bbb2d9		
-0x784066	80		ふりーズみさいる	ccd8b08359d0bbb2d9		
-0x784066	81		はいパーみさいる	cab28370b0d0bbb2d9		
-0x784066	82		多弾頭みさいる	91bd926593aad0bbb2d9		
-0x784066	83		ＢＨくらっしゃー	82618267b8d7afbcacb0		
+0x784066	52		プらズまガん	8376d78359cf834bdd	Plasma Gun	human
+0x784066	53		はんドガん	cadd8368834bdd	Handgun	human
+0x784066	54		ブろーにんグ	8375dbb0c6dd834f	Browning	human
+0x784066	55		はんドブらすたー	cadd83688375d7bdc0b0	Hand Blaster	human
+0x784066	56		さブましんガん	bb8375cfbcdd834bdd	SMG	human
+0x784066	57		ビーむらいふる	8372b0d1d7b2ccd9	Beam Rifle	human
+0x784066	58		対戦車らいふる	91ce90ed8ed4d7b2ccd9	A-Tank Rifle	human
+0x784066	59		火炎放射器	89ce898a95fa8ecb8aed	Flamethrower	human
+0x784066	60		Ｆ・ブらすたー	826581458375d7bdc0b0	F. Blaster	human
+0x784066	61		さんダーボると	bbdd835fb0837bd9c4	Thunderbolt	human
+0x784066	62		れいブらすたー	dab28375d7bdc0b0	Ray Blaster	human
+0x784066	63		まいんドブれーく	cfb2dd83688375dab0b8	Mind Break	human
+0x784066	64		Ｚ・ブらすたー	827981458375d7bdc0b0	Z. Blaster	human
+0x784066	65		めガましんガん	d2834bcfbcdd834bdd	Mega MG	human
+0x784066	66		バズーか	836f8359b0b6	Bazooka	human
+0x784066	67		しょるダーかのん	bcaed9835fb0b6c9dd	Shoulder Cannon	human
+0x784066	68		Ｆ・バすたー	82658145836fbdc0b0	F. Buster	human
+0x784066	69		ふりーズきゃのん	ccd8b08359b7acc9dd	Freeze Cannon	human
+0x784066	70		えれきゅーと	b4dab7adb0c4	Electrocute	human
+0x784066	71		れいバすたー	dab2836fbdc0b0	Ray Buster	human
+0x784066	72		れいすとーむ	dab2bdc4b0d1	Ray Storm	human
+0x784066	73		ふぉとんきゃのん	ccabc4ddb7acc9dd	Photon Cannon	human
+0x784066	74		超重力きゃのん	92b48f6497cdb7acc9dd	Gravity Cannon	human
+0x784066	75		さいこすまっしゅ	bbb2babdcfafbcad	Psycho Smash	human
+0x784066	76		ザいザーきゃのん	8355b28355b0b7acc9dd	Zaizer Cannon	human
+0x784066	77		対戦車みさいる	91ce90ed8ed4d0bbb2d9	A-Tank Missile	human
+0x784066	78		Ｍ・らんちゃー	826c8145d7ddc1acb0	M. Launcher	human
+0x784066	79		なパーむみさいる	c58370b0d1d0bbb2d9	Napalm Missile	human
+0x784066	80		ふりーズみさいる	ccd8b08359d0bbb2d9	Freeze Missile	human
+0x784066	81		はいパーみさいる	cab28370b0d0bbb2d9	Hyper Missile	human
+0x784066	82		多弾頭みさいる	91bd926593aad0bbb2d9	Multi Missile	human
+0x784066	83		ＢＨくらっしゃー	82618267b8d7afbcacb0	BH Crusher	human
 0x784066	84					
 0x784066	85					
 0x784066	86					
 0x784066	87					
-0x784066	88		ますく	cfbdb8		
-0x784066	89		ないとますく	c5b2c4cfbdb8		
-0x784066	90		はーふへるむ	cab0cccdd9d1		
-0x784066	91		すーパーますく	bdb08370b0cfbdb8		
-0x784066	92		ふるへるむ	ccd9cdd9d1		
-0x784066	93		ふぁいたーへるむ	cca7b2c0b0cdd9d1		
-0x784066	94		ＳＳＳ・へるむ	8272827282728145cdd9d1		
-0x784066	95		照準器	8fc68f808aed		
-0x784066	96		赤外線照準器	90d48a4f90fc8fc68f808aed		
-0x784066	97		さいこさいと	bbb2babbb2c4		
-0x784066	98		れいさいと	dab2bbb2c4		
-0x784066	99		さいとへるむ	bbb2c4cdd9d1		
-0x784066	100		さいきっくへるむ	bbb2b7afb8cdd9d1		
-0x784066	101		すくらっプへるむ	bdb8d7af8376cdd9d1		
-0x784066	102		れいさいとへるむ	dab2bbb2c4cdd9d1		
+0x784066	88		ますく	cfbdb8	Mask	human
+0x784066	89		ないとますく	c5b2c4cfbdb8	Night Mask	human
+0x784066	90		はーふへるむ	cab0cccdd9d1	Half Helm	human
+0x784066	91		すーパーますく	bdb08370b0cfbdb8	Super Mask	human
+0x784066	92		ふるへるむ	ccd9cdd9d1	Full Helm	human
+0x784066	93		ふぁいたーへるむ	cca7b2c0b0cdd9d1	Fighter Helm	human
+0x784066	94		ＳＳＳ・へるむ	8272827282728145cdd9d1	SSS Helm	human
+0x784066	95		照準器	8fc68f808aed	Sight	human
+0x784066	96		赤外線照準器	90d48a4f90fc8fc68f808aed	IR Sight	human
+0x784066	97		さいこさいと	bbb2babbb2c4	Psycho Sight	human
+0x784066	98		れいさいと	dab2bbb2c4	Ray Sight	human
+0x784066	99		さいとへるむ	bbb2c4cdd9d1	Sight Helm	human
+0x784066	100		さいきっくへるむ	bbb2b7afb8cdd9d1	Psychic Helm	human
+0x784066	101		すくらっプへるむ	bdb8d7af8376cdd9d1	Scrap Helm	human
+0x784066	102		れいさいとへるむ	dab2bbb2c4cdd9d1	Ray Sight Helm	human
 0x784066	103					
-0x784066	104		いベいしブりんグ	b28378b2bc8375d8dd834f		
-0x784066	105		まグねっとりんグ	cf834fc8afc4d8dd834f		
-0x784066	106		電磁ブれすれっと	93648ea58375dabddaafc4		
-0x784066	107		れいブれすれっと	dab28375dabddaafc4		
-0x784066	108		ちたんしーるド	c1c0ddbcb0d98368		
-0x784066	109		ないとしーるド	c5b2c4bcb0d98368		
-0x784066	110		さいこしーるド	bbb2babcb0d98368		
-0x784066	111		電磁しーるド	93648ea5bcb0d98368		
-0x784066	112		れいしーるド	dab2bcb0d98368		
-0x784066	113		ザいザーしーるド	8355b28355b0bcb0d98368		
-0x784066	114		超次元バりあ	92b48e9f8cb3836fd8b1		
-0x784066	115		れいバりあ	dab2836fd8b1		
-0x784066	116		超電磁バりあ	92b493648ea5836fd8b1		
-0x784066	117		はいパーバりあ	cab28370b0836fd8b1		
-0x784066	118		ＢＨ・バりあ	826182678145836fd8b1		
+0x784066	104		いベいしブりんグ	b28378b2bc8375d8dd834f	Evade Ring	human
+0x784066	105		まグねっとりんグ	cf834fc8afc4d8dd834f	Magnet Ring	human
+0x784066	106		電磁ブれすれっと	93648ea58375dabddaafc4	EM Bracelet	human
+0x784066	107		れいブれすれっと	dab28375dabddaafc4	Ray Bracelet	human
+0x784066	108		ちたんしーるド	c1c0ddbcb0d98368	Titan Shield	human
+0x784066	109		ないとしーるド	c5b2c4bcb0d98368	Night Shield	human
+0x784066	110		さいこしーるド	bbb2babcb0d98368	Psycho Shield	human
+0x784066	111		電磁しーるド	93648ea5bcb0d98368	EM Shield	human
+0x784066	112		れいしーるド	dab2bcb0d98368	Ray Shield	human
+0x784066	113		ザいザーしーるド	8355b28355b0bcb0d98368	Zaizer Shield	human
+0x784066	114		超次元バりあ	92b48e9f8cb3836fd8b1	Dim Barrier	human
+0x784066	115		れいバりあ	dab2836fd8b1	Ray Barrier	human
+0x784066	116		超電磁バりあ	92b493648ea5836fd8b1	EM Barrier	human
+0x784066	117		はいパーバりあ	cab28370b0836fd8b1	Hyper Barrier	human
+0x784066	118		ＢＨ・バりあ	826182678145836fd8b1	BH Barrier	human
 0x784066	119					
 0x784066	120					
 0x784066	121					
 0x784066	122					
 0x784066	123					
-0x784066	124		しゃつ	bcacc2		
-0x784066	125		こーと	bab0c4		
-0x784066	126		プろてくたー	8376dbc3b8c0b0		
-0x784066	127		プろとさいバー	8376dbc4bbb2836fb0		
-0x784066	128		らいとすーつ	d7b2c4bdb0c2		
-0x784066	129		ポりまーすーつ	837cd8cfb0bdb0c2		
-0x784066	130		こすもすーつ	babdd3bdb0c2		
-0x784066	131		せらみっくすーつ	bed7d0afb8bdb0c2		
-0x784066	132		ふぁいたーすーつ	cca7b2c0b0bdb0c2		
-0x784066	133		はいパーすーつ	cab28370b0bdb0c2		
-0x784066	134		すくらっプすーつ	bdb8d7af8376bdb0c2		
-0x784066	135		さいバーすーつ	bbb2836fb0bdb0c2		
-0x784066	136		さいこすーつ	bbb2babdb0c2		
-0x784066	137		プろてくとすーつ	8376dbc3b8c4bdb0c2		
-0x784066	138		ちたんあーまー	c1c0ddb1b0cfb0		
-0x784066	139		あーむドすーつ	b1b0d18368bdb0c2		
-0x784066	140		バとるすーつ	836fc4d9bdb0c2		
-0x784066	141		ないとあーまー	c5b2c4b1b0cfb0		
-0x784066	142		すーパーさいバー	bdb08370b0bbb2836fb0		
-0x784066	143		すちーるボデぃ	bdc1b0d9837b8366a8		
-0x784066	144		ちたんボデぃ	c1c0dd837b8366a8		
-0x784066	145		さいバーふれーむ	bbb2836fb0ccdab0d1		
-0x784066	146		超電磁ふれーむ	92b493648ea5ccdab0d1		
-0x784066	147		すくらっプボデぃ	bdb8d7af8376837b8366a8		
-0x784066	148		ザいザーふれーむ	8355b28355b0ccdab0d1		
+0x784066	124		しゃつ	bcacc2	Shirt	human
+0x784066	125		こーと	bab0c4	Coat	human
+0x784066	126		プろてくたー	8376dbc3b8c0b0	Protector	human
+0x784066	127		プろとさいバー	8376dbc4bbb2836fb0	Proto Cyber	human
+0x784066	128		らいとすーつ	d7b2c4bdb0c2	Light Suit	human
+0x784066	129		ポりまーすーつ	837cd8cfb0bdb0c2	Polymer Suit	human
+0x784066	130		こすもすーつ	babdd3bdb0c2	Cosmo Suit	human
+0x784066	131		せらみっくすーつ	bed7d0afb8bdb0c2	Ceramic Suit	human
+0x784066	132		ふぁいたーすーつ	cca7b2c0b0bdb0c2	Fighter Suit	human
+0x784066	133		はいパーすーつ	cab28370b0bdb0c2	Hyper Suit	human
+0x784066	134		すくらっプすーつ	bdb8d7af8376bdb0c2	Scrap Suit	human
+0x784066	135		さいバーすーつ	bbb2836fb0bdb0c2	Cyber Suit	human
+0x784066	136		さいこすーつ	bbb2babdb0c2	Psycho Suit	human
+0x784066	137		プろてくとすーつ	8376dbc3b8c4bdb0c2	Protect Suit	human
+0x784066	138		ちたんあーまー	c1c0ddb1b0cfb0	Titan Armor	human
+0x784066	139		あーむドすーつ	b1b0d18368bdb0c2	Armed Suit	human
+0x784066	140		バとるすーつ	836fc4d9bdb0c2	Battle Suit	human
+0x784066	141		ないとあーまー	c5b2c4b1b0cfb0	Night Armor	human
+0x784066	142		すーパーさいバー	bdb08370b0bbb2836fb0	Super Cyber	human
+0x784066	143		すちーるボデぃ	bdc1b0d9837b8366a8	Steel Body	human
+0x784066	144		ちたんボデぃ	c1c0dd837b8366a8	Titan Body	human
+0x784066	145		さいバーふれーむ	bbb2836fb0ccdab0d1	Cyber Frame	human
+0x784066	146		超電磁ふれーむ	92b493648ea5ccdab0d1	EM Frame	human
+0x784066	147		すくらっプボデぃ	bdb8d7af8376837b8366a8	Scrap Body	human
+0x784066	148		ザいザーふれーむ	8355b28355b0ccdab0d1	Zaizer Frame	human
 0x784066	149					
 0x784066	150					
 0x784066	151					
@@ -155,54 +155,54 @@ block_off	str_off	speaker	text	raw_hex	english	status
 0x784066	153					
 0x784066	154					
 0x784066	155					
-0x784066	156		はんドめデぃかる	cadd8368d28366a8b6d9		
-0x784066	157		めデぃかるつーる	d28366a8b6d9c2b0d9		
-0x784066	158		めデぃかるせっと	d28366a8b6d9beafc4		
-0x784066	159		はいめデぃかる	cab2d28366a8b6d9		
-0x784066	160		さいこきゅあ	bbb2bab7adb1		
-0x784066	161		はいさいこきゅあ	cab2bbb2bab7adb1		
-0x784066	162		はんドグれねード	cadd8368834fdac8b08368		
-0x784066	163		はいグれねード	cab2834fdac8b08368		
-0x784066	164		はんドなパーむ	cadd8368c58370b0d1		
-0x784066	165		はいパーなパーむ	cab28370b0c58370b0d1		
-0x784066	166		ふりージんグボむ	ccd8b08357dd834f837bd1		
-0x784066	167		らいとにんグボむ	d7b2c4c6dd834f837bd1		
-0x784066	168		れいボーる	dab2837bb0d9		
-0x784066	169		グらビてぃ・ボむ	834fd78372c3a88145837bd1		
-0x784066	170		すたんグれねード	bdc0dd834fdac8b08368		
-0x784066	171		すりープガす	bdd8b08376834bbd		
-0x784066	172		パららいズガす	8370d7d7b28359834bbd		
-0x784066	173		さいこくらっしゅ	bbb2bab8d7afbcad		
-0x784066	174		ちたんブーめらん	c1c0dd8375b0d2d7dd		
-0x784066	175		れいりんグ	dab2d8dd834f		
-0x784066	176		ビーむダーと	8372b0d1835fb0c4		
-0x784066	177		超時空弾	92b48e9e8bf39265		
-0x784066	178		とろんふぃーるド	c4dbddcca8b0d98368		
-0x784066	179		超電磁ふぃーるド	92b493648ea5cca8b0d98368		
-0x784066	180		きゅあめデぃしん	b7adb1d28366a8bcdd		
-0x784066	181		はんドさてらいと	cadd8368bbc3d7b2c4		
-0x784066	182		みゅんとすの薬草	d0adddc4bd82cc96f29190		
-0x784066	183		かん詰め	b6dd8b6c82df		
-0x784066	184		まーズちけっと	cfb08359c1b9afc4		
-0x784066	185		ザジるちけっと	83558357d9c1b9afc4		
-0x784066	186		すてあちけっと	bdc3b1c1b9afc4		
-0x784066	187		ほむちけっと	ced1c1b9afc4		
-0x784066	188		ジゅーくちけっと	8357adb0b8c1b9afc4		
-0x784066	189		きゃんプせっと	b7acdd8376beafc4		
-0x784066	190		簡易工具せっと	8ac888d58d488befbeafc4		
-0x784066	191		めか修理ボっくす	d2b68f43979d837bafb8bd		
-0x784066	192		ビデおれたー	83728366b5dac0b0		
-0x784066	193		まーズ連邦史百科	cfb083599841964d8e6a955389c8		
-0x784066	194		三つ葉の紋章	8e4f82c2977482cc96e48fcd		
+0x784066	156		はんドめデぃかる	cadd8368d28366a8b6d9	Hand Medkit	human
+0x784066	157		めデぃかるつーる	d28366a8b6d9c2b0d9	Medical Tool	human
+0x784066	158		めデぃかるせっと	d28366a8b6d9beafc4	Medical Set	human
+0x784066	159		はいめデぃかる	cab2d28366a8b6d9	Hi-Medkit	human
+0x784066	160		さいこきゅあ	bbb2bab7adb1	Psycho Cure	human
+0x784066	161		はいさいこきゅあ	cab2bbb2bab7adb1	Hi-Psycho Cure	human
+0x784066	162		はんドグれねード	cadd8368834fdac8b08368	Hand Grenade	human
+0x784066	163		はいグれねード	cab2834fdac8b08368	Hi-Grenade	human
+0x784066	164		はんドなパーむ	cadd8368c58370b0d1	Hand Napalm	human
+0x784066	165		はいパーなパーむ	cab28370b0c58370b0d1	Hyper Napalm	human
+0x784066	166		ふりージんグボむ	ccd8b08357dd834f837bd1	Freeze Bomb	human
+0x784066	167		らいとにんグボむ	d7b2c4c6dd834f837bd1	Lightning Bomb	human
+0x784066	168		れいボーる	dab2837bb0d9	Ray Ball	human
+0x784066	169		グらビてぃ・ボむ	834fd78372c3a88145837bd1	Gravity Bomb	human
+0x784066	170		すたんグれねード	bdc0dd834fdac8b08368	Stun Grenade	human
+0x784066	171		すりープガす	bdd8b08376834bbd	Sleep Gas	human
+0x784066	172		パららいズガす	8370d7d7b28359834bbd	Paralyze Gas	human
+0x784066	173		さいこくらっしゅ	bbb2bab8d7afbcad	Psycho Crush	human
+0x784066	174		ちたんブーめらん	c1c0dd8375b0d2d7dd	Titan Boomerang	human
+0x784066	175		れいりんグ	dab2d8dd834f	Ray Ring	human
+0x784066	176		ビーむダーと	8372b0d1835fb0c4	Beam Dart	human
+0x784066	177		超時空弾	92b48e9e8bf39265	Warp Bomb	human
+0x784066	178		とろんふぃーるド	c4dbddcca8b0d98368	Tron Field	human
+0x784066	179		超電磁ふぃーるド	92b493648ea5cca8b0d98368	EM Field	human
+0x784066	180		きゅあめデぃしん	b7adb1d28366a8bcdd	Cure Medicine	human
+0x784066	181		はんドさてらいと	cadd8368bbc3d7b2c4	Hand Satellite	human
+0x784066	182		みゅんとすの薬草	d0adddc4bd82cc96f29190	Myuntos Herb	human
+0x784066	183		かん詰め	b6dd8b6c82df	Canned Food	human
+0x784066	184		まーズちけっと	cfb08359c1b9afc4	Mars Ticket	human
+0x784066	185		ザジるちけっと	83558357d9c1b9afc4	Zazil Ticket	human
+0x784066	186		すてあちけっと	bdc3b1c1b9afc4	Stea Ticket	human
+0x784066	187		ほむちけっと	ced1c1b9afc4	Hom Ticket	human
+0x784066	188		ジゅーくちけっと	8357adb0b8c1b9afc4	Juke Ticket	human
+0x784066	189		きゃんプせっと	b7acdd8376beafc4	Camp Set	human
+0x784066	190		簡易工具せっと	8ac888d58d488befbeafc4	Tool Set	human
+0x784066	191		めか修理ボっくす	d2b68f43979d837bafb8bd	Repair Box	human
+0x784066	192		ビデおれたー	83728366b5dac0b0	Video Letter	human
+0x784066	193		まーズ連邦史百科	cfb083599841964d8e6a955389c8	Mars Chronicle	human
+0x784066	194		三つ葉の紋章	8e4f82c2977482cc96e48fcd	Clover Crest	human
 0x784066	195					
-0x784066	196		まいくろちっプ	cfb2b8dbc1af8376		
-0x784066	197		通行許可証	92ca8d738b9689c28fd8		
-0x784066	198		ザいザー鉱の破片	8355b28355b08d7a82cc946a95d0		
-0x784066	199		ビゅードすのきー	8372adb08368bd82ccb7b0		
-0x784066	200		ゴるのきー	8353d982ccb7b0		
-0x784066	201		ボるあのきー	837bd9b182ccb7b0		
-0x784066	202		月の光	8c8e82cc8cf5		
-0x784066	203		ザいザー原石	8355b28355b08cb490ce		
+0x784066	196		まいくろちっプ	cfb2b8dbc1af8376	Microchip	human
+0x784066	197		通行許可証	92ca8d738b9689c28fd8	Travel Pass	human
+0x784066	198		ザいザー鉱の破片	8355b28355b08d7a82cc946a95d0	Zaizer Shard	human
+0x784066	199		ビゅードすのきー	8372adb08368bd82ccb7b0	Byudos Key	human
+0x784066	200		ゴるのきー	8353d982ccb7b0	Gol Key	human
+0x784066	201		ボるあのきー	837bd9b182ccb7b0	Borua Key	human
+0x784066	202		月の光	8c8e82cc8cf5	Moonlight	human
+0x784066	203		ザいザー原石	8355b28355b08cb490ce	Zaizer Gem	human
 0x784066	204					
 0x784066	205					
 0x784066	206					
@@ -217,8 +217,8 @@ block_off	str_off	speaker	text	raw_hex	english	status
 0x784066	215					
 0x784066	216					
 0x784066	217					
-0x784066	218		さいこりんグ	bbb2bad8dd834f		
-0x784066	219		ドぅむなの宝珠	8368a9d1c582cc95f38eec		
+0x784066	218		さいこりんグ	bbb2bad8dd834f	Psycho Ring	human
+0x784066	219		ドぅむなの宝珠	8368a9d1c582cc95f38eec	Dumna Orb	human
 0x784066	220					
 0x784066	221					
 0x784066	222					
@@ -283,128 +283,128 @@ block_off	str_off	speaker	text	raw_hex	english	status
 0x784066	281					
 0x784066	282					
 0x784066	283		−−−−−−	817c817c817c817c817c817c		
-0x784066	284		はいパーしょっと	cab28370b0bcaeafc4		
-0x784066	285		ふらっしゅボると	ccd7afbcad837bd9c4		
-0x784066	286		めガガとりんグ砲	d2834b834bc4d8dd834f9643		
-0x784066	287		グれねードかのん	834fdac8b08368b6c9dd		
-0x784066	288		２５０みり貫通砲	82518254824fd0d88ad192ca9643		
-0x784066	289		さらまんダー	bbd7cfdd835fb0		
-0x784066	290		プらズまバすたー	8376d78359cf836fbdc0b0		
-0x784066	291		パわーそにっく砲	8370dcb0bfc6afb89643		
-0x784066	292		粒子砲	97b18e719643		
-0x784066	293		まるちれいかのん	cfd9c1dab2b6c9dd		
-0x784066	294		ビーむかったー	8372b0d1b6afc0b0		
-0x784066	295		ひーとみさいる	cbb0c4d0bbb2d9		
-0x784066	296		炸裂閃光みさいる	e07997f4914d8cf5d0bbb2d9		
-0x784066	297		すーパーなパーむ	bdb08370b0c58370b0d1		
-0x784066	298		わいバーん	dcb2836fb0dd		
-0x784066	299		光子爆弾	8cf58e71949a9265		
-0x784066	300		あくあジぇっと砲	b1b8b18357aaafc49643		
-0x784066	301		３２０みり貫通砲	82528251824fd0d88ad192ca9643		
-0x784066	302		ザいザーすパーく	8355b28355b0bd8370b0b8		
-0x784066	303		拡散れいバすたー	8a678e55dab2836fbdc0b0		
-0x784066	304		プらズまいおん砲	8376d78359cfb2b5dd9643		
-0x784066	305		ふぉとんビーむ砲	ccabc4dd8372b0d19643		
-0x784066	306		パるすれいザー砲	8370d9bddab28355b09643		
-0x784066	307		はいパー素粒子砲	cab28370b0916697b18e719643		
-0x784066	308		中性子ビーむ砲	928690ab8e718372b0d19643		
-0x784066	309		５６０みり光子砲	82548255824fd0d88cf58e719643		
-0x784066	310		へるプろみねんす	cdd98376dbd0c8ddbd		
-0x784066	311		陽電子速射砲	977a93648e7191ac8ecb9643		
-0x784066	312		すくらっプかのん	bdb8d7af8376b6c9dd		
-0x784066	313		ザいザーかのん	8355b28355b0b6c9dd		
-0x784066	314		ケブれす砲	83508375dabd9643		
-0x784066	315		むーんすらいダー	d1b0ddbdd7b2835fb0		
-0x784066	316		すてるすみさいる	bdc3d9bdd0bbb2d9		
-0x784066	317		ふりージんグゼろ	ccd8b08357dd834f835bdb		
-0x784066	318		Ｇ・プれっしゃー	826681458376daafbcacb0		
-0x784066	319		プらズまみさいる	8376d78359cfd0bbb2d9		
-0x784066	320		まるちみさいる	cfd9c1d0bbb2d9		
-0x784066	321		はいドろみさいる	cab28368dbd0bbb2d9		
-0x784066	322		反陽子みさいる	94bd977a8e71d0bbb2d9		
-0x784066	323		超時空振動弾	92b48e9e8bf3905593ae9265		
-0x784066	324		ちたにうむ	c1c0c6b3d1		
-0x784066	325		それのいド	bfdac9b28368		
-0x784066	326		β−せらみっく	83c0817cbed7d0afb8		
-0x784066	327		てとらちたん	c3c4d7c1c0dd		
-0x784066	328		ＴＲＡふれーむ	827382718260ccdab0d1		
-0x784066	329		うらにうむ	b3d7c6b3d1		
-0x784066	330		硬化プらすちっく	8d6489bb8376d7bdc1afb8		
-0x784066	331		粒子ふれーむ	97b18e71ccdab0d1		
-0x784066	332		さいあろん	bbb2b1dbdd		
-0x784066	333		Ｏ−Ｄ合金	826e817c82638d878be0		
-0x784066	334		デみかーボのいド	8366d0b6b0837bc9b28368		
-0x784066	335		とぅおねら	c4a9b5c8d7		
-0x784066	336		うぃーガー装甲	b3a8b0834bb091958d62		
+0x784066	284		はいパーしょっと	cab28370b0bcaeafc4	Hyper Shot	human
+0x784066	285		ふらっしゅボると	ccd7afbcad837bd9c4	Flash Bolt	human
+0x784066	286		めガガとりんグ砲	d2834b834bc4d8dd834f9643	Mega Gatling	human
+0x784066	287		グれねードかのん	834fdac8b08368b6c9dd	Grenade Cannon	human
+0x784066	288		２５０みり貫通砲	82518254824fd0d88ad192ca9643	250mm Cannon	human
+0x784066	289		さらまんダー	bbd7cfdd835fb0	Salamander	human
+0x784066	290		プらズまバすたー	8376d78359cf836fbdc0b0	Plasma Buster	human
+0x784066	291		パわーそにっく砲	8370dcb0bfc6afb89643	Power Sonic	human
+0x784066	292		粒子砲	97b18e719643	Particle Cannon	human
+0x784066	293		まるちれいかのん	cfd9c1dab2b6c9dd	Multi Ray Cannon	human
+0x784066	294		ビーむかったー	8372b0d1b6afc0b0	Beam Cutter	human
+0x784066	295		ひーとみさいる	cbb0c4d0bbb2d9	Heat Missile	human
+0x784066	296		炸裂閃光みさいる	e07997f4914d8cf5d0bbb2d9	Flash Missile	human
+0x784066	297		すーパーなパーむ	bdb08370b0c58370b0d1	Super Napalm	human
+0x784066	298		わいバーん	dcb2836fb0dd	Wyvern	human
+0x784066	299		光子爆弾	8cf58e71949a9265	Photon Bomb	human
+0x784066	300		あくあジぇっと砲	b1b8b18357aaafc49643	Aqua Jet	human
+0x784066	301		３２０みり貫通砲	82528251824fd0d88ad192ca9643	320mm Cannon	human
+0x784066	302		ザいザーすパーく	8355b28355b0bd8370b0b8	Zaizer Spark	human
+0x784066	303		拡散れいバすたー	8a678e55dab2836fbdc0b0	Spread Buster	human
+0x784066	304		プらズまいおん砲	8376d78359cfb2b5dd9643	Plasma Ion	human
+0x784066	305		ふぉとんビーむ砲	ccabc4dd8372b0d19643	Photon Beam	human
+0x784066	306		パるすれいザー砲	8370d9bddab28355b09643	Pulse Laser	human
+0x784066	307		はいパー素粒子砲	cab28370b0916697b18e719643	Hyper Particle	human
+0x784066	308		中性子ビーむ砲	928690ab8e718372b0d19643	Neutron Beam	human
+0x784066	309		５６０みり光子砲	82548255824fd0d88cf58e719643	560mm Photon	human
+0x784066	310		へるプろみねんす	cdd98376dbd0c8ddbd	Hell Prominence	human
+0x784066	311		陽電子速射砲	977a93648e7191ac8ecb9643	Positron Cannon	human
+0x784066	312		すくらっプかのん	bdb8d7af8376b6c9dd	Scrap Cannon	human
+0x784066	313		ザいザーかのん	8355b28355b0b6c9dd	Zaizer Cannon	human
+0x784066	314		ケブれす砲	83508375dabd9643	Kebres Cannon	human
+0x784066	315		むーんすらいダー	d1b0ddbdd7b2835fb0	Moon Slider	human
+0x784066	316		すてるすみさいる	bdc3d9bdd0bbb2d9	Stealth Missile	human
+0x784066	317		ふりージんグゼろ	ccd8b08357dd834f835bdb	Freezing Zero	human
+0x784066	318		Ｇ・プれっしゃー	826681458376daafbcacb0	G. Pressure	human
+0x784066	319		プらズまみさいる	8376d78359cfd0bbb2d9	Plasma Missile	human
+0x784066	320		まるちみさいる	cfd9c1d0bbb2d9	Multi Missile	human
+0x784066	321		はいドろみさいる	cab28368dbd0bbb2d9	Hydro Missile	human
+0x784066	322		反陽子みさいる	94bd977a8e71d0bbb2d9	Antiproton	human
+0x784066	323		超時空振動弾	92b48e9e8bf3905593ae9265	Warp Shell	human
+0x784066	324		ちたにうむ	c1c0c6b3d1	Titanium	human
+0x784066	325		それのいド	bfdac9b28368	Solenoid	human
+0x784066	326		β−せらみっく	83c0817cbed7d0afb8	B-Ceramic	human
+0x784066	327		てとらちたん	c3c4d7c1c0dd	Tetra-Titan	human
+0x784066	328		ＴＲＡふれーむ	827382718260ccdab0d1	TRA Frame	human
+0x784066	329		うらにうむ	b3d7c6b3d1	Uranium	human
+0x784066	330		硬化プらすちっく	8d6489bb8376d7bdc1afb8	Hard Plastic	human
+0x784066	331		粒子ふれーむ	97b18e71ccdab0d1	Particle Frame	human
+0x784066	332		さいあろん	bbb2b1dbdd	Sialon	human
+0x784066	333		Ｏ−Ｄ合金	826e817c82638d878be0	O-D Alloy	human
+0x784066	334		デみかーボのいド	8366d0b6b0837bc9b28368	Demi-Carbonoid	human
+0x784066	335		とぅおねら	c4a9b5c8d7	Tuonela	human
+0x784066	336		うぃーガー装甲	b3a8b0834bb091958d62	Wieger Armor	human
 0x784066	337					
 0x784066	338					
 0x784066	339					
-0x784066	340		のーまるえんジん	c9b0cfd9b4dd8357dd		
-0x784066	341		Ｊ−Ｓえんジん	8269817c8272b4dd8357dd		
+0x784066	340		のーまるえんジん	c9b0cfd9b4dd8357dd	Normal Engine	human
+0x784066	341		Ｊ−Ｓえんジん	8269817c8272b4dd8357dd	J-S Engine	human
 0x784066	342		あるゴー<87><58>	b1d98353b08758		
-0x784066	343		プらズま	8376d78359cf		
-0x784066	344		Ｇ−いおん	8266817cb2b5dd		
-0x784066	345		ＮＥＧＡ−Ｊ	826d826482668260817c8269		
-0x784066	346		めガプらズま	d2834b8376d78359cf		
-0x784066	347		へりうむジぇっと	cdd8b3d18357aaafc4		
-0x784066	348		ギガプらズま	834d834b8376d78359cf		
-0x784066	349		反陽子えんジん	94bd977a8e71b4dd8357dd		
-0x784066	350		すらいプにる	bdd7b28376c6d9		
-0x784066	351		ブらっジ	8375d7af8357		
+0x784066	343		プらズま	8376d78359cf	Plasma	human
+0x784066	344		Ｇ−いおん	8266817cb2b5dd	G-Ion	human
+0x784066	345		ＮＥＧＡ−Ｊ	826d826482668260817c8269	NEGA-J	human
+0x784066	346		めガプらズま	d2834b8376d78359cf	Mega Plasma	human
+0x784066	347		へりうむジぇっと	cdd8b3d18357aaafc4	Helium Jet	human
+0x784066	348		ギガプらズま	834d834b8376d78359cf	Giga Plasma	human
+0x784066	349		反陽子えんジん	94bd977a8e71b4dd8357dd	Antiproton Eng	human
+0x784066	350		すらいプにる	bdd7b28376c6d9	Sleipnir	human
+0x784066	351		ブらっジ	8375d7af8357	Brage	human
 0x784066	352					
 0x784066	353					
 0x784066	354					
 0x784066	355					
-0x784066	356		ふぁるこん	cca7d9badd		
-0x784066	357		ふぇにっくす	ccaac6afb8bd		
-0x784066	358		ふぁるこん２	cca7d9badd8251		
-0x784066	359		Ｓ・ふぇにっくす	82728145ccaac6afb8bd		
-0x784066	360		ガーなード	834bb0c5b08368		
-0x784066	361		きんグガーなード	b7dd834f834bb0c5b08368		
-0x784066	362		たすくバとらー	c0bdb8836fc4d7b0		
-0x784066	363		すてぃんグれー	bdc3a8dd834fdab0		
-0x784066	364		えあかー	b4b1b6b0		
-0x784066	365		すのーたんく	bdc9b0c0ddb8		
-0x784066	366		へるバすたー	cdd9836fbdc0b0		
-0x784066	367		バとるバギー	836fc4d9836f834db0		
-0x784066	368		らんドあたっかー	d7dd8368b1c0afb6b0		
-0x784066	369		ジぇっとほバー	8357aaafc4ce836fb0		
-0x784066	370		いっジ	b2af8357		
-0x784066	371		デぃジぇ	8366a88357aa		
-0x784066	372		ふぁいく	cca7b2b8		
+0x784066	356		ふぁるこん	cca7d9badd	Falcon	human
+0x784066	357		ふぇにっくす	ccaac6afb8bd	Phoenix	human
+0x784066	358		ふぁるこん２	cca7d9badd8251	Falcon 2	human
+0x784066	359		Ｓ・ふぇにっくす	82728145ccaac6afb8bd	S. Phoenix	human
+0x784066	360		ガーなード	834bb0c5b08368	Garnard	human
+0x784066	361		きんグガーなード	b7dd834f834bb0c5b08368	King Garnard	human
+0x784066	362		たすくバとらー	c0bdb8836fc4d7b0	Task Battler	human
+0x784066	363		すてぃんグれー	bdc3a8dd834fdab0	Stingray	human
+0x784066	364		えあかー	b4b1b6b0	Air Car	human
+0x784066	365		すのーたんく	bdc9b0c0ddb8	Snow Tank	human
+0x784066	366		へるバすたー	cdd9836fbdc0b0	Hellbuster	human
+0x784066	367		バとるバギー	836fc4d9836f834db0	Battle Buggy	human
+0x784066	368		らんドあたっかー	d7dd8368b1c0afb6b0	Land Attacker	human
+0x784066	369		ジぇっとほバー	8357aaafc4ce836fb0	Jet Hover	human
+0x784066	370		いっジ	b2af8357	Edge	human
+0x784066	371		デぃジぇ	8366a88357aa	Dije	human
+0x784066	372		ふぁいく	cca7b2b8	Faik	human
 0x784066	373					
-0x784066	374		あくバい	b1b8836fb2		
-0x784066	375		デぃーふぉ	8366a8b0ccab		
-0x784066	376		ガいりゅー	834bb2d8adb0		
-0x784066	377		デぃくさー	8366a8b8bbb0		
-0x784066	378		ゴーむ	8353b0d1		
-0x784066	379		ゾーく	835db0b8		
-0x784066	380		ひーりんグ	cbb0d8dd834f		
-0x784066	381		すりープ	bdd8b08376		
-0x784066	382		てれきねしす	c3dab7c8bcbd		
-0x784066	383		いりゅージょん	b2d8adb08357aedd		
-0x784066	384		ひーと	cbb0c4		
-0x784066	385		ふりーズ	ccd8b08359		
-0x784066	386		さんダーボると	bbdd835fb0837bd9c4		
-0x784066	387		デぃめんしょん	8366a8d2ddbcaedd		
-0x784066	388		くえいく	b8b4b2b8		
-0x784066	389		まいんドすとーむ	cfb2dd8368bdc4b0d1		
+0x784066	374		あくバい	b1b8836fb2	Akvai	human
+0x784066	375		デぃーふぉ	8366a8b0ccab	Deefo	human
+0x784066	376		ガいりゅー	834bb2d8adb0	Gairyu	human
+0x784066	377		デぃくさー	8366a8b8bbb0	Dixer	human
+0x784066	378		ゴーむ	8353b0d1	Gohm	human
+0x784066	379		ゾーく	835db0b8	Zohk	human
+0x784066	380		ひーりんグ	cbb0d8dd834f	Healing	human
+0x784066	381		すりープ	bdd8b08376	Sleep	human
+0x784066	382		てれきねしす	c3dab7c8bcbd	Telekinesis	human
+0x784066	383		いりゅージょん	b2d8adb08357aedd	Illusion	human
+0x784066	384		ひーと	cbb0c4	Heat	human
+0x784066	385		ふりーズ	ccd8b08359	Freeze	human
+0x784066	386		さんダーボると	bbdd835fb0837bd9c4	Thunderbolt	human
+0x784066	387		デぃめんしょん	8366a8d2ddbcaedd	Dimension	human
+0x784066	388		くえいく	b8b4b2b8	Quake	human
+0x784066	389		まいんドすとーむ	cfb2dd8368bdc4b0d1	Mind Storm	human
 0x784066	390					
-0x784066	391		きゅあ	b7adb1		
+0x784066	391		きゅあ	b7adb1	Cure	human
 0x784066	392					
 0x784066	393					
-0x784066	394		精神回復	90b8905f89f1959c		
-0x784066	395		精神攻撃	90b8905f8d558c82		
-0x784066	396		精神防御	90b8905f96688ce4		
-0x784066	397		精神錯乱	90b8905f8df69790		
-0x784066	398		精神破壊	90b8905f946a89f3		
-0x784066	399		さいこしーるド	bbb2babcb0d98368		
+0x784066	394		精神回復	90b8905f89f1959c	Mind Heal	human
+0x784066	395		精神攻撃	90b8905f8d558c82	Mind Attack	human
+0x784066	396		精神防御	90b8905f96688ce4	Mind Defense	human
+0x784066	397		精神錯乱	90b8905f8df69790	Confusion	human
+0x784066	398		精神破壊	90b8905f946a89f3	Mind Break	human
+0x784066	399		さいこしーるド	bbb2babcb0d98368	Psycho Shield	human
 0x784066	400					
 0x784066	401					
 0x784066	402					
 0x784066	403					
-0x784066	404		万能ドらいバー	969c945c8368d7b2836fb0		
-0x784066	405		電磁バブる	93648ea5836f8375d9		
+0x784066	404		万能ドらいバー	969c945c8368d7b2836fb0	Omni Driver	human
+0x784066	405		電磁バブる	93648ea5836f8375d9	EM Bubble	human
 0x784066	406					
 0x784066	407					
 0x784066	408					
@@ -413,27 +413,27 @@ block_off	str_off	speaker	text	raw_hex	english	status
 0x784066	411					
 0x784066	412					
 0x784066	413					
-0x784066	414		めかビーとる	d2b68372b0c4d9		
-0x784066	415		めかまんてぃす	d2b6cfddc3a8bd		
-0x784066	416		めかたいガー	d2b6c0b2834bb0		
-0x784066	417		めかドらゴん	d2b68368d78353dd		
-0x784066	418		十字切り	8f5c8e9a90d882e8		
-0x784066	419		飛しょう斬	94f282b582e582a48e61		
-0x784066	420		乱舞剣	979095918c95		
-0x784066	421		剣魂波	8c958db09467		
-0x784066	422		飛えん落とし	94f282a682f1978e82c682b5		
+0x784066	414		めかビーとる	d2b68372b0c4d9	Mecha Beetle	human
+0x784066	415		めかまんてぃす	d2b6cfddc3a8bd	Mecha Mantis	human
+0x784066	416		めかたいガー	d2b6c0b2834bb0	Mecha Tiger	human
+0x784066	417		めかドらゴん	d2b68368d78353dd	Mecha Dragon	human
+0x784066	418		十字切り	8f5c8e9a90d882e8	Cross Slash	human
+0x784066	419		飛しょう斬	94f282b582e582a48e61	Flying Slash	human
+0x784066	420		乱舞剣	979095918c95	Sword Dance	human
+0x784066	421		剣魂波	8c958db09467	Soul Wave	human
+0x784066	422		飛えん落とし	94f282a682f1978e82c682b5	Swallow Drop	human
 0x784066	423					
-0x784066	424		ひーりんグ	cbb0d8dd834f		
-0x784066	425		てれポーと	c3da837cb0c4		
-0x784066	426		ろけーしょん	dbb9b0bcaedd		
-0x784066	427		いんビジブる	b2dd837283578375d9		
+0x784066	424		ひーりんグ	cbb0d8dd834f	Healing	human
+0x784066	425		てれポーと	c3da837cb0c4	Teleport	human
+0x784066	426		ろけーしょん	dbb9b0bcaedd	Location	human
+0x784066	427		いんビジブる	b2dd837283578375d9	Invisible	human
 0x784066	428					
 0x784066	429					
-0x784066	430		精神回復	90b8905f89f1959c		
+0x784066	430		精神回復	90b8905f89f1959c	Mind Heal	human
 0x784066	431					
 0x784066	432					
-0x784066	433		性能分析	90ab945c95aa90cd		
-0x784066	434		かすたむ	b6bdc0d1		
-0x784066	435		めか修理	d2b68f43979d		
+0x784066	433		性能分析	90ab945c95aa90cd	Analyze	human
+0x784066	434		かすたむ	b6bdc0d1	Custom	human
+0x784066	435		めか修理	d2b68f43979d	Repair	human
 0x784066	436					
-0x784066	437		めかバード	d2b6836fb08368		
+0x784066	437		めかバード	d2b6836fb08368	Mecha Bird	human
