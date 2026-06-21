@@ -90,6 +90,32 @@ def name_patch(cooked):
     return patches
 
 
+# Field-menu / system text: inline SJIS strings in bank 0x6B (labels, option lists, pickers,
+# messages) - extracted to script/menu.tsv by tools/export_menu.py, drawn by the bank-0x6D label
+# loop ($5748, patched in bank6d.s to render ASCII in our VWF font). Each row's raw_hex is the
+# original glyph run + its 0x00 terminator (= the writable slot); we splice English ASCII (1 byte/
+# char, '|'=0x0D separator), NUL-terminated, zero-padded to the slot - shorter than the SJIS, so it
+# fits in place with no repointing. Rows without an english value are left byte-exact.
+def menu_patch(cooked):
+    import tsv
+    from alshark import menucodec
+    patches = []
+    for r in tsv.read(os.path.join(ROOT, 'script', 'menu.tsv')):
+        off = int(r['block_off'], 16)
+        raw = bytes.fromhex(r['raw_hex'])               # run + 0x00 terminator
+        if cooked[off:off + len(raw)] != raw:
+            raise SystemExit('menu.tsv 0x%x not as extracted' % off)
+        en = r.get('english', '')
+        if not en:
+            continue
+        new = menucodec.encode(en) + b'\x00'
+        if len(new) > len(raw):
+            raise SystemExit('menu.tsv 0x%x overflows: %d > %d' % (off, len(new), len(raw)))
+        new += b'\x00' * (len(raw) - len(new))          # pad to the slot (stays in span)
+        patches.append((off, new))
+    return patches
+
+
 def assemble(src):
     """Assemble one src/*.s -> build/<name>.bin, return the bytes."""
     name = os.path.splitext(src)[0]
@@ -206,6 +232,7 @@ def main():
     patches = assemble_banks(cooked)
     patches += blob_patches()    # bake the VWF font at cooked 0xa1a000
     patches += name_patch(cooked)   # English character names
+    patches += menu_patch(cooked)   # English field-menu labels
     import reinsert               # splice English from cutscene.tsv into the #-engine blocks
     cut, flagged = reinsert.build(args.work, os.path.join(ROOT, 'script', 'cutscene.tsv'))
     for base, o, n in flagged:

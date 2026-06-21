@@ -1,0 +1,60 @@
+block_off	str_off	speaker	text	raw_hex	english	status
+0xb038	0x0		アトライア	8341836783898343834100	Atraia	human
+0xb043	0x0		ヘルバスター	8377838b836f8358835e815b00	Hellbuster	human
+0xb050	0x0		バトルバギー	836f8367838b836f834d815b00	Battle Buggy	human
+0xb05d	0x0		ランドアタッカー	8389839383688341835e8362834a815b00	Land Attacker	human
+0xb166	0x0		能力が上昇した。	945c97cd82aa8fe38fb882b582bd814200	Stats increased.	human
+0xb183	0x0		ジョー|なんぼわしが天才でも、これ以上|のレベルアップは不可能じゃわい	83578387815b0d82c882f182da82ed82b582aa93568dcb82c582e0814182b182ea88c88fe30d82cc838c8378838b83418362837682cd957389c2945c82b682e182ed82a200	Joe|Even a genius like me|can't raise your level|any higher.	human
+0xb1ff	0x0		･ﾉ	a5c900		
+0xb281	0x0		�xｩ	8578a900		
+0xb28e	0x0		�|ｩ	857ca900		
+0xb2a5	0x0		�}ｩ	857da900		
+0xb490	0x0		　隊列を変更します。　	814091e097f182f095cf8d5882b582dc82b78142814000	   Formation changed.	human
+0xb7b8	0x0		ｩ水	a9908500		
+0xb853	0x0		材ｨｩ	8ddea8a900		
+0xb8af	0x0		ﾌ憚ｨ憊ｨｩ	cc9cdda89cdea8a900		
+0xbc90	0x0		�xｩ	8578a900		
+0xbc9d	0x0		�|ｩ	857ca900		
+0xbdc7	0x0		Ｓｔｒ　ＰｏｗＤｅｆ　Ｐｏｗ　　　　　　可|　　　　　不可|	8272829482928140826f828f82978263828582868140826f828f829781408140814081408140814089c20d81408140814081408140957389c20d00		
+0xbe19	0x0		シオン　	835683498393814000	Sion	human
+0xbe22	0x0		ショーコ	83568387815b835200	Shoko	human
+0xbe2b	0x0		カル　　	834a838b8140814000	Carl	human
+0xbe34	0x0		Ｓ・カル	82728145834a838b00	S.Carl	human
+0xbe3d	0x0		ジョー　	83578387815b814000	Joe	human
+0xbe46	0x0		ウェルダ	83458346838b835f00	Welda	human
+0xbe4f	0x0		ギーデル	834d815b8366838b00	Gieder	human
+0xbe58	0x0		ルシア　	838b83568341814000	Lucia	human
+0xbe61	0x0		マモン　	837d83828393814000	Mamon	human
+0xbe90	0x0		ﾐ｡	d0a100		
+0xbe9e	0x0		すでに搭載された|タンクが存在します	82b782c582c9938b8dda82b382ea82bd0d835e8393834e82aa91b68ddd82b582dc82b700	A tank is already|installed.	human
+0xbee4	0x0		データ表示|ステータス|アイテム|作戦|装備変更|特殊能力|システム|	8366815b835e955c8ea60d83588365815b835e83580d83418343836583800d8dec90ed0d919594f595cf8d580d93c18eea945c97cd0d83568358836583800d00	Data View|Status|Item|Plan|Equip|Skills|System|	human
+0xbf26	0x0		ステータス|アイテム|作戦|装備変更|特殊能力|システム|	83588365815b835e83580d83418343836583800d8dec90ed0d919594f595cf8d580d93c18eea945c97cd0d83568358836583800d00	Status|Item|Plan|Equip|Skills|System|	human
+0xbf71	0x0		＜誰の？＞	8183924e82cc8148818400	<Whose?>	human
+0xbf7e	0x0		＜誰に？＞	8183924e82c98148818400	<To whom?>	human
+0xbfb3	0x0		ジョー|よっしゃっ！|気合い入れて、パワーアップして|やるか！	83578387815b0d82e682c182b582e182c181490d8b438d8782a293fc82ea82c481418370838f815b83418362837682b582c40d82e282e982a9814900	Joe|All right!|Let's fire up and|power you up!	human
+0xbff1	0x0		その特殊能力は今使えない。	82bb82cc93c18eea945c97cd82cd8da18e6782a682c882a2814200	Can't use that|skill now.	human
+0xc00e	0x0		空間が閉鎖されていて|テレポートできない！	8bf38ad482aa95c28dbd82b382ea82c482a282c40d8365838c837c815b836782c582ab82c882a2814900	The area is sealed,|can't teleport!	human
+0xc03a	0x0		カルには使用できない	834a838b82c982cd8e67977082c582ab82c882a200	Can't use on Carl.	human
+0xc061	0x0		話しかける|隊列変更	986282b582a982af82e90d91e097f195cf8d5800	Talk|Formation	human
+0xc087	0x0		＜システム＞|　セーブ|　ロード	8183835683588365838081840d8140835a815b83750d8140838d815b836800	<System>|   Save|   Load	human
+0xc0b8	0x0		＜システム＞|　ロード	8183835683588365838081840d8140838d815b836800	<System>|   Load	human
+0xc0e0	0x0		現在の状態をセーブします|よろしいですか？|　　ＹＥＳ　　　ＮＯ	8cbb8ddd82cc8ff391d482f0835a815b837582b582dc82b70d82e682eb82b582a282c582b782a981480d81408140827882648272814081408140826d826e00	Save your game?|Are you sure?|      YES         NO	human
+0xc131	0x0		ロードしてやり直します|よろしいですか？|　　ＹＥＳ　　　ＮＯ	838d815b836882b582c482e282e892bc82b582dc82b70d82e682eb82b582a282c582b782a981480d81408140827882648272814081408140826d826e00	Load your game?|Are you sure?|      YES         NO	human
+0xc17a	0x0		セーブが終了しました。	835a815b837582aa8f4997b982b582dc82b582bd814200	Save complete.	human
+0xc19d	0x0		ここではセーブできません。	82b182b182c582cd835a815b837582c582ab82dc82b982f1814200	Can't save here.	human
+0xc1ca	0x0		使う|解体する	8e6782a40d89f091cc82b782e900	Use|Scrap	human
+0xc1e4	0x0		そのアイテムをここで使うことは|できない。	82bb82cc834183438365838082f082b182b182c58e6782a482b182c682cd0d82c582ab82c882a2814200	Can't use that item|here.	human
+0xc25d	0x0		スクラップになるぜ||解体しますか？|　　ＹＥＳ　　　ＮＯ	8358834e83898362837682c982c882e982ba0d0d89f091cc82b582dc82b782a981480d81408140827882648272814081408140826d826e00	It becomes scrap.||Dismantle it?|      YES         NO	human
+0xc297	0x0		そのアイテムは解体できない。	82bb82cc834183438365838082cd89f091cc82c582ab82c882a2814200	Can't scrap that item.	human
+0xc2e6	0x0		タンク	835e8393834e00	Tank	human
+0xc2ef	0x0		カル	834a838b00	Carl	human
+0xc2f6	0x0		タンク|カル	835e8393834e0d834a838b00	Tank|Carl	human
+0xc352	0x0		スクラップが|必要だぞ。||修理しますか？|　　ＹＥＳ　　　ＮＯ	8358834e83898362837682aa0d954b977682be82bc81420d0d8f43979d82b582dc82b782a981480d81408140827882648272814081408140826d826e00	You need scrap.||Repair it?|      YES         NO	human
+0xc3a7	0x0		こら、シオン。|いくらわしがメカの天才でも、|スクラップがなくちゃあ、どうし|ようもなかろうが。	82b182e7814183568349839381420d82a282ad82e782ed82b582aa8381834a82cc93568dcb82c582e081410d8358834e83898362837682aa82c882ad82bf82e182a0814182c782a482b50d82e682a482e082c882a982eb82a482aa814200	Hey, Sion.|Even a mech genius like me|can't do a thing|without scrap.	human
+0xc412	0x0		ジョー|なんじゃい！|どこも壊れとりゃせんぞ！	83578387815b0d82c882f182b682e182a281490d82c782b182e089f382ea82c682e882e182b982f182bc814900	Joe|What?!|Nothing's broken at all!	human
+0xc513	0x0		ﾂ･	c2a500		
+0xc5f0	0x0		ﾂ･	c2a500		
+0xc6cc	0x0		ﾂ･	c2a500		
+0xc7a2	0x0		ﾂ･	c2a500		
+0xcd7d	0x0		ｪｽ埒獄ｽｽ嵜漉ｽｲ	aabd9abd8d96bdbd9bbd8d97bdb200		
+0xce87	0x0		ｪｽ､ｾ頃ｾｽ･ｾ今ｾｲ	aabda4be8da0bebda5be8da1beb200		

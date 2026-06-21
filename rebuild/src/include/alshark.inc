@@ -57,3 +57,18 @@
 .define glyphFlag     $5F40 ; 1 = current glyph is ours (ASCII), 0 = let BIOS draw it
 .define glyphIdx      $5F41 ; ASCII index (char - 0x20) of the current glyph
 .define menuWidth     $5F42 ; render_hook stashes the current glyph width here for $40AE
+
+; Menu LABEL drawer ($5702 body, loop top $5748): draws the field-menu labels (Status/Item/...)
+; from the 0x0d-separated SJIS lists in bank 0x6B. The loop reads each byte from ($16); a byte
+; >= $40 is taken as a 2-byte SJIS lead (lead->$F9, trail->$F8, JSR $5003 draw, $16+=2, pen $00+=12);
+; a byte < $40 takes the resident digit/half-width path ($57B5: $F8=byte, JSR $503E, $16+=1, $00+=8).
+; So ASCII LETTERS ($41-$7A) wrongly hit the 2-byte path -> blank. We intercept the $40 split and
+; route printable ASCII (except digits, which keep the digit font for HP/MP numbers) to a 1-byte
+; path that flags the glyph as ours (glyphFlag/glyphIdx) so render_hook draws our VWF font, advancing
+; pen $00 by the real glyph width (menuWidth). Digits and true SJIS fall through to the originals.
+.define menuLabelLoop   $5748 ; top of the label byte loop (our handler JMPs back here)
+.define menuLabelSplit  $578C ; the CMP #$40 / BCC $57B5 split; we overwrite with JMP menu_label_char
+.define menuLabel1byte  $57B5 ; original digit/half-width path (STA $F8 / JSR $503E ...)
+.define menuLabel2byte  $5790 ; original 2-byte SJIS path (STA $F9 / LDY #1 / LDA ($16),Y ...)
+.define menuDraw        $5003 ; sets glyphBuf ptr + JSR $E060(->render_hook) + blit; RTS
+.define menu_label_slack $5CC0 ; free zero run $5CC0-$5D38 (~0x78 B) in the bank 0x6D code region
