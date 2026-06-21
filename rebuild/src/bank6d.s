@@ -100,6 +100,8 @@ rh_loop:
   ; the engine adds boxAdv to penX at 6A:$8115 after we return; pre-bias by (width-boxAdv).
   ldx glyphIdx
   lda fontWidths,x               ; advance width (font bank 0x7F, still paged in)
+  sta menuWidth                  ; stash for the menu name-loop advance ($40AE); only that
+                                 ; (menu-only) site reads it, so harmless to dialogue/cutscene
   clc
   adc penX
   sec
@@ -120,7 +122,20 @@ rh_loop:
 .ORG nameConvOrig - $4000        ; $587E (was: LDA ($16) / CMP #$20)
   jmp name_conv
 
-.ORG $5F14 - $4000               ; proven-safe slack, after render_hook (ends $5F10)
+; ---- menu name VWF: replace the name-loop's fixed +12 X-advance with += menuWidth (real glyph
+; width) so English menu names advance proportionally and fit the slot (no BG overflow). Menu-only
+; (the name-read routine at $4057); cutscene names draw via 6A:$7FE4.
+.ORG nameLoopAdv - $4000         ; $40AE (was: CLC / LDA #$0C / ADC $00 / STA $00 / CLA / ...)
+  clc
+  lda $00
+  adc menuWidth                  ; $00 += this glyph's real width instead of the fixed +12
+  sta $00
+  lda #$00
+  adc $01
+  sta $01
+  jmp nameLoopTop                ; $4080: loop to the next glyph
+
+.ORG $5F18 - $4000               ; proven-safe slack, after render_hook (now ends ~$5F17)
 name_conv:
   lda (scriptPtr)                ; the name byte ($16 = name-table pointer)
   cmp #$20

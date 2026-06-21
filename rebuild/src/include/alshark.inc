@@ -36,6 +36,14 @@
 ; VWF advance: the engine tracks cumulative text X in $273F, advancing +$0C/char at 6A:$8115
 .define penX          $273F ; engine cumulative text X (work RAM, always mapped)
 .define boxAdv        $0C   ; engine's fixed per-char advance (fullwidth = 12 px)
+; Menu name VWF: the menu name-read loop ($4057) advances its pixel-X ($00) by a FIXED +12 per
+; glyph at $40AE (CLC / LDA #$0C / ADC $00 / STA $00), so long English names overrun the slot into
+; BG VRAM. render_hook stashes the glyph width to menuWidth; we re-emit $40AE to advance $00 by
+; menuWidth instead (proportional). The name-read routine is MENU-ONLY (cutscene names use 6A:$7FE4)
+; and dialogue/cutscene never read menuWidth, so this is scoped to menu names.
+.define nameLoopTop   $4080 ; top of the menu name-draw loop (BRA target)
+.define nameLoopAdv   $40AE ; the fixed +12 advance we replace with += menuWidth
 ; render-hook scratch in the PROVEN-safe slack (the fontpatch region; $5F60+ is engine BSS)
 .define glyphFlag     $5F40 ; 1 = current glyph is ours (ASCII), 0 = let BIOS draw it
 .define glyphIdx      $5F41 ; ASCII index (char - 0x20) of the current glyph
+.define menuWidth     $5F42 ; render_hook stashes the current glyph width here for $40AE
