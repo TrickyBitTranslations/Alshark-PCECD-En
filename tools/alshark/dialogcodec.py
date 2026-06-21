@@ -153,14 +153,27 @@ def _pct_len(d, i):
     verified subcommands; raises on an unhandled one (so it's measured + added, never silently
     corrupting). Length-prefixed codes (`% S L <L bytes>`) are 3 + L."""
     s = d[i + 1]
-    if s in (0x04, 0x1a, 0x1c):
-        return 3 + d[i + 2]
-    if s in (0x06, 0x14):                  # cursor/box positioning: % S 02 XX YY (measured 584x)
-        return 5
-    if s == 0x1f:
-        return 4
-    if s == 0xff:
+    if s >= 0x80:                          # box terminator (e.g. %<ff>), no params
         return 2
+    # inline-length / relative-skip handlers: % S L <L bytes> (handler reads L, then L more)
+    if s in (0x04, 0x05, 0x07, 0x08, 0x13, 0x14, 0x15, 0x16, 0x19, 0x1a, 0x1c, 0x1d):
+        return 3 + d[i + 2]
+    # NOTE 0x10/0x11/0x12 share one handler ($8832) that renders INLINE TEXT (mixed 1/2-byte
+    # glyphs, count not a simple byte length) - not yet cracked, so they fall through to raise;
+    # the ~15 strings that use them stay untranslated for now rather than risk a mis-size.
+    # fixed length = 2 + the param bytes the handler reads via $9911/$9916
+    FIXED = {0x00: 4, 0x01: 3, 0x02: 2, 0x06: 5, 0x09: 4, 0x0a: 4, 0x0b: 5, 0x0c: 5,
+             0x0d: 6, 0x0e: 2, 0x0f: 3, 0x17: 4, 0x18: 5, 0x1b: 4,
+             0x1f: 4, 0x20: 6}
+    if s in FIXED:
+        return FIXED[s]
+    if s == 0x03:                          # conditional: 3 if the peeked byte is 0, else 5
+        return 3 if d[i + 3] == 0 else 5
+    if s == 0x1e:                          # skip L, +2 params, a NUL-terminated run, +2 params
+        j = i + 3 + d[i + 2] + 2
+        while j < len(d) and d[j] != 0x00:
+            j += 1
+        return j - i + 3
     raise ValueError('dialogcodec: unhandled %%<%02x> at 0x%x - measure its length + add it'
                      % (s, i))
 
