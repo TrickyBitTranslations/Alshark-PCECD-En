@@ -32,6 +32,21 @@ def block_used(codec, entries):
     return total
 
 
+def has_text(codec, raw):
+    """True if the row holds displayable glyph text worth translating.
+
+    Pure control-code / padding rows (no glyph runs) return False, so the site
+    hides them and drops them from every count. A decode failure is treated as
+    text present (a deferred/uncrackable line), so it stays counted."""
+    try:
+        if codec is dialogcodec:
+            return any(t == "dlg" for t, _ in codec.tokenize(raw))
+        s = codec.decode(raw)
+        return bool(s and s.strip())
+    except Exception:
+        return True
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     budget_file = ROOT / "script" / "budgets.json"
@@ -50,7 +65,9 @@ def main():
             line = {"id": r["str_off"], "sp": r["speaker"], "jp": r["text"], "en": en}
             if st:
                 line["st"] = st
-            structural = raw == b"\x00"      # pure terminator/padding, nothing to translate
+            # Control-only rows (terminator/padding or no displayable glyphs)
+            # have nothing to translate.
+            structural = raw == b"\x00" or not has_text(codec, raw)
             if structural:
                 line["x"] = 1                # dimmed on the site, excluded from all counts
             blocks[bo].append(line)
