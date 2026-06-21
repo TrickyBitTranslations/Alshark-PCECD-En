@@ -125,15 +125,14 @@ rh_loop:
 ; ---- menu name VWF: replace the name-loop's fixed +12 X-advance with += menuWidth (real glyph
 ; width) so English menu names advance proportionally and fit the slot (no BG overflow). Menu-only
 ; (the name-read routine at $4057); cutscene names draw via 6A:$7FE4.
-.ORG nameLoopAdv - $4000         ; $40AE (was: CLC / LDA #$0C / ADC $00 / STA $00 / CLA / ...)
-  clc
-  lda $00
-  adc menuWidth                  ; $00 += this glyph's real width instead of the fixed +12
-  sta $00
-  lda #$00
-  adc $01
-  sta $01
-  jmp nameLoopTop                ; $4080: loop to the next glyph
+.ORG nameLoopAdv - $4000         ; $40AE: redirect to a slack trampoline (3 bytes, NO overrun).
+  jmp nameAdvTramp               ; an inline re-emit here is +3 bytes vs the original and overruns
+                                 ; the loop's exit at $40BC (turning it into JMP $4080 = infinite loop)
+
+.ORG nameLoopExit - $4000        ; $40BC: restore the exit the first cut's inline re-emit clobbered
+  pla                            ; (orig PLA / TAM #$08 / RTS) - balances the PHA/TMA at routine entry
+  tam #$08
+  rts
 
 .ORG $5F18 - $4000               ; proven-safe slack, after render_hook (now ends ~$5F17)
 name_conv:
@@ -155,3 +154,16 @@ name_conv:
 nc_orig:
   cmp #$20                       ; replay the CMP #$20 our JMP clobbered at $5880
   jmp nameConvBody               ; $5882: rest of the original converter (BNE $588E ...)
+
+; ---- menu name advance trampoline (slack): $00 += menuWidth (VWF) then loop. Redirected from
+; $40AE; absolute menuWidth ($5F42, safe). Trampolining (vs an inline re-emit) avoids the +3-byte
+; overrun that clobbered the loop's exit and hung the menu.
+.ORG nameAdvTramp - $4000        ; $5F43
+  clc
+  lda $00
+  adc menuWidth                  ; $00 += this glyph's real width instead of the fixed +12
+  sta $00
+  cla
+  adc $01
+  sta $01
+  jmp nameLoopTop                ; $4080

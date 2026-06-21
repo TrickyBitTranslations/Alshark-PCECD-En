@@ -42,7 +42,11 @@
 ; menuWidth instead (proportional). The name-read routine is MENU-ONLY (cutscene names use 6A:$7FE4)
 ; and dialogue/cutscene never read menuWidth, so this is scoped to menu names.
 .define nameLoopTop   $4080 ; top of the menu name-draw loop (BRA target)
-.define nameLoopAdv   $40AE ; the fixed +12 advance we replace with += menuWidth
+.define nameLoopAdv   $40AE ; the fixed +12 advance; we redirect to a slack trampoline (an INLINE
+                            ; re-emit here is +3 bytes vs the original and overruns the loop's exit
+                            ; at $40BC = PLA/TAM #$08/RTS, turning it into JMP $4080 = infinite loop)
+.define nameLoopExit  $40BC ; the loop's exit (orig PLA/TAM #$08/RTS); BEQ at $4082 targets it
+.define nameAdvTramp  $5F43 ; slack trampoline: $00 += menuWidth (VWF) then JMP nameLoopTop
 ; render-hook scratch in the PROVEN-safe slack (the fontpatch region; $5F60+ is engine BSS)
 .define glyphFlag     $5F40 ; 1 = current glyph is ours (ASCII), 0 = let BIOS draw it
 .define glyphIdx      $5F41 ; ASCII index (char - 0x20) of the current glyph
