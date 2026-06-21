@@ -101,3 +101,4 @@ block_off	str_off	speaker	text	raw_hex	english	status
 0x16ae6	0x0		��ｩ	85faa900		
 0x16af4	0x0		爼ﾐ爻	e0aad0e0a900		
 0x16be6	0x0		ｮ璢	aee0e300		
+0x1942b	0x0		アタック|特殊能力|アイテム|装備変更|ステータス|戦闘離脱<00>	8341835e8362834e0d93c18eea945c97cd0d83418343836583800d919594f595cf8d580d83588365815b835e83580d90ed93ac97a3924500	Attack|Skills|Item|Equip|Status|Flee	
