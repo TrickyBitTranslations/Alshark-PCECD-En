@@ -16,23 +16,32 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import tsv
 from alshark import menucodec
 
-BANK6B = (0xB000, 0xD000)               # cooked range of bank 0x6B
+# Resident banks that hold field-menu / system inline text, drawn by the bank-0x6D $5748 loop.
+# (cooked lo, hi): 0x6A engine messages, 0x6B menu lists + messages, 0x6D render bank (equip/
+# status stat labels, skill categories, equip/quit messages, picker + party-name copies).
+REGIONS = [(0x9000, 0xb000), (0xb000, 0xd000), (0x15000, 0x17000)]
 
 
 def export(cooked, out='script/menu.tsv'):
+    prev = {}                           # carry over existing english/status by offset
+    try:
+        for r in tsv.read(out):
+            prev[r['block_off']] = (r.get('english', ''), r.get('status', ''))
+    except OSError:
+        pass
     rows = []
-    for off, run in menucodec.find(cooked, *BANK6B):
-        rows.append({
-            'block_off': '0x%x' % off,
-            'str_off': '0x0',
-            'speaker': '',
-            'text': menucodec.decode(run),
-            'raw_hex': (run + b'\x00').hex(),
-            'english': '',
-            'status': '',
-        })
+    for lo, hi in REGIONS:
+        for off, run in menucodec.find(cooked, lo, hi):
+            key = '0x%x' % off
+            en, st = prev.get(key, ('', ''))
+            rows.append({
+                'block_off': key, 'str_off': '0x0', 'speaker': '',
+                'text': menucodec.decode(run), 'raw_hex': (run + b'\x00').hex(),
+                'english': en, 'status': st,
+            })
     tsv.write(out, rows)
-    print('wrote %s (%d strings)' % (out, len(rows)))
+    print('wrote %s (%d strings, %d already translated)'
+          % (out, len(rows), sum(1 for r in rows if r['english'])))
 
 
 def main():

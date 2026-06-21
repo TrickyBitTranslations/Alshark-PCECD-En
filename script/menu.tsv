@@ -1,4 +1,15 @@
 block_off	str_off	speaker	text	raw_hex	english	status
+0x9393	0x0		ﾐ|･	d00da500		
+0x93f5	0x0		はい|いいえ	82cd82a20d82a282a282a600	Yes|No	human
+0x9a2d	0x0		これ以上アイテムは	82b182ea88c88fe3834183438365838082cd00	No more items	human
+0x9a42	0x0		持てません。	8e9d82c482dc82b982f1814200	can be held.	human
+0x9a51	0x0		格納庫が	8a69945b8cc982aa00	Hangar	human
+0x9a5c	0x0		いっぱいです。	82a282c182cf82a282c582b7814200	is full.	human
+0x9d2e	0x0		ﾚｩ	daa900		
+0xa4c8	0x0		爼ﾐﾙｩ	e0aad0d9a900		
+0xa991	0x0		ｃｒ：|ｓｃ：	8283829281460d82938283814600	cr:|sc:	human
+0xaba3	0x0		寫ｷ嵜	9b8db79bbd00		
+0xabd3	0x0		　　　　は、特殊能力を|使うことができない。	814081408140814082cd814193c18eea945c97cd82f00d8e6782a482b182c682aa82c582ab82c882a2814200		
 0xb038	0x0		アトライア	8341836783898343834100	Atraia	human
 0xb043	0x0		ヘルバスター	8377838b836f8358835e815b00	Hellbuster	human
 0xb050	0x0		バトルバギー	836f8367838b836f834d815b00	Battle Buggy	human
@@ -58,3 +69,35 @@ block_off	str_off	speaker	text	raw_hex	english	status
 0xc7a2	0x0		ﾂ･	c2a500		
 0xcd7d	0x0		ｪｽ埒獄ｽｽ嵜漉ｽｲ	aabd9abd8d96bdbd9bbd8d97bdb200		
 0xce87	0x0		ｪｽ､ｾ頃ｾｽ･ｾ今ｾｲ	aabda4be8da0bebda5be8da1beb200		
+0x1512a	0x0		シオン　	835683498393814000	Sion	human
+0x15133	0x0		ショーコ	83568387815b835200	Shoko	human
+0x1513c	0x0		カル　　	834a838b8140814000	Carl	human
+0x15145	0x0		Ｓ・カル	82728145834a838b00	S.Carl	human
+0x1514e	0x0		ジョー　	83578387815b814000	Joe	human
+0x15157	0x0		ウェルダ	83458346838b835f00	Welda	human
+0x15160	0x0		ギーデル	834d815b8366838b00	Gieder	human
+0x15169	0x0		ルシア　	838b83568341814000	Lucia	human
+0x15172	0x0		マモン　	837d83828393814000	Mamon	human
+0x1553c	0x0		ﾊﾐﾞｩ	cad0dea900		
+0x1575e	0x0		ﾊ･	caa500		
+0x15973	0x0		ｨ･	a8a500		
+0x15bde	0x0		はい　　いいえ	82cd82a28140814082a282a282a600	Yes      No	human
+0x15bed	0x0		ゲームを終了します。|よろしいですか？||いいえ　　はい|	8351815b838082f08f4997b982b582dc82b781420d82e682eb82b582a282c582b782a981480d0d82a282a282a68140814082cd82a20d00	Quit the game?|Are you sure?||No      Yes|	human
+0x15c26	0x0		＜誰の？＞	8183924e82cc8148818400	<Whose?>	human
+0x15c33	0x0		＜誰に？＞	8183924e82c98148818400	<To whom?>	human
+0x15cef	0x0		Ｒ|Ｌ|Ｈ|Ｓ	82710d826b0d82670d827200	R|L|H|S	human
+0x15cfd	0x0		アイテムがいっぱいで|装備を外せません。	834183438365838082aa82a282c182cf82a282c50d919594f582f08a4f82b982dc82b982f1814200	Item slots full,|can't unequip.	human
+0x15d27	0x0		アイテムがありません。	834183438365838082aa82a082e882dc82b982f1814200	No items.	human
+0x15d40	0x0		装備の対象となる|アイテムがありません。	919594f582cc91ce8fdb82c682c882e90d834183438365838082aa82a082e882dc82b982f1814200	No equippable|items.	human
+0x15d6a	0x0		重量オーバーで、装備|できません。	8f6497ca8349815b836f815b82c58141919594f50d82c582ab82dc82b982f1814200	Too heavy to|equip.	human
+0x15d8e	0x0		Ｍ＿Ａｒｍ|Ｓ＿Ａｒｍ|ＳＰ|Ｄｅｆ|Ｍｂｌ|	826c815182608292828d0d8272815182608292828d0d8272826f0d8263828582860d826c8282828c0d00	M_Arm|S_Arm|SP|Def|Mbl|	human
+0x15e0c	0x0		　戦闘用特殊能力	814090ed93ac977093c18eea945c97cd00	   Battle Skills	human
+0x15e1f	0x0		　通常用特殊能力	814092ca8fed977093c18eea945c97cd00	   Field Skills	human
+0x15eb6	0x0		　戦闘用特殊能力	814090ed93ac977093c18eea945c97cd00	   Battle Skills	human
+0x15ec9	0x0		　通常用特殊能力	814092ca8fed977093c18eea945c97cd00	   Field Skills	human
+0x16aa5	0x0		��ｩ	85faa900		
+0x16ab3	0x0		爼ﾐ爻	e0aad0e0a900		
+0x16ad3	0x0		爼ﾐ濮ｩ	e0aad0e060a900		
+0x16ae6	0x0		��ｩ	85faa900		
+0x16af4	0x0		爼ﾐ爻	e0aad0e0a900		
+0x16be6	0x0		ｮ璢	aee0e300		
