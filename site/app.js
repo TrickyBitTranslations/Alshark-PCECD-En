@@ -298,8 +298,8 @@ function linesTable(file, block, lines) {
     if (unsafe) {
       const s = document.createElement("span");
       s.className = "engine";
-      s.title = "This row overlaps engine data and can't be translated yet.";
-      s.textContent = "engine data";
+      s.title = "Control data only (codes/padding, no text). Nothing to translate; excluded from counts.";
+      s.textContent = "control data";
       act.appendChild(s);
       tr.appendChild(act);
       table.appendChild(tr);
