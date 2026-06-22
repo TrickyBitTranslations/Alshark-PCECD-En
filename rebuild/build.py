@@ -334,11 +334,38 @@ def save_menu_patch(cooked):
         patches.append((BASE_DISC + off, blob))                    # English string in free space
         patches.append((entry, bytes([addr & 0xff, addr >> 8])))   # repoint the entry's string ptr
         off += len(blob)
-    if off > FREE:
-        raise SystemExit('save-menu strings (%d bytes) exceed free space (%d)' % (off, FREE))
     # widen ONLY the option box (dialog boxes are already wide): row stride MUST match the width
     patches.append((0x48018b5, b'\x40\x01'))     # option box row stride 0x0060 -> 0x0140 ($8D*0x20)
     patches.append((0x48018b7, b'\x0d'))         # option box width param 0x06 -> 0x0d ($8D = 10)
+
+    # --- "TrickyBit Translations" credit: BORDERLESS white text at the bottom. $64A7 always draws a
+    # blue box, so don't use it. Instead use pre-rendered 8x8 tiles (plane0=plane3=glyph -> color 9
+    # = white on color 0 = transparent in palette 2; from tools/alshark/gen_credit.py), DMA them to
+    # free VRAM, and write the BAT row directly. Hook the once-per-render JSR $634E at $6107.
+    ctiles = open(os.path.join(ROOT, 'script', 'savemenu_credit.bin'), 'rb').read()
+    n = len(ctiles) // 32                               # tile count (1 row, 8px tall)
+    TILE_VRAM = 0x7000                                  # free VRAM (tile 0x700, after DATA-2, before staging 0x72c)
+    TNO, ROW = TILE_VRAM >> 4, 26                       # tile number 0x700; bottom screen row (tune)
+    bat = ROW * 32 + (32 - n) // 2                      # centered BAT word address
+    cbat = b''.join(bytes([(TNO + i) & 0xff, ((TNO + i) >> 8) | 0x20]) for i in range(n))  # palette 2
+    cti_off, cba_off = off, off + len(ctiles)
+    cwr_off = cba_off + len(cbat)
+    cti_log, cba_log, cwr_log = BASE_LOG + cti_off, BASE_LOG + cba_off, BASE_LOG + cwr_off
+    wrap = bytes([0x20, 0x4e, 0x63,                                          # JSR $634E (orig DATA render)
+                  0xa9, 0x00, 0xa2, TILE_VRAM >> 8, 0x20, 0xae, 0xe0,        # MAWR = TILE_VRAM
+                  0xe3, cti_log & 0xff, cti_log >> 8, 0x02, 0x00, len(ctiles) & 0xff, len(ctiles) >> 8,  # TIA tiles->VRAM
+                  0xa9, bat & 0xff, 0xa2, bat >> 8, 0x20, 0xae, 0xe0,        # MAWR = BAT row
+                  0xe3, cba_log & 0xff, cba_log >> 8, 0x02, 0x00, len(cbat) & 0xff, len(cbat) >> 8,  # TIA bat->VRAM
+                  0x60])                                                     # RTS
+    off = cwr_off + len(wrap)
+    if off > FREE:
+        raise SystemExit('save-menu data (%d bytes) exceeds free space (%d)' % (off, FREE))
+    if cooked[0x4801107:0x480110a] != b'\x20\x4e\x63':   # sanity: $6107 = JSR $634E (hook target)
+        raise SystemExit('save-menu credit hook site not as expected')
+    patches.append((BASE_DISC + cti_off, ctiles))
+    patches.append((BASE_DISC + cba_off, cbat))
+    patches.append((BASE_DISC + cwr_off, wrap))
+    patches.append((0x4801108, bytes([cwr_log & 0xff, cwr_log >> 8])))   # $6107 JSR $634E -> JSR wrap
     return patches
 
 
