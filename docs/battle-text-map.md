@@ -56,37 +56,36 @@ Segments [22,16,12]; the 16-byte `　　　　　　　　` is a runtime skill-n
 Translated offset-preserving (skill-name blank kept). Not yet visually verified (needs a
 skill-learn event) but same proven method.
 
-## Party-name array  (cooked 0x19afb)  -- TRANSLATED, but NOT the HUD source
-A 9-entry array of 8-byte null-terminated name fields: シオン/ショーコ/カル/Ｓ・カル/ジョー/
-ウェルダ/ギーデル/ルシア/マモン -> Sion/Shoko/Kal/S. Kal/Joe/Welda/Giedel/Lucia/Mamon.
-Translated in battle.tsv (each field = name + 0x00 pad to 8). Confirmed in-emu that this
-loads to card 0xEAFB (now reads "Sion..."). NOTE the simple `card = cooked - 0xB000` rule
-does NOT hold up here - card 0xEAFB is a separate load, not cooked 0x1AAFB (which is code).
+## Party-name array  (cooked 0x19afb)  -- DONE, driven by names.tsv
+A 9-entry array of 8-byte null-terminated name fields (stride 9): シオン/ショーコ/カル/Ｓ・カル/
+ジョー/ウェルダ/ギーデル/ルシア/マモン. Patched by `party_array_patch()` in build.py from
+**script/names.tsv** (via `alshark.cast.party_names`) - ASCII, padded to 8. Loads to card 0xEAFB.
+NOTE the simple `card = cooked - 0xB000` rule does NOT hold here - card 0xEAFB is a separate load.
 
-## TODO - Battle HUD party names (right panel, シオン/ショーコ) -- System Card BIOS render
-Traced exhaustively (VRAM-write bps + 9-11 frame call stacks). Findings:
-- The name is **background tiles** (BAT words $57-$59, tile refs 821C/8215/823D = シ/オ/ン).
-- The glyph BITMAPS are rendered at **battle init** (vram-write bp on tile bitmap $21C0 fires),
-  but the renderer bottoms out in the **PC Engine System Card BIOS** (PC $F452, MPR7=bank 0x00),
-  i.e. the CD card's built-in SJIS/kanji font ROM, called via the BIOS vector **`$E036`** from
-  game code in **bank 0x68** (e.g. `$4089`, a VRAM fill/transfer loop; HUD draw chain
-  $4128/$439F/$43BA/$4495). It does NOT use the `$5748` VWF drawer.
-- The name SJIS source is **never resident** during battle: searched card RAM (9), WRAM (0),
-  CD-ROM RAM (2), and zero-page at both the command menu AND the exact battle-init draw - only
-  the sentence literals (C4ED, 1257C) ever appear. The name is rendered upstream (party
-  formation) via the BIOS font ROM; battle blits the resulting tiles.
-- The 0x19afb array (card 0xEAFB) is confirmed NOT the HUD source (patched it to "Sion", HUD
-  unchanged).
-**Conclusion:** localizing the HUD names is a **dedicated subproject**, not a data patch or a
-single-routine hook. It needs the System Card BIOS font-function spec + a proper disassembly of
-the bank-0x68 name-setup path to redirect glyph rendering to English (and a width strategy:
-full-width English overflows the JP-sized slots; proportional needs replacing the BIOS render).
-Do this with the disassembly tooling, not live emulator tracing. The level-up / learned-skill
-name blanks share this BIOS-font name source.
+## Battle HUD party names (right panel)  -- DONE, data patch (NO code/BIOS work)
+Earlier notes here wrongly concluded this needed the System Card BIOS. It does not. The HUD
+name is **background tiles**, and the names are stored as **pre-built tile-ref data**, not text:
+- **Name writer**: bank 0x73 `$5E22` loop copies **8 tile-refs per member** from a table to the
+  BAT (`LDX #$08`). The per-member source table is at **cooked 0x3f790a** (16 bytes = 8 tile-refs
+  of `(font_index, 0x70)` each; member m at +m*16). (`$5D2F` nearby draws the box/bars frame -
+  that's what the misleading $E036/$4089 traces were catching.)
+- **Font**: an 8x8 half-width tile font at **cooked 0x39000** (32 bytes/glyph, VRAM tile
+  0x200+index, planes: per row [plane0,0xFF] x8 then repeated). Indices map to JIS X 0201
+  (index = SJIS half-width code - 0xA0); it is **katakana-only, no Latin**. The load covers
+  indices 0x00-0xF7 (VRAM tiles 0x200-0x2F7).
+- **Fix (pure data)**: render English glyphs from our font, inject into spare font slots, and
+  rewrite the name table. `tools/alshark/hudnames.py` renders each name PROPORTIONALLY in 04b-03,
+  slices it into 8x8 tiles, and writes `script/hud_names_patch.json`; `hud_patch()` splices it.
+  Names come from **script/names.tsv** (same source as the array). Verified in-game.
+- **Spare-slot gotcha**: font slots 0x70-0xA3 are blank but USED as HUD box/bar/gauge graphics
+  (referencing them showed glyphs as garbage in the bottom-right). Use the clean blank run
+  **0xC0-0xEB** (44 slots), well clear of all HUD graphics.
+The level-up / learned-skill name blanks are a separate (result-window) mechanism, already
+offset-preserved above.
 
 ## TODO - other
-- **Party-array copies** at cooked 0xbe1c and 0x1512d (field/other contexts) - still JP.
-  Translated 0x19afb only (card 0xEAFB); used by some name display, not the battle HUD.
+- **Party-array copies** at cooked 0xbe1c and 0x1512d (field/other contexts) - still JP. Could be
+  driven from names.tsv the same way as 0x19afb if a context needs them.
 
 ## Battle strings (script/battle.tsv)
 | cooked   | what                | class        | status |
@@ -97,4 +96,5 @@ name blanks share this BIOS-font name source.
 | 0x1956b  | reward window       | result-win   | EN (verified) |
 | 0x19469  | level-up window     | result-win   | EN (verified) |
 | 0x19530  | learned-skill       | result-win   | EN (offset-preserved) |
-| 0x19afb  | party-name array x9 | name fields  | EN (loads to card 0xEAFB; not the HUD source) |
+| 0x19afb  | party-name array x9 | name fields  | EN (from names.tsv via party_array_patch) |
+| 0x3f790a | HUD name tile-refs   | tile table   | EN (from names.tsv via hudnames.py + hud_patch) |

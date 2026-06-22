@@ -141,6 +141,41 @@ def battle_patch(cooked):
     return patches
 
 
+# Battle party-name array (cooked 0x19afb): 9 entries, 8-byte name field + 0x00 terminator,
+# stride 9. Driven from script/names.tsv (via alshark.cast) so it stays in sync with the main
+# name table and the HUD names - a translator edits names.tsv only. ASCII, padded with 0x00.
+PARTY_ARRAY = 0x19afb
+
+
+def party_array_patch(cooked):
+    from alshark import cast
+    patches = []
+    for i, name in enumerate(cast.party_names(ROOT)):
+        off = PARTY_ARRAY + i * 9
+        if len(name) > 8:
+            raise SystemExit('party name %r > 8 bytes for the array field' % name)
+        if cooked[off + 8] != 0x00:
+            raise SystemExit('party array 0x%x not as expected' % off)
+        patches.append((off, name.encode('latin-1').ljust(8, b'\x00')))
+    return patches
+
+
+# Battle HUD party names (right panel). These are NOT text - they're a pre-built table
+# of font tile-refs (8 per member) at cooked 0x3f790a, referencing an 8x8 half-width font
+# (disc 0x39000, VRAM tile 0x200+index) that has only katakana. script/hud_names_patch.json
+# (built offline from PixelOperator8) injects English 8x8 glyphs into spare font slots and
+# rewrites the name table with English tile-refs. Pure data; see docs/battle-text-map.md.
+def hud_patch(cooked):
+    import json
+    NAMET = 0x3f790a
+    if cooked[NAMET:NAMET + 6] != bytes.fromhex('1c70157 03d70'.replace(' ', '')):
+        raise SystemExit('HUD name table not as extracted at 0x%x' % NAMET)
+    patches = []
+    for off, hx in json.load(open(os.path.join(ROOT, 'script', 'hud_names_patch.json'))):
+        patches.append((off, bytes.fromhex(hx)))
+    return patches
+
+
 def assemble(src):
     """Assemble one src/*.s -> build/<name>.bin, return the bytes."""
     name = os.path.splitext(src)[0]
@@ -259,6 +294,8 @@ def main():
     patches += name_patch(cooked)   # English character names
     patches += menu_patch(cooked)   # English field-menu labels
     patches += battle_patch(cooked)  # English battle prose (failure/level-up/rewards)
+    patches += party_array_patch(cooked)  # battle party-name array (from names.tsv)
+    patches += hud_patch(cooked)     # English battle HUD party names (font glyphs + table)
     import reinsert               # splice English from cutscene.tsv into the #-engine blocks
     cut, flagged = reinsert.build(args.work, os.path.join(ROOT, 'script', 'cutscene.tsv'))
     for base, o, n in flagged:
