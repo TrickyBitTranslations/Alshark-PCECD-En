@@ -1,0 +1,30 @@
+block_off	str_off	speaker	text	raw_hex	english	status
+0x20f032	0x0		ｶｲﾅﾝの町	b6b2c5dd82cc92ac	Kainan Town	
+0x215032	0x0		ﾃﾙﾀｲの町	c3d9c0b282cc92ac	Terutai Town	
+0x21b032	0x0		ﾊﾏｯｸの町	cacfafb882cc92ac	Hammuck Town	
+0x221032	0x0		ｺｽﾏの町	babdcf82cc92ac	Kosma Town	
+0x227032	0x0		ポｰｷﾝの町	837cb0b7dd82cc92ac	Porkin Town	
+0x22d032	0x0		ﾛﾚﾘｱの町	dbdad8b182cc92ac	Loreria Town	
+0x233032	0x0		ﾂﾄｯｸの町	c2c4afb882cc92ac	Tutock Town	
+0x239032	0x0		ｻｲバﾙの町	bbb2836fd982cc92ac	Saibal Town	
+0x245032	0x0		ｳｨガの町	b3a8834b82cc92ac	Wiga Town	
+0x24b032	0x0		ガドｽの町	834b8368bd82cc92ac	Gados Town	
+0x257032	0x0		ﾎグﾗの町	ce834fd782cc92ac	Hogura Town	
+0x263032	0x0		ﾋﾙジｬの町	cbd98357ac82cc92ac	Hilja Town	
+0x269032	0x0		ベギｰの町	8378834db082cc92ac	Begi Town	
+0x26f032	0x0		ﾜﾝプｼｬｰの町	dcdd8376bcacb082cc92ac	Wampshire Town	
+0x275032	0x0		ｺｰデｨﾙの町	bab08366a8d982cc92ac	Cordil Town	
+0x281032	0x0		デﾙｱｲの町	8366d9b1b282cc92ac	Derai Town	
+0x287032	0x0		ﾋｰｽの町	cbb0bd82cc92ac	Heath Town	
+0x28d032	0x0		宇宙要塞バﾙバｽ	8946928897768dc7836fd9836fbd	Space Fortress Barbas	
+0x299032	0x0		ﾔｰｸｰの村	d4b0b8b082cc91ba	Yaku Village	
+0x29f032	0x0		ｺﾙﾚﾙの村	bad9dad982cc91ba	Korrel Village	
+0x2a5032	0x0		ダｲﾅの村	835fb2c582cc91ba	Daina Village	
+0x2ab032	0x0		ﾐｶｰの村	d0b6b082cc91ba	Mika Village	
+0x2b1032	0x0		首都ﾃｽｳｨﾙ	8ef19373c3bdb3a8d9	Capital Tesuwil	
+0x2b7032	0x0		首都ｳｭﾙﾄﾘｱ	8ef19373b3add9c4d8b1	Capital Wultria	
+0x2bd032	0x0		ﾐｶｰの試練	d0b6b082cc8e8e97fb	Mika's Trial	
+0x2c3032	0x0		ﾔｰｸｰの試練	d4b0b8b082cc8e8e97fb	Yaku's Trial	
+0x2c9032	0x0		ｺﾙﾚﾙの試練	bad9dad982cc8e8e97fb	Korrel's Trial	
+0x2cf032	0x0		ｻｰﾄｽの遺跡	bbb0c4bd82cc88e290d5	Sartos Ruins	
+0x2d5032	0x0		超重力ｼｰﾙド放射基地	92b48f6497cdbcb0d9836895fa8ecb8aee926e	Gravity Shield Base	
