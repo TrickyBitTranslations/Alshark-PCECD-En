@@ -1,4 +1,43 @@
 block_off	str_off	speaker	text	raw_hex	english	status
+0x101032	0x0		ｺｸピｯﾄ	bab88373afc4	Cockpit	
+0x107032	0x0		地下酒場	926e89ba8ef08fea	Underground Bar	
+0x10d032	0x0		ﾃｽｳｨﾙビﾙ内	c3bdb3a8d98372d993e0	Tesuwil Building	
+0x113032	0x0		地下酒場	926e89ba8ef08fea	Underground Bar	
+0x125032	0x0		惑星ｽﾃｱ	986690afbdc3b1	Planet Stea	
+0x12b032	0x0		惑星ﾏｰズ	986690afcfb08359	Planet Mars	
+0x131032	0x0		惑星ザジﾙ	986690af83558357d9	Planet Zazil	
+0x137032	0x0		惑星ビｭｰﾄ	986690af8372adb0c4	Planet Byut	
+0x13d032	0x0		惑星ﾎﾑ	986690afced1	Planet Hom	
+0x143032	0x0		惑星ジｭｰｸ	986690af8357adb0b8	Planet Juke	
+0x149032	0x0		惑星ﾃｨﾙｽ	986690afc3a8d9bd	Planet Tilus	
+0x14f032	0x0		惑星ｳｭﾙﾄﾘｱ	986690afb3add9c4d8b1	Planet Wultria	
+0x155032	0x0		惑星ﾋｭﾘｽ	986690afcbadd8bd	Planet Hyuris	
+0x15b032	0x0		惑星バｲデﾝ	986690af836fb28366dd	Planet Biden	
+0x161032	0x0		惑星ビｭｰドｽ	986690af8372adb08368bd	Planet Byudos	
+0x167032	0x0		惑星ビｪザ	986690af8372aa8355	Planet Bieza	
+0x16d032	0x0		惑星ﾉｰﾐｹ	986690afc9b0d0b9	Planet Normike	
+0x173032	0x0		惑星ｻｰﾀﾘｱ	986690afbbb0c0d8b1	Planet Sartaria	
+0x179032	0x0		惑星ポﾚダ	986690af837cda835f	Planet Poreda	
+0x17f032	0x0		惑星ゾｶﾍﾙ	986690af835db6cdd9	Planet Zokahel	
+0x185032	0x0		惑星ﾖｽﾇ	986690afd6bdc7	Planet Yosnu	
+0x18b032	0x0		惑星ヴｫﾝ	986690af8394abdd	Planet Von	
+0x191032	0x0		惑星ｱｽｸ	986690afb1bdb8	Planet Ask	
+0x197032	0x0		惑星ｻﾁ	986690afbbc1	Planet Sachi	
+0x19d032	0x0		衛星ﾄﾘﾑ	897190afc4d8d1	Moon Trim	
+0x1a3032	0x0		衛星ゴﾙ	897190af8353d9	Moon Gol	
+0x1a9032	0x0		衛星ボﾙｱ	897190af837bd9b1	Moon Borua	
+0x1af032	0x0		ＣＳｽﾃｰｼｮﾝ	82628272bdc3b0bcaedd	CS Station	
+0x1b5032	0x0		軍事ｽﾃｰｼｮﾝ	8c528e96bdc3b0bcaedd	Military Station	
+0x1bb032	0x0		補給ｽﾃｰｼｮﾝ	95e28b8bbdc3b0bcaedd	Supply Station	
+0x1c1032	0x0		補給ｽﾃｰｼｮﾝ	95e28b8bbdc3b0bcaedd	Supply Station	
+0x1df032	0x0		要塞バﾙバｽ中枢	97768dc7836fd9836fbd92869095	Barbas Core	
+0x1e5032	0x0		ｽﾃｱ宇宙港	bdc3b1894692888d60	Stea Spaceport	
+0x1eb032	0x0		ﾏｰズ宇宙港	cfb08359894692888d60	Mars Spaceport	
+0x1f1032	0x0		ザジﾙ宇宙港	83558357d9894692888d60	Zazil Spaceport	
+0x1f7032	0x0		ﾎﾑ宇宙港	ced1894692888d60	Hom Spaceport	
+0x1fd032	0x0		ジｭｰｸ宇宙港	8357adb0b8894692888d60	Juke Spaceport	
+0x203032	0x0		ﾃｨﾙｽ宇宙港	c3a8d9bd894692888d60	Tilus Spaceport	
+0x209032	0x0		ｳｭﾙﾄﾘｱ宇宙港	b3add9c4d8b1894692888d60	Wultria Spaceport	
 0x20f032	0x0		ｶｲﾅﾝの町	b6b2c5dd82cc92ac	Kainan Town	
 0x215032	0x0		ﾃﾙﾀｲの町	c3d9c0b282cc92ac	Terutai Town	
 0x21b032	0x0		ﾊﾏｯｸの町	cacfafb882cc92ac	Hammuck Town	
@@ -28,3 +67,28 @@ block_off	str_off	speaker	text	raw_hex	english	status
 0x2c9032	0x0		ｺﾙﾚﾙの試練	bad9dad982cc8e8e97fb	Korrel's Trial	
 0x2cf032	0x0		ｻｰﾄｽの遺跡	bbb0c4bd82cc88e290d5	Sartos Ruins	
 0x2d5032	0x0		超重力ｼｰﾙド放射基地	92b48f6497cdbcb0d9836895fa8ecb8aee926e	Gravity Shield Base	
+0x2db032	0x0		超重力ｼｰﾙド放射基地	92b48f6497cdbcb0d9836895fa8ecb8aee926e	Gravity Shield Base	
+0x2e1032	0x0		帝国星軍前線基地	92e98d9190af8c52914f90fc8aee926e	Imperial Front Base	
+0x2e7032	0x0		帝国宙軍補給基地	92e98d9192888c5295e28b8b8aee926e	Imperial Supply Base	
+0x2ed032	0x0		ｳｭﾘｱ王宮	b3add8b189a48b7b	Wulria Palace	
+0x2f3032	0x0		ゾﾘｱｽ資源発掘基地	835dd8b1bd8e918cb994ad8c408aee926e	Zorias Mining Base	
+0x2f9032	0x0		ゾﾘｱｽ燃料精錬基地	835dd8b1bd945297bf90b898428aee926e	Zorias Refinery	
+0x305032	0x0		超重力ｼｰﾙド放射基地	92b48f6497cdbcb0d9836895fa8ecb8aee926e	Gravity Shield Base	
+0x30b032	0x0		帝国星軍総司令部	92e98d9190af8c52918d8e6997df9594	Imperial HQ	
+0x311032	0x0		ﾏｳﾝドｷｬｽﾙ	cfb3dd8368b7acbdd9	Mound Castle	
+0x317032	0x0		ザｰﾃ・ｺｾの宮殿	8355b0c38145babe82cc8b7b9361	Zarte's Palace	
+0x31d032	0x0		ﾗﾐｭｰの住処	d7d0adb082cc8f5a8f88	Ramyu's Lair	
+0x323032	0x0		植民船	904196af9144	Colony Ship	
+0x329032	0x0		ゾﾘｱｽ兵器工場	835dd8b1bd95ba8aed8d488fea	Zorias Arms Plant	
+0x32f032	0x0		ゾﾘｱｽバｲｵ研究所	835dd8b1bd836fb2b58ca48b868f8a	Zorias Bio Lab	
+0x335032	0x0		ﾉｰザﾝの砦	c9b08355dd82cc8dd4	Northern Fort	
+0x33b032	0x0		廃坑	94708d42	Abandoned Mine	
+0x341032	0x0		鉱山	8d7a8e52	Mine	
+0x347032	0x0		ダスト	835f83588367	Dust	
+0x34d032	0x0		ｺｰﾘｽの塔	bab0d8bd82cc9383	Coris Tower	
+0x353032	0x0		ザｸｾﾝｷｬﾆｵﾝ	8355b8beddb7acc6b5dd	Saxon Canyon	
+0x35f032	0x0		ザｲザﾙの火口	8355b28355d982cc89ce8cfb	Zaizal Crater	
+0x365032	0x0		ジｮｰの部屋	8357aeb082cc959489ae	Joe's Room	
+0x36b032	0x0		ﾏｰズ民間航宙船	cfb0835996af8ad48d7192889144	Mars Civilian Ship	
+0x3d1032	0x0		ﾗｯｾﾙガｲﾔｰ艦内	d7afbed9834bb2d4b08acd93e0	Russell Gaia	
+0x3d7032	0x0		ﾗｯｾﾙガｲﾔｰ艦内	d7afbed9834bb2d4b08acd93e0	Russell Gaia	

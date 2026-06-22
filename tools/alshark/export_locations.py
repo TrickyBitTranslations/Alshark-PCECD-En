@@ -13,10 +13,9 @@ Columns match the other script TSVs (block_off = the name's cooked offset).
 import sys
 from alshark import textcodec
 
-MAP_START = 0x20f000
-MAP_END = 0x2d6000
-STRIDE = 0x6000
-NAME_OFF = 0x32
+NAME_OFF = 0x32          # location name is inline at map-block + 0x32
+PTR_OFF = 0x2E           # the banner's name pointer at map-block + 0x2E (= $C032 when un-relocated)
+PTR_VAL = b'\x32\xc0'    # default pointer value ($C032)
 
 _HW = "｡｢｣､･ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝﾞﾟ"
 HK = {0xa1 + i: c for i, c in enumerate(_HW)}
@@ -53,11 +52,19 @@ def decode(b):
 
 def main():
     data = open(sys.argv[1], "rb").read()
+    # Disc-wide scan: a location banner has the default name pointer $C032 at block+0x2E and a
+    # valid inline name at block+0x32. Map blocks are 0x1000-aligned (filters stray $C032 matches).
     print("block_off\tstr_off\tspeaker\ttext\traw_hex\tenglish\tstatus")
-    for base in range(MAP_START, MAP_END, STRIDE):
-        nm = name_at(data, base + NAME_OFF)
-        if nm:
-            print("0x%x\t0x0\t\t%s\t%s\t\t" % (base + NAME_OFF, decode(nm), nm.hex()))
+    seen = set()
+    i = data.find(PTR_VAL)
+    while i != -1:
+        base = i - PTR_OFF
+        if base >= 0 and base & 0xFFF == 0 and base not in seen:
+            nm = name_at(data, base + NAME_OFF)
+            if nm:
+                seen.add(base)
+                print("0x%x\t0x0\t\t%s\t%s\t\t" % (base + NAME_OFF, decode(nm), nm.hex()))
+        i = data.find(PTR_VAL, i + 1)
 
 
 if __name__ == "__main__":
