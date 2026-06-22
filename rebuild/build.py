@@ -296,19 +296,50 @@ def save_menu_patch(cooked):
     write-bp-confirmed unused across the whole menu) and the entry pointer repointed there.
     Pure data patch, no asm. See memory title-menu-todo for the full RE.
     """
-    fw = lambda s: ''.join(chr(ord(c) + 0xFEE0) if 0x21 <= ord(c) <= 0x7e else c for c in s)
-    opts = ['Start', 'Copy', 'Delete']           # TODO: move to a savemenu.tsv if the team wants
-    blob = b'\x52'.join(fw(o).encode('shift_jis') for o in opts) + b'\x45'  # R between, E terminator
-    if cooked[0x48018ad:0x48018af] != b'\x77\x69':       # sanity: option entry pointer = $6977
-        raise SystemExit('save-menu option entry pointer not as expected')
-    if any(cooked[0x2be1a60:0x2be1a60 + len(blob) + 4]):  # the relocation home must be clear
-        raise SystemExit('save-menu relocation space at 0x2be1a60 is not free')
-    return [
-        (0x2be1a60, blob),               # English options in verified-free bank 0x68 ($4a60)
-        (0x48018ad, b'\x60\x4a'),        # repoint option-entry string pointer -> $4a60
-        (0x48018b5, b'\x40\x01'),        # box row stride 0x0060 -> 0x0140 ($8D * 0x20, 10 tiles/row)
-        (0x48018b7, b'\x0d'),            # box width param 0x06 -> 0x0d ($8D = 10 cells)
+    def fw(s):                                   # ASCII -> full-width SJIS (this menu has no half-width)
+        out = []
+        for c in s:
+            if c == ' ':
+                out.append('　')             # space -> full-width space
+            elif 0x21 <= ord(c) <= 0x7e:
+                out.append(chr(ord(c) + 0xFEE0))
+            else:
+                out.append(c)
+        return ''.join(out).encode('shift_jis')
+
+    def msg(lines):                              # 0x52 'R' = newline between lines, 0x45 'E' = end
+        return b'\x52'.join(fw(l) for l in lines) + b'\x45'
+
+    # (entry addr in the descriptor table, English lines). Option box = narrow (needs widen below);
+    # the dialog boxes are already wide (W=23, $8D=20, ~13 full-width chars/line, 3 lines / 4 for msg7)
+    # and share one tile region (modal), so they only need string relocation + repoint.
+    items = [
+        (0x48018ad, ['Start', 'Copy', 'Delete']),                              # option box
+        (0x48018dd, ['Copy slot has', 'data. Erase', 'it to copy.']),          # msg3 copy-target-has-data
+        (0x48018ed, ['Backup RAM is', 'full. Erase a', 'file to copy.']),      # msg4 RAM-full on copy
+        (0x48018fd, ['No data here.', 'Cannot copy.']),                        # msg5 no-data on copy
+        (0x480190d, ['Erase this', 'save data?', '  Yes    No']),              # msg6 delete-confirm
+        (0x480191d, ['Backup RAM', 'is too full.', 'Erase files,', 'then restart.']),  # msg7 RAM-insufficient
+        (0x480192d, ['A BIOS error', 'occurred.', 'Please reset.']),           # msg8 BIOS-error
     ]
+    BASE_DISC, BASE_LOG, FREE = 0x2be1a60, 0x4a60, 1440   # verified-free bank-0x68 slack (write-bp)
+    if cooked[0x48018ad:0x48018af] != b'\x77\x69':        # sanity: option entry pointer = $6977
+        raise SystemExit('save-menu option entry pointer not as expected')
+    if any(cooked[BASE_DISC:BASE_DISC + FREE]):           # the relocation home must be clear
+        raise SystemExit('save-menu relocation space at 0x%x is not free' % BASE_DISC)
+    patches, off = [], 0
+    for entry, lines in items:
+        blob = msg(lines)
+        addr = BASE_LOG + off
+        patches.append((BASE_DISC + off, blob))                    # English string in free space
+        patches.append((entry, bytes([addr & 0xff, addr >> 8])))   # repoint the entry's string ptr
+        off += len(blob)
+    if off > FREE:
+        raise SystemExit('save-menu strings (%d bytes) exceed free space (%d)' % (off, FREE))
+    # widen ONLY the option box (dialog boxes are already wide): row stride MUST match the width
+    patches.append((0x48018b5, b'\x40\x01'))     # option box row stride 0x0060 -> 0x0140 ($8D*0x20)
+    patches.append((0x48018b7, b'\x0d'))         # option box width param 0x06 -> 0x0d ($8D = 10)
+    return patches
 
 
 def write_disc(patches, want_chd):
