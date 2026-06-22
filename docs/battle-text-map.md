@@ -73,13 +73,26 @@ name is **background tiles**, and the names are stored as **pre-built tile-ref d
   0x200+index, planes: per row [plane0,0xFF] x8 then repeated). Indices map to JIS X 0201
   (index = SJIS half-width code - 0xA0); it is **katakana-only, no Latin**. The load covers
   indices 0x00-0xF7 (VRAM tiles 0x200-0x2F7).
-- **Fix (pure data)**: render English glyphs from our font, inject into spare font slots, and
-  rewrite the name table. `tools/alshark/hudnames.py` renders each name PROPORTIONALLY in 04b-03,
-  slices it into 8x8 tiles, and writes `script/hud_names_patch.json`; `hud_patch()` splices it.
-  Names come from **script/names.tsv** (same source as the array). Verified in-game.
-- **Spare-slot gotcha**: font slots 0x70-0xA3 are blank but USED as HUD box/bar/gauge graphics
-  (referencing them showed glyphs as garbage in the bottom-right). Use the clean blank run
-  **0xC0-0xEB** (44 slots), well clear of all HUD graphics.
+- **Glyphs (disc, safe)**: `tools/alshark/hudnames.py` renders each name PROPORTIONALLY in 04b-03,
+  slices it into 8x8 tiles, and injects them into spare font slots (writes `script/hud_names_patch.json`;
+  `hud_patch()` splices them onto the disc at 0x39000). Names come from **script/names.tsv**.
+  - **Spare-slot gotcha 1**: font slots 0x70-0xA3 are blank but USED as HUD box/bar/gauge graphics
+    (referencing them showed glyphs as garbage in the bottom-right). Use the clean blank run
+    **0xC0-0xEB** (44 slots), well clear of all HUD graphics.
+- **The name table CANNOT be patched on disc.** 0x3f790a is embedded in a HUD screen tilemap that
+  the **field/town reuses after a battle** - patching it there corrupts the field (whole-map garbage)
+  once you go town -> battle -> town. (Confirmed by bisect: font-glyphs-only is clean; the on-disc
+  name-table rewrite is what corrupts.)
+- **Fix = pointer redirect (pure data, no asm).** Leave 0x3f790a ORIGINAL (field stays JP/clean) and
+  redirect ONLY the battle draw: the per-member name draw at **bank 0x73 `$5DEA`** sets its source
+  pointer with `LDA #$0A` / `LDA #$69` (= `$690A`) at **$5E0C/$5E10**. Repoint those two operand bytes
+  to an English copy of the 144-byte tile-ref table placed in **bank-0x73 slack ($4500)**. Bank 0x73
+  runs only in battle (the field uses different code + reloads the original tilemap from disc), so the
+  field is untouched. `hud_patch()` does all three: glyphs (0x39000), the English table (cooked 0x29500
+  = logical $4500), and the two operand patches (cooked 0x2AE0C/0x2AE10). Verified town->battle->town.
+  - Bank 0x73 lives at **cooked 0x29000** (NOT 0x21000 - the `card = cooked - 0xB000` rule fails here;
+    found by searching for its code bytes). Slack $4500-$458F is clear; the bank's only BSS in the big
+    $4030 zero-run is the isolated flags $4030/$4231/$440F.
 The level-up / learned-skill name blanks are a separate (result-window) mechanism, already
 offset-preserved above.
 
