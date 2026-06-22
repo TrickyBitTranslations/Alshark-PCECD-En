@@ -63,15 +63,24 @@ Translated in battle.tsv (each field = name + 0x00 pad to 8). Confirmed in-emu t
 loads to card 0xEAFB (now reads "Sion..."). NOTE the simple `card = cooked - 0xB000` rule
 does NOT hold up here - card 0xEAFB is a separate load, not cooked 0x1AAFB (which is code).
 
-## TODO
-- **Battle HUD party names** (right panel, シオン/ショーコ) - NOT FIXED. They do **not**
-  read from the 0x19afb array (card 0xEAFB is "Sion" now, HUD still shows シオン), and there
-  is no other clean `シオン` name copy left in card RAM (only sentence literals at C4ED,
-  1257C). So the HUD name is loaded/cached separately (likely pre-rendered to VRAM at battle
-  start, or read from a system-bank/ROM copy). To find it: set a read-bp during a HUD redraw
-  (e.g. when PP/MP changes mid-battle) and trace the source. Same likely applies to the
-  level-up name blank.
-- **Other party-array copies** at cooked 0xbe1c and 0x1512d (field/other contexts) - still JP.
+## TODO - Battle HUD party names (right panel, シオン/ショーコ) -- needs a VWF hook
+Traced via VRAM-write bp on the name's BAT entries (VRAM words $57-$59, tile refs
+821C/8215/823D). The HUD name is **background tiles**, drawn by a glyph renderer in
+**bank 0x68 at ~$458E** (an 11-frame deep call from the battle HUD setup; chain incl.
+$4128/$439F/$43BA/$4495). It does **not** use the `$5748` VWF drawer (the bp on $5748 only
+fired for the command menu, never at battle start). Key blocker: the name fields are **8-byte
+fixed slots** and the renderer draws **full-width SJIS** - so:
+  - Full-width English does NOT fit: Shoko/Welda/Giedel are 10-12 bytes full-width > 8.
+  - 1-byte ASCII fits (Shoko=5) but the bank-0x68 renderer would garble it (expects SJIS).
+So the HUD names need a **VWF hook on the bank-0x68 name renderer** (the same idea as
+`menu_label_char` for $5748, but for this routine) + an ASCII name source. That's a dedicated
+asm task in a system bank - deferred. The 0x19afb array (card 0xEAFB) is confirmed NOT the HUD
+source; the HUD name source is read transiently upstream (not a persistent card-RAM copy).
+The level-up / learned-skill name blanks likely share this renderer/limitation.
+
+## TODO - other
+- **Party-array copies** at cooked 0xbe1c and 0x1512d (field/other contexts) - still JP.
+  Translated 0x19afb only (card 0xEAFB); used by some name display, not the battle HUD.
 
 ## Battle strings (script/battle.tsv)
 | cooked   | what                | class        | status |
