@@ -48,6 +48,7 @@ def carve(cooked):
     os.makedirs(os.path.join(HERE, 'incbin'), exist_ok=True)
     for name, off, ln in CARVE:
         open(os.path.join(HERE, 'incbin', name), 'wb').write(cooked[off:off + ln])
+    gen_hud_idx()                  # incbin/hud_en_idx.bin for boot.s copy_hud_names (must precede assembly)
 
 
 def blob_patches():
@@ -163,43 +164,37 @@ def party_array_patch(cooked):
 
 
 # Battle HUD party names (right panel). The names are a table of 8x8 font tile-refs (8 per
-# member) referencing an 8x8 half-width font (disc 0x39000, VRAM tile 0x200+index, katakana
-# only). script/hud_names_patch.json (built by tools/alshark/hudnames.py) injects English 8x8
-# glyphs into spare font slots AND holds the English tile-ref table.
+# member) referencing an 8x8 half-width font (disc 0x39000, VRAM tile 0x200+index, katakana only).
+# script/hud_names_patch.json (built by tools/alshark/hudnames.py) injects English 8x8 glyphs into
+# spare font slots AND holds the English tile-ref table.
 #
-# The on-disc name table (0x3f790a) is embedded in a HUD screen tilemap the FIELD reuses, so
-# editing it corrupts the field after a battle. Instead we leave 0x3f790a untouched (field stays
-# JP/clean) and redirect ONLY the battle name-draw: the per-member draw at bank 0x73 $5DEA sets
-# its source pointer with LDA #$0A / LDA #$69 (= $690A) at $5E0C/$5E10; we repoint that to an
-# English copy placed in bank-0x73 slack ($4500). Bank 0x73 runs only in battle, so the field is
-# unaffected. Pure data, no asm. See docs/battle-text-map.md.
-B73 = 0x29000                    # cooked offset of bank 0x73 (logical $4000-$5FFF in battle)
-EN_TABLE = 0x4500                # logical addr of the English name table in bank-0x73 slack
-EN_TABLE_OFF = B73 + (EN_TABLE - 0x4000)          # = 0x29500
-PTR_LO = B73 + (0x5E0C - 0x4000)                  # $5E0C operand (LDA #$0A -> $18 lo)
-PTR_HI = B73 + (0x5E10 - 0x4000)                  # $5E10 operand (LDA #$69 -> $19 hi)
+# The draw reads its name table at $690A (bank 0x78) - resident and COMBAT-STABLE (verified: a
+# card-RAM write breakpoint on $690A never fires across boot/field/battle), but loaded from disc
+# 0x3f790a, which is shared with the field (patching it on disc corrupts the field). Every spare
+# card slack we tried was a work buffer or sprite-graphics source. So: leave the disc original
+# (field clean) and overwrite the card copy of $690A at runtime from the font-reload hook (boot.s
+# copy_hud_names, runs at every transition, combat-stable WRAM). hud_patch here only injects the
+# font glyphs; gen_hud_idx() builds the 72 glyph indices boot.s copies in. See docs/battle-text-map.md
+# and memory verify-slack-empirically.
+def gen_hud_idx():
+    """Write incbin/hud_en_idx.bin: 72 font-glyph indices (9 members x 8 tiles) for boot.s."""
+    import json
+    table = [(off, bytes.fromhex(hx))
+             for off, hx in json.load(open(os.path.join(ROOT, 'script', 'hud_names_patch.json')))
+             if off >= 0x3f0000]
+    blob = b''.join(b for _, b in sorted(table))   # 9 x 16-byte (index,$70) entries = 144 bytes
+    if len(blob) != 144:
+        raise SystemExit('HUD name table is %d bytes, expected 144' % len(blob))
+    idx = bytes(blob[i] for i in range(0, 144, 2))  # drop the $70 palette byte -> 72 indices
+    open(os.path.join(HERE, 'incbin', 'hud_en_idx.bin'), 'wb').write(idx)
 
 
 def hud_patch(cooked):
     import json
     patches = []
-    table = []
     for off, hx in json.load(open(os.path.join(ROOT, 'script', 'hud_names_patch.json'))):
-        b = bytes.fromhex(hx)
         if off < 0x3b000:
-            patches.append((off, b))              # font glyphs -> spare disc font slots (safe)
-        else:
-            table.append((off, b))                # name-table entries -> the English table
-    table = b''.join(b for _, b in sorted(table))  # concat in member order (0..8)
-    if len(table) != 144:
-        raise SystemExit('HUD name table is %d bytes, expected 144' % len(table))
-    if any(cooked[EN_TABLE_OFF:EN_TABLE_OFF + 144]):
-        raise SystemExit('bank 0x73 slack at 0x%x is not clear' % EN_TABLE_OFF)
-    if cooked[PTR_LO - 1:PTR_LO + 1] != b'\xa9\x0a' or cooked[PTR_HI - 1:PTR_HI + 1] != b'\xa9\x69':
-        raise SystemExit('bank 0x73 name-draw pointer not as expected (not $690A)')
-    patches.append((EN_TABLE_OFF, table))                       # English table in slack
-    patches.append((PTR_LO, bytes([EN_TABLE & 0xff])))          # redirect $18 lo -> $4500
-    patches.append((PTR_HI, bytes([EN_TABLE >> 8])))            # redirect $19 hi
+            patches.append((off, bytes.fromhex(hx)))   # English font glyphs -> spare disc font slots
     return patches
 
 
@@ -362,7 +357,7 @@ def main():
     patches += menu_patch(cooked)   # English field-menu labels
     patches += battle_patch(cooked)  # English battle prose (failure/level-up/rewards)
     patches += party_array_patch(cooked)  # battle party-name array (from names.tsv)
-    patches += hud_patch(cooked)     # English battle HUD names (font glyphs + redirected source)
+    patches += hud_patch(cooked)     # English HUD-name font glyphs (table copied in via boot.s)
     patches += location_patch(cooked)  # English town-entry banners (relocated + proportional)
     import reinsert               # splice English from cutscene.tsv into the #-engine blocks
     cut, flagged = reinsert.build(args.work, os.path.join(ROOT, 'script', 'cutscene.tsv'))

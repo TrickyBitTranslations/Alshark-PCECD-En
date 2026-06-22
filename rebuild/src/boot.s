@@ -53,6 +53,7 @@ ms_sv:
 mr_have:
   pla
   tam #$40                        ; restore MPR6
+  jsr copy_hud_names              ; refresh the English battle-HUD name table in $690A (bank 0x78)
   ldx #$07                        ; restore the descriptor
 ms_rs:
   lda.w desc_save,x
@@ -86,3 +87,31 @@ font_load:
 
 desc_save:
   .db $00, $00, $00, $00, $00, $00, $00, $00
+
+; ---- battle HUD party names: the draw reads its name table at $690A (bank 0x78), which is
+; resident and combat-stable but loaded from disc 0x3f790a (shared with the field - can't patch
+; on disc). So we overwrite the card copy here: this hook runs at every transition (when the font
+; reloads). hud_idx holds 72 font-glyph indices (9 members x 8 tiles); we expand each to a
+; (index, $70) tile-ref into $690A. Idempotent; $690A then stays English through combat. ----
+copy_hud_names:
+  tma #$08                        ; save MPR3
+  pha
+  lda #$78
+  tam #$08                        ; page bank 0x78 into MPR3 ($6000-$7FFF)
+  ldx #$47                        ; 72 indices, X = 71..0
+chn_lp:
+  txa
+  asl a                          ; A = X*2 = dest offset into the 144-byte table
+  tay
+  lda.w hud_idx,x
+  sta $690A,y                     ; tile-ref low byte = glyph index
+  lda #$70
+  iny
+  sta $690A,y                     ; tile-ref high byte = palette $70
+  dex
+  bpl chn_lp
+  pla
+  tam #$08                        ; restore MPR3
+  rts
+hud_idx:
+  .incbin "incbin/hud_en_idx.bin"
