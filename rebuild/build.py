@@ -277,6 +277,40 @@ def assemble_banks(cooked):
     return patches
 
 
+def save_menu_patch(cooked):
+    """English boot save-menu option buttons: 開始/複写/削除 -> Start/Copy/Delete.
+
+    The boot save/title menu is the System Card BRAM-style UI (banks 0x68-0x6C). Its option box
+    is described by a 0x10-byte entry at disc 0x48018ad: [ptr][params]. A glyph compositor (bank
+    0x68 $43EB) builds each char into a VRAM tile region; $663B lays text out horizontally
+    (X += per char, 0x52 'R' = newline, 0x45 'E' = end). The font has full-width SJIS Latin (that's
+    what ＤＡＴＡ/ＬＶ are), so English must be full-width (half-width ASCII renders as garbage).
+    To fit "Start/Copy/Delete" the box must be widened, which means THREE coupled entry fields:
+      - entry+0xa (disc 0x48018b7) = box width param; live $8D = param - 3. 0x0d -> $8D = 10 cells.
+      - entry+0x8 (disc 0x48018b5/6) = glyph/BAT ROW STRIDE in bytes; must equal $8D*0x20 (0x140),
+        or the staging row stride mismatches the render and the text transposes/garbles.
+      - tile-base (entry+0x4/0x6) is LEFT at the original 0x44d: its region has slack up to the
+        DATA-1 box (tile 0x500), so the widened 10x6 box (-> tiles 0x44d..0x4c5) stays clear of it.
+        (Relocating the tile-base instead just collided with the DATA-1/DATA-2 boxes.)
+    The option string itself is relocated to verified-free bank-0x68 space ($4a60, disc 0x2be1a60,
+    write-bp-confirmed unused across the whole menu) and the entry pointer repointed there.
+    Pure data patch, no asm. See memory title-menu-todo for the full RE.
+    """
+    fw = lambda s: ''.join(chr(ord(c) + 0xFEE0) if 0x21 <= ord(c) <= 0x7e else c for c in s)
+    opts = ['Start', 'Copy', 'Delete']           # TODO: move to a savemenu.tsv if the team wants
+    blob = b'\x52'.join(fw(o).encode('shift_jis') for o in opts) + b'\x45'  # R between, E terminator
+    if cooked[0x48018ad:0x48018af] != b'\x77\x69':       # sanity: option entry pointer = $6977
+        raise SystemExit('save-menu option entry pointer not as expected')
+    if any(cooked[0x2be1a60:0x2be1a60 + len(blob) + 4]):  # the relocation home must be clear
+        raise SystemExit('save-menu relocation space at 0x2be1a60 is not free')
+    return [
+        (0x2be1a60, blob),               # English options in verified-free bank 0x68 ($4a60)
+        (0x48018ad, b'\x60\x4a'),        # repoint option-entry string pointer -> $4a60
+        (0x48018b5, b'\x40\x01'),        # box row stride 0x0060 -> 0x0140 ($8D * 0x20, 10 tiles/row)
+        (0x48018b7, b'\x0d'),            # box width param 0x06 -> 0x0d ($8D = 10 cells)
+    ]
+
+
 def write_disc(patches, want_chd):
     extracted = os.path.join(ROOT, 'extracted')
     out = os.path.join(HERE, 'build')
@@ -359,6 +393,7 @@ def main():
     patches += party_array_patch(cooked)  # battle party-name array (from names.tsv)
     patches += hud_patch(cooked)     # English HUD-name font glyphs (table copied in via boot.s)
     patches += location_patch(cooked)  # English town-entry banners (relocated + proportional)
+    patches += save_menu_patch(cooked)  # English boot save-menu option buttons (Start/Copy/Delete)
     import reinsert               # splice English from cutscene.tsv into the #-engine blocks
     cut, flagged = reinsert.build(args.work, os.path.join(ROOT, 'script', 'cutscene.tsv'))
     for base, o, n in flagged:
