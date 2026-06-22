@@ -44,16 +44,34 @@ JP segment byte lengths (split on `<0d>`): **[24, 17, 17, 17, 14]**
 English must match these lengths (pad labels with spaces); `00000` stays at 37/55/73.
 Status: translated offset-preserving in battle.tsv (verify in-game).
 
-## TODO - still Japanese (map the same way before translating)
-- **Level-up window** @ cooked 0x19469 (card 0xE469): 7 stat numbers (MaxPP, MaxMP,
-  IQ, R_Str, L_Str, Agl, Drb) + a name slot (the `　　　　` blank). Find its inserter
-  (likely bank 0x6E too) and its 7 `TII` dests + the name-insertion offset.
-- **Learned-skill window** @ cooked 0x19530 (card 0xE530): a skill-name slot
-  (the `　　　　　　　　` blank, runtime-written). Find the name-insertion offset.
-- **Party HUD names** (right panel, シオン/ショーコ): drawn from a hardcoded JP name
-  copy, not the $D066 table. 5 raw `シオン` copies exist in card RAM
-  (C4ED, E409, E571, EAFB, 1257C) - E409/E571 are the message literals; find which
-  feeds the HUD and translate that source (4-byte "Sion" fits the 6-byte slot).
+## Level-up window  (string @ cooked 0x19469, card 0xE469)  -- DONE
+7 stat-number slots (logical $849C/$84AE/$84C0/$84D2/$84E4/$84F6/$8508 = cooked
+0x1949C..0x19508, spacing 18) + a name blank at logical $846F (cooked 0x1946F, the
+`　　　　` run). JP segment byte lengths: **[18,18,0,17,17,17,17,17,17,17,16,10]**.
+Translated offset-preserving (stat labels left as the game's full-width Latin so number
+columns stay aligned); verified clean in-game. The name blank still shows JP (see HUD names).
+
+## Learned-skill window  (string @ cooked 0x19530, card 0xE530)  -- DONE
+Segments [22,16,12]; the 16-byte `　　　　　　　　` is a runtime skill-name blank.
+Translated offset-preserving (skill-name blank kept). Not yet visually verified (needs a
+skill-learn event) but same proven method.
+
+## Party-name array  (cooked 0x19afb)  -- TRANSLATED, but NOT the HUD source
+A 9-entry array of 8-byte null-terminated name fields: シオン/ショーコ/カル/Ｓ・カル/ジョー/
+ウェルダ/ギーデル/ルシア/マモン -> Sion/Shoko/Kal/S. Kal/Joe/Welda/Giedel/Lucia/Mamon.
+Translated in battle.tsv (each field = name + 0x00 pad to 8). Confirmed in-emu that this
+loads to card 0xEAFB (now reads "Sion..."). NOTE the simple `card = cooked - 0xB000` rule
+does NOT hold up here - card 0xEAFB is a separate load, not cooked 0x1AAFB (which is code).
+
+## TODO
+- **Battle HUD party names** (right panel, シオン/ショーコ) - NOT FIXED. They do **not**
+  read from the 0x19afb array (card 0xEAFB is "Sion" now, HUD still shows シオン), and there
+  is no other clean `シオン` name copy left in card RAM (only sentence literals at C4ED,
+  1257C). So the HUD name is loaded/cached separately (likely pre-rendered to VRAM at battle
+  start, or read from a system-bank/ROM copy). To find it: set a read-bp during a HUD redraw
+  (e.g. when PP/MP changes mid-battle) and trace the source. Same likely applies to the
+  level-up name blank.
+- **Other party-array copies** at cooked 0xbe1c and 0x1512d (field/other contexts) - still JP.
 
 ## Battle strings (script/battle.tsv)
 | cooked   | what                | class        | status |
@@ -61,6 +79,7 @@ Status: translated offset-preserving in battle.tsv (verify in-game).
 | 0x19400  | "Failed"            | message-box  | EN     |
 | 0x19407  | can't-use-skill     | message-box  | EN     |
 | 0x1df90  | can't-use-item-here | message-box  | EN (verified) |
-| 0x1956b  | reward window       | result-win   | EN (offset-preserved) |
-| 0x19469  | level-up window     | result-win   | JP (TODO) |
-| 0x19530  | learned-skill       | result-win   | JP (TODO) |
+| 0x1956b  | reward window       | result-win   | EN (verified) |
+| 0x19469  | level-up window     | result-win   | EN (verified) |
+| 0x19530  | learned-skill       | result-win   | EN (offset-preserved) |
+| 0x19afb  | party-name array x9 | name fields  | EN (loads to card 0xEAFB; not the HUD source) |
