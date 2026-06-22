@@ -28,12 +28,14 @@ TRACK2 = 3590
 
 # Original banks the asm .BACKGROUNDs, carved from the cooked disc into incbin/ at build time
 # (game bytes - never committed): (incbin file, cooked offset, length).
-CARVE = [('bank6d.bin', 0x15000, 0x2000), ('boot.bin', 0x00000, 0x2000)]
+CARVE = [('bank6d.bin', 0x15000, 0x2000), ('boot.bin', 0x00000, 0x2000),
+         ('bank6b.bin', 0x0b000, 0x2000)]
 
 # asm source (in src/) -> cooked disc offset of the bank's first byte.
 BANKS = [
     ('bank6d.s', 0x15000),   # #-engine render/conversion bank ($4000-$5FFF): VWF render hook
     ('boot.s',   0x00000),   # boot/WRAM image ($2000-$3FFF): per-transition font reload
+    ('bank6b.s', 0x0b000),   # field banner bank ($A000-$BFFF): proportional location-name banner
 ]
 
 # raw blobs spliced onto disc: (cooked offset, incbin file). The VWF font (committed asset).
@@ -201,6 +203,46 @@ def hud_patch(cooked):
     return patches
 
 
+# Field location-name banners (town-entry place names). Each map block's name is an inline
+# half-width-katakana string at block+0x32 in tight slots; English (with suffix) doesn't fit.
+# So we RELOCATE: write [start_x][english\0] into free space in the map block's bank-0x76 page
+# and repoint the map's name pointer at block+0x2E to it. start_x is the precomputed centered left
+# edge (8 + (144 - pixel_width)/2). The bank-0x6B hook (bank6b.s) reads start_x + draws the name
+# proportionally. Names from script/locations.tsv. Pure data here; see docs/battle-text-map.md.
+def location_patch(cooked):
+    import tsv
+    widths = open(os.path.join(HERE, 'incbin', 'vwf_widths.bin'), 'rb').read()
+    px = lambda s: sum(widths[ord(c) - 0x20] for c in s)
+    patches = []
+    for r in tsv.read(os.path.join(ROOT, 'script', 'locations.tsv')):
+        en = r.get('english', '').strip()
+        if not en:
+            continue
+        base = int(r['block_off'], 16) - 0x32              # map block start
+        if cooked[base + 0x2E:base + 0x30] != b'\x32\xc0':  # sanity: name pointer = $C032
+            raise SystemExit('location 0x%x name pointer not as expected' % base)
+        best = (0, 0)                                       # biggest zero run in the bank-0x76 page
+        i = base + 0x50
+        while i < base + 0x2000:
+            if cooked[i] == 0:
+                j = i
+                while j < base + 0x2000 and cooked[j] == 0:
+                    j += 1
+                if j - i > best[1]:
+                    best = (i - base, j - i)
+                i = j
+            else:
+                i += 1
+        foff = best[0] + 2                                  # small margin into the free run
+        blob = bytes([8 + (144 - px(en)) // 2]) + en.encode('latin-1') + b'\x00'
+        if best[1] < len(blob) + 2 or foff + len(blob) > 0x2000:
+            raise SystemExit('location %r: no room in map block' % en)
+        addr = 0xC000 + foff
+        patches.append((base + foff, blob))                # [start_x][name\0] in free space
+        patches.append((base + 0x2E, bytes([addr & 0xff, addr >> 8])))  # repoint name pointer
+    return patches
+
+
 def assemble(src):
     """Assemble one src/*.s -> build/<name>.bin, return the bytes."""
     name = os.path.splitext(src)[0]
@@ -321,6 +363,7 @@ def main():
     patches += battle_patch(cooked)  # English battle prose (failure/level-up/rewards)
     patches += party_array_patch(cooked)  # battle party-name array (from names.tsv)
     patches += hud_patch(cooked)     # English battle HUD names (font glyphs + redirected source)
+    patches += location_patch(cooked)  # English town-entry banners (relocated + proportional)
     import reinsert               # splice English from cutscene.tsv into the #-engine blocks
     cut, flagged = reinsert.build(args.work, os.path.join(ROOT, 'script', 'cutscene.tsv'))
     for base, o, n in flagged:
