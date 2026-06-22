@@ -369,6 +369,30 @@ def save_menu_patch(cooked):
     return patches
 
 
+def formation_patch(cooked):
+    """In-game formation (party-order) menu (the "Plan" submenu) at cooked 0xb3f9. It's drawn by the
+    bank-0x6D VWF loop like the other field menus, but export_menu.py's run finder skips it: the block
+    interleaves SJIS glyphs with raw ASCII spaces (0x20) and slot digits (0x31-0x35), which break run
+    detection. The full-width spaces position the two columns, so translate ONLY the three text
+    segments IN PLACE, padded with spaces (a 0x00 pad would terminate the block and hide the columns)."""
+    import alshark.menucodec as menucodec
+    segs = [
+        (0xb3f9, '隊列を変更します。', 'Change formation.'),  # 隊列を変更します。
+        (0xb426, '＜現隊列＞', '<Current>'),                                  # ＜現隊列＞
+        (0xb433, '＜新隊列＞', '<New>'),                                      # ＜新隊列＞
+    ]
+    patches = []
+    for off, jp, en in segs:
+        jb = jp.encode('shift_jis')
+        if cooked[off:off + len(jb)] != jb:
+            raise SystemExit('formation menu seg 0x%x not as expected' % off)
+        eb = menucodec.encode(en)
+        if len(eb) > len(jb):
+            raise SystemExit('formation menu %r too long (%d > %d)' % (en, len(eb), len(jb)))
+        patches.append((off, eb + b'\x20' * (len(jb) - len(eb))))   # space-pad, NOT 0x00
+    return patches
+
+
 def write_disc(patches, want_chd):
     extracted = os.path.join(ROOT, 'extracted')
     out = os.path.join(HERE, 'build')
@@ -452,6 +476,7 @@ def main():
     patches += hud_patch(cooked)     # English HUD-name font glyphs (table copied in via boot.s)
     patches += location_patch(cooked)  # English town-entry banners (relocated + proportional)
     patches += save_menu_patch(cooked)  # English boot save-menu option buttons (Start/Copy/Delete)
+    patches += formation_patch(cooked)  # English in-game formation (party-order) menu
     import reinsert               # splice English from cutscene.tsv into the #-engine blocks
     cut, flagged = reinsert.build(args.work, os.path.join(ROOT, 'script', 'cutscene.tsv'))
     for base, o, n in flagged:
