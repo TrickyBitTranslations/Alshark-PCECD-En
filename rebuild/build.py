@@ -318,7 +318,7 @@ def save_menu_patch(cooked):
         (0x48018dd, ['Copy slot has', 'data. Erase', 'it to copy.']),          # msg3 copy-target-has-data
         (0x48018ed, ['Backup RAM is', 'full. Erase a', 'file to copy.']),      # msg4 RAM-full on copy
         (0x48018fd, ['No data here.', 'Cannot copy.']),                        # msg5 no-data on copy
-        (0x480190d, ['Erase this', 'save data?', '  Yes    No']),              # msg6 delete-confirm
+        (0x480190d, ['Erase this', 'save data?', '    Yes  No']),              # msg6 delete-confirm (Yes col4 / No col9 to sit just after the cursor)
         (0x480191d, ['Backup RAM', 'is too full.', 'Erase files,', 'then restart.']),  # msg7 RAM-insufficient
         (0x480192d, ['A BIOS error', 'occurred.', 'Please reset.']),           # msg8 BIOS-error
     ]
