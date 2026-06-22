@@ -116,6 +116,31 @@ def menu_patch(cooked):
     return patches
 
 
+# Battle prose strings (failure / level-up / rewards / can't-use), edited via
+# script/battle.tsv. These live inline among engine code with no pointer table, so
+# each english keeps every control byte as <XX> markup (textcodec round-trips exactly)
+# and is spliced into the original 0x00-terminated span, padded to length - nothing
+# outside the span moves. Drawn by the same bank-6D label loop, so ASCII renders VWF.
+def battle_patch(cooked):
+    import tsv
+    from alshark import textcodec
+    patches = []
+    for r in tsv.read(os.path.join(ROOT, 'script', 'battle.tsv')):
+        off = int(r['block_off'], 16)
+        raw = bytes.fromhex(r['raw_hex'])               # original span incl. 0x00
+        if cooked[off:off + len(raw)] != raw:
+            raise SystemExit('battle.tsv 0x%x not as extracted' % off)
+        en = r.get('english', '')
+        if not en:
+            continue
+        new = textcodec.encode(en)                      # markup already ends with <00>
+        if len(new) > len(raw):
+            raise SystemExit('battle.tsv 0x%x overflows: %d > %d' % (off, len(new), len(raw)))
+        new += b'\x00' * (len(raw) - len(new))          # pad within the span
+        patches.append((off, new))
+    return patches
+
+
 def assemble(src):
     """Assemble one src/*.s -> build/<name>.bin, return the bytes."""
     name = os.path.splitext(src)[0]
@@ -233,6 +258,7 @@ def main():
     patches += blob_patches()    # bake the VWF font at cooked 0xa1a000
     patches += name_patch(cooked)   # English character names
     patches += menu_patch(cooked)   # English field-menu labels
+    patches += battle_patch(cooked)  # English battle prose (failure/level-up/rewards)
     import reinsert               # splice English from cutscene.tsv into the #-engine blocks
     cut, flagged = reinsert.build(args.work, os.path.join(ROOT, 'script', 'cutscene.tsv'))
     for base, o, n in flagged:
