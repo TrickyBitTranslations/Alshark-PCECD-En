@@ -63,20 +63,26 @@ Translated in battle.tsv (each field = name + 0x00 pad to 8). Confirmed in-emu t
 loads to card 0xEAFB (now reads "Sion..."). NOTE the simple `card = cooked - 0xB000` rule
 does NOT hold up here - card 0xEAFB is a separate load, not cooked 0x1AAFB (which is code).
 
-## TODO - Battle HUD party names (right panel, シオン/ショーコ) -- needs a VWF hook
-Traced via VRAM-write bp on the name's BAT entries (VRAM words $57-$59, tile refs
-821C/8215/823D). The HUD name is **background tiles**, drawn by a glyph renderer in
-**bank 0x68 at ~$458E** (an 11-frame deep call from the battle HUD setup; chain incl.
-$4128/$439F/$43BA/$4495). It does **not** use the `$5748` VWF drawer (the bp on $5748 only
-fired for the command menu, never at battle start). Key blocker: the name fields are **8-byte
-fixed slots** and the renderer draws **full-width SJIS** - so:
-  - Full-width English does NOT fit: Shoko/Welda/Giedel are 10-12 bytes full-width > 8.
-  - 1-byte ASCII fits (Shoko=5) but the bank-0x68 renderer would garble it (expects SJIS).
-So the HUD names need a **VWF hook on the bank-0x68 name renderer** (the same idea as
-`menu_label_char` for $5748, but for this routine) + an ASCII name source. That's a dedicated
-asm task in a system bank - deferred. The 0x19afb array (card 0xEAFB) is confirmed NOT the HUD
-source; the HUD name source is read transiently upstream (not a persistent card-RAM copy).
-The level-up / learned-skill name blanks likely share this renderer/limitation.
+## TODO - Battle HUD party names (right panel, シオン/ショーコ) -- System Card BIOS render
+Traced exhaustively (VRAM-write bps + 9-11 frame call stacks). Findings:
+- The name is **background tiles** (BAT words $57-$59, tile refs 821C/8215/823D = シ/オ/ン).
+- The glyph BITMAPS are rendered at **battle init** (vram-write bp on tile bitmap $21C0 fires),
+  but the renderer bottoms out in the **PC Engine System Card BIOS** (PC $F452, MPR7=bank 0x00),
+  i.e. the CD card's built-in SJIS/kanji font ROM, called via the BIOS vector **`$E036`** from
+  game code in **bank 0x68** (e.g. `$4089`, a VRAM fill/transfer loop; HUD draw chain
+  $4128/$439F/$43BA/$4495). It does NOT use the `$5748` VWF drawer.
+- The name SJIS source is **never resident** during battle: searched card RAM (9), WRAM (0),
+  CD-ROM RAM (2), and zero-page at both the command menu AND the exact battle-init draw - only
+  the sentence literals (C4ED, 1257C) ever appear. The name is rendered upstream (party
+  formation) via the BIOS font ROM; battle blits the resulting tiles.
+- The 0x19afb array (card 0xEAFB) is confirmed NOT the HUD source (patched it to "Sion", HUD
+  unchanged).
+**Conclusion:** localizing the HUD names is a **dedicated subproject**, not a data patch or a
+single-routine hook. It needs the System Card BIOS font-function spec + a proper disassembly of
+the bank-0x68 name-setup path to redirect glyph rendering to English (and a width strategy:
+full-width English overflows the JP-sized slots; proportional needs replacing the BIOS render).
+Do this with the disassembly tooling, not live emulator tracing. The level-up / learned-skill
+name blanks share this BIOS-font name source.
 
 ## TODO - other
 - **Party-array copies** at cooked 0xbe1c and 0x1512d (field/other contexts) - still JP.
