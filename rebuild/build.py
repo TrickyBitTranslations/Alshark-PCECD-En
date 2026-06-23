@@ -357,6 +357,7 @@ def formation_patch(cooked):
         (0xb3f9, '隊列を変更します。', 'Change formation.'),  # 隊列を変更します。
         (0xb426, '＜現隊列＞', '<Current>'),                                  # ＜現隊列＞
         (0xb433, '＜新隊列＞', '<New>'),                                      # ＜新隊列＞
+        (0xb4a8, 'これでよろしいですか？', 'Is this OK?'),                    # confirm prompt
     ]
     patches = []
     for off, jp, en in segs:
