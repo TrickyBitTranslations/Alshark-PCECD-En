@@ -426,6 +426,34 @@ def selftest():
         print('%-12s disassembler round-trip: byte-identical (%d B)' % (src, len(data)))
 
 
+def title_credit_patch(cooked):
+    """Add 'TrickyBit Translations' to the title screen, in the empty gap just ABOVE the (C) lines.
+    The staff-credits text (which also draws the title's copyright) is at disc 0x4805000 (bank 0x6B,
+    loaded on every path to the title): full-width SJIS, CR/LF (0d 0a) line breaks, 0x1a end marker.
+    The '(C)RIGHT STUFF' line is preceded by filler blank lines; replace 3 of them (right before that
+    line) with the two-line credit + a blank line. Net zero lines, so the copyright keeps its screen
+    position and the credit lands in the visible gap above it; the block grows into the ~6KB of free
+    space after the 0x1a end marker. (Appending AFTER the (C) rendered off the bottom edge; the
+    save-menu bottom had no cold-safe room - see noredist/docs/findings/savemenu-banks.md.)"""
+    def fw(s):
+        return ''.join((chr(ord(c) + 0xFEE0) if 0x21 <= ord(c) <= 0x7e else ('　' if c == ' ' else c))
+                       for c in s).encode('shift_jis')
+    rt = cooked.find(fw('RIGHT'))
+    if rt < 0:
+        raise SystemExit('title-credit: (C)RIGHT STUFF line not found')
+    line_start = rt - 12                       # the "　　（Ｃ）　" leading before RIGHT
+    if cooked[line_start - 6:line_start] != b'\x0d\x0a' * 3:
+        raise SystemExit('title-credit: expected filler CRLFs before the (C) line')
+    end = cooked.find(b'\x1a', rt)
+    if end < 0:
+        raise SystemExit('title-credit: block end marker not found')
+    credit = fw('   TrickyBit') + b'\x0d\x0a' + fw('  Translations') + b'\x0d\x0a' + b'\x0d\x0a'
+    tail = bytes(cooked[line_start:end + 1])   # (C)RIGHT ... ,INC. ... 0x1a (re-emitted after the credit)
+    if any(cooked[end + 1:end + 1 + (len(credit) - 6)]):
+        raise SystemExit('title-credit: free space after end marker is not clear')
+    return [(line_start - 6, credit + tail)]   # 3 filler blanks -> credit (net 0 lines); grows into free space
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--work', default=os.path.join(ROOT, 'work'))
@@ -454,6 +482,7 @@ def main():
     patches += location_patch(cooked)  # English town-entry banners (relocated + proportional)
     patches += save_menu_patch(cooked)  # English boot save-menu option buttons (Start/Copy/Delete)
     patches += formation_patch(cooked)  # English in-game formation (party-order) menu
+    patches += title_credit_patch(cooked)  # 'TrickyBit Translations' in the staff credits / title (C) roll
     import reinsert               # splice English from cutscene.tsv into the #-engine blocks
     cut, flagged = reinsert.build(args.work, os.path.join(ROOT, 'script', 'cutscene.tsv'))
     for base, o, n in flagged:
