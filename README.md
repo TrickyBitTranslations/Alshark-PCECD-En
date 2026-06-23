@@ -1,21 +1,39 @@
 # Alshark - English fan translation (work in progress)
 
+**UPDATE: 06/23/26** - We're close to releasing a '0.1' release of the translation patch.
+The goal is for it to have all known script blocks translated, all critical ui translated
+(with some small interaction presentation bugs here and there that don't prevent usage/
+progression), and our current blocker list cleared out. We really could use help bashing
+on this build to see what things look like.
+
 Tooling and translation data for an English patch of **Alshark** (アルシャーク), a
 PC Engine Super CD-ROM2 RPG (Right Stuff / Victor Entertainment, 1994).
 
 **Progress and how to help: https://trickybittranslations.github.io/Alshark-PCECD-En/**
 
-No game data is included. Bring your own `Alshark (Japan).chd` and a PC Engine Super
-System Card BIOS. This repo holds only original tooling, the translation script, and
-the site.
+No game data is included. This repo holds only original tooling, the translation script, 
+and the site. Once we're ready, the patch will be available via Releases.
 
 ## Status
 
-The edit pipeline round-trips byte-perfect on the main story script (32 blocks, 940
-strings), and English renders in-game with a proportional (variable-width) font: in
-field dialogue, in the `#` cutscene engine (intro translated, control codes preserved),
-and in the status/equip/item menus (character and item names fit their slots). What is
-left is mostly content: the translation itself, and fitting longer lines.
+Translation and build pipelines are solid and functional. Game-side, a custom font has
+been added to assist in the variable width font feature we've added. Dialog text is 
+crisp, clear, and makes efficient use of the space.
+
+Most UI screens are translated at this point, with most of them also using the VFW
+renderer. 
+
+**The entire script has been extracted, and a starting machine translation is
+being put together as a starting point.
+
+From here, we're hoping japanese speakers who want to help with the translation will
+load up the [Script Site](https://trickybittranslations.github.io/Alshark-PCECD-En/)
+and begin submitting translation improvements.**
+
+There's a lot of bug hunting still to do. It's a fairly long game, and save states 
+aren't a reliable way to test because of how text gets loaded into RAM. The game may 
+have already copied strings off the disc to RAM by the time you create the save state, 
+so any text in that region will keep showing the old values.
 
 ## How text is stored
 
