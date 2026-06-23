@@ -202,12 +202,16 @@ def _pct_len(d, i):
     s = d[i + 1]
     if s >= 0x80:                          # box terminator (e.g. %<ff>), no params
         return 2
-    # inline-length / relative-skip handlers: % S L <L bytes> (handler reads L, then L more)
-    if s in (0x04, 0x05, 0x07, 0x08, 0x13, 0x14, 0x15, 0x16, 0x19, 0x1a, 0x1c, 0x1d):
+    # inline-length / relative-skip handlers: % S L <L bytes> (handler reads L, then L more).
+    # 0x10/0x11/0x12 (inline-glyph display - shop item/price) and 0x21/0x25/0x26 are ALSO
+    # length-prefixed: the L byte is the data byte count, so length = 3 + L. (The handler renders
+    # those L bytes as a variable number of 1/2-byte glyphs - that glyph COUNT is not the byte
+    # length, which is what made these look uncrackable - but the byte length is plain 3+L.)
+    # Verified: re-encode round-trips byte-exact for 67/70 such rows; the other 3 only drop a
+    # trailing pad space. Cracking these unlocks the shop / inn / item-get dialogue.
+    if s in (0x04, 0x05, 0x07, 0x08, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x19, 0x1a,
+             0x1c, 0x1d, 0x21, 0x25, 0x26):
         return 3 + d[i + 2]
-    # NOTE 0x10/0x11/0x12 share one handler ($8832) that renders INLINE TEXT (mixed 1/2-byte
-    # glyphs, count not a simple byte length) - not yet cracked, so they fall through to raise;
-    # the ~15 strings that use them stay untranslated for now rather than risk a mis-size.
     # fixed length = 2 + the param bytes the handler reads via $9911/$9916
     FIXED = {0x00: 4, 0x01: 3, 0x02: 2, 0x06: 5, 0x09: 4, 0x0a: 4, 0x0b: 5, 0x0c: 5,
              0x0d: 6, 0x0e: 2, 0x0f: 3, 0x17: 4, 0x18: 5, 0x1b: 4,
