@@ -72,21 +72,31 @@ def split_entries(data, base, ptrs, blocklen):
     return out
 
 
-def rebuild(entries):
-    """entries: list of raw bytes. Return rebuilt block (pointer table + entries),
-    recomputing the relative pointer table for whatever lengths the entries are."""
-    table_size = 2 * len(entries)
-    offs = []
+def _rebuild(entries, offs, ptr_base):
+    """Lay out a pointer-table block. entries are in INDEX (pointer-table) order. If offs is
+    given (each entry's original str_off) strings are placed in their original PHYSICAL order,
+    so an unchanged block round-trips byte-identical even when its pointer table is non-monotonic
+    (strings stored out of index order); otherwise strings go in index order. Pointers carry
+    ptr_base (0 = relative tier-1, 0xC000 = #-engine)."""
+    n = len(entries)
+    table_size = 2 * n
+    order = sorted(range(n), key=lambda i: offs[i]) if offs is not None else list(range(n))
+    pos = [0] * n
     cur = table_size
-    for r in entries:
-        offs.append(cur)
-        cur += len(r)
-    out = bytearray()
-    for o in offs:
-        out += struct.pack('<H', o)
-    for r in entries:
-        out += r
+    for i in order:
+        pos[i] = cur
+        cur += len(entries[i])
+    out = bytearray(cur)
+    for i in range(n):
+        struct.pack_into('<H', out, 2 * i, ptr_base + pos[i])
+    for i in range(n):
+        out[pos[i]:pos[i] + len(entries[i])] = entries[i]
     return bytes(out)
+
+
+def rebuild(entries, offs=None):
+    """Rebuilt relative-pointer block (tier-1 map/event). See _rebuild."""
+    return _rebuild(entries, offs, 0)
 
 
 def find_c000_blocks(data):
@@ -102,18 +112,17 @@ def find_c000_blocks(data):
         cnt = (w0 - 0xC000) // 2 if ok else 0
         if ok and 2 <= cnt <= 400:
             ptrs = []
-            last = -1
             for i in range(cnt):
                 p = struct.unpack_from('<H', data, base + 2 * i)[0]
-                if p < last or not (0xC000 <= p < 0xE000):
-                    ptrs = []
-                    break
+                if not (0xC000 <= p < 0xE000):     # valid load-page pointer; NOT required to be
+                    ptrs = []                       # sorted - some blocks store strings out of index
+                    break                           # order (e.g. 0x7d5000 swaps its last two entries)
                 ptrs.append(p)
-                last = p
             if ptrs and ptrs[0] == w0:
-                sa = data[base + (ptrs[0] - 0xC000):base + (ptrs[-1] - 0xC000) + 40]
+                hi = max(ptrs) - 0xC000             # last string physically (may not be ptrs[-1])
+                sa = data[base + (ptrs[0] - 0xC000):base + hi + 40]
                 if sum(1 for x in sa if 0xA1 <= x <= 0xDF) >= cnt:
-                    end = base + (ptrs[-1] - 0xC000)
+                    end = base + hi
                     while end < n and data[end] != 0x00:
                         end += 1
                     end += 1
@@ -125,30 +134,25 @@ def find_c000_blocks(data):
 
 
 def split_c000(data, base, ptrs, blocklen):
-    """Entry bytes for a $C000 block (pointers are absolute $C000-based)."""
+    """Entry bytes for a $C000 block (pointers are absolute $C000-based). Pointers are not
+    guaranteed sorted, so an entry ends at the next-higher offset physically (or block end),
+    NOT at ptrs[i+1] - that keeps out-of-order blocks (e.g. 0x7d5000) split correctly while
+    preserving index order (entry i == ptrs[i])."""
+    offs = sorted(p - 0xC000 for p in ptrs)
     out = []
-    for i in range(len(ptrs)):
-        s = base + (ptrs[i] - 0xC000)
-        e = base + (ptrs[i + 1] - 0xC000) if i + 1 < len(ptrs) else base + blocklen
-        out.append(bytes(data[s:e]))
+    for p in ptrs:
+        s = p - 0xC000
+        nxt = [o for o in offs if o > s]
+        e = min(nxt) if nxt else blocklen
+        out.append(bytes(data[base + s:base + e]))
     return out
 
 
-def rebuild_c000(entries):
-    """entries: list of raw bytes. Rebuilt $C000 block (absolute $C000-based pointer
-    table + entries); like rebuild() but pointers carry the $C000 load base."""
-    table_size = 2 * len(entries)
-    offs = []
-    cur = table_size
-    for r in entries:
-        offs.append(cur)
-        cur += len(r)
-    out = bytearray()
-    for o in offs:
-        out += struct.pack('<H', 0xC000 + o)
-    for r in entries:
-        out += r
-    return bytes(out)
+def rebuild_c000(entries, offs=None):
+    """Rebuilt $C000 absolute-pointer block (#-engine). See _rebuild; passing offs keeps
+    out-of-order blocks (e.g. 0x7d5000, whose pointer table is non-monotonic) byte-identical
+    when unchanged."""
+    return _rebuild(entries, offs, 0xC000)
 
 
 def layout(data):
