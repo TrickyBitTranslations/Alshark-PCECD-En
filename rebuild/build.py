@@ -278,23 +278,23 @@ def assemble_banks(cooked):
 
 
 def save_menu_patch(cooked):
-    """English boot save-menu option buttons: 開始/複写/削除 -> Start/Copy/Delete.
+    """English boot save-menu (Start/Copy/Delete + the copy/delete/error dialogs), COLD-SAFE.
 
-    The boot save/title menu is the System Card BRAM-style UI (banks 0x68-0x6C). Its option box
-    is described by a 0x10-byte entry at disc 0x48018ad: [ptr][params]. A glyph compositor (bank
-    0x68 $43EB) builds each char into a VRAM tile region; $663B lays text out horizontally
-    (X += per char, 0x52 'R' = newline, 0x45 'E' = end). The font has full-width SJIS Latin (that's
-    what ＤＡＴＡ/ＬＶ are), so English must be full-width (half-width ASCII renders as garbage).
-    To fit "Start/Copy/Delete" the box must be widened, which means THREE coupled entry fields:
-      - entry+0xa (disc 0x48018b7) = box width param; live $8D = param - 3. 0x0d -> $8D = 10 cells.
-      - entry+0x8 (disc 0x48018b5/6) = glyph/BAT ROW STRIDE in bytes; must equal $8D*0x20 (0x140),
-        or the staging row stride mismatches the render and the text transposes/garbles.
-      - tile-base (entry+0x4/0x6) is LEFT at the original 0x44d: its region has slack up to the
-        DATA-1 box (tile 0x500), so the widened 10x6 box (-> tiles 0x44d..0x4c5) stays clear of it.
-        (Relocating the tile-base instead just collided with the DATA-1/DATA-2 boxes.)
-    The option string itself is relocated to verified-free bank-0x68 space ($4a60, disc 0x2be1a60,
-    write-bp-confirmed unused across the whole menu) and the entry pointer repointed there.
-    Pure data patch, no asm. See memory title-menu-todo for the full RE.
+    The menu is the System Card BRAM-style UI (banks 0x68-0x6C). The earlier version relocated the
+    strings to $4A60 in bank 0x68 and "verified it free" - but only in the WARM menu. Bank 0x68 is
+    DUAL-SOURCE: boot loads it from disc 0x2be1000 (so the warm menu showed the text) while the
+    post-death COLD path reloads bank 0x68 from cooked 0x5000, where $4A60 is real code. So after
+    die -> title -> Run the strings rendered empty and the credit black-screened. Fix: relocate into
+    BANK 0x69 (disc 0x4801000) - the one save-menu bank with a single cold-reloaded source (its
+    descriptor table already survives the cold path). The free space is the JP strings we repoint
+    away from: the 6 JP dialog strings are back-to-back (430 contiguous bytes at $69BF), and ALL 7
+    strings (option + dialogs) pack into that one region. (NB: a 40B disc-zero gap at $79CD is NOT
+    usable - it's a runtime glyph/BG staging buffer.) Full bank map: noredist/docs/findings/savemenu-banks.md.
+
+    The option box still needs widening to fit "Start/Copy/Delete"; those two descriptor bytes
+    (0x48018b5/b7) live in bank 0x69, so they are cold-safe. Two dialogs are trimmed a few chars to
+    fit the 430B region. The "TrickyBit" credit is NOT here - its 384B of pre-baked tiles do not fit
+    bank 0x69, so it must be re-rendered from the menu font (Stage 2), not DMA'd as tiles.
     """
     def fw(s):                                   # ASCII -> full-width SJIS (this menu has no half-width)
         out = []
@@ -310,62 +310,39 @@ def save_menu_patch(cooked):
     def msg(lines):                              # 0x52 'R' = newline between lines, 0x45 'E' = end
         return b'\x52'.join(fw(l) for l in lines) + b'\x45'
 
-    # (entry addr in the descriptor table, English lines). Option box = narrow (needs widen below);
-    # the dialog boxes are already wide (W=23, $8D=20, ~13 full-width chars/line, 3 lines / 4 for msg7)
-    # and share one tile region (modal), so they only need string relocation + repoint.
-    items = [
-        (0x48018ad, ['Start', 'Copy', 'Delete']),                              # option box
-        (0x48018dd, ['Copy slot has', 'data. Erase', 'it to copy.']),          # msg3 copy-target-has-data
-        (0x48018ed, ['Backup RAM is', 'full. Erase a', 'file to copy.']),      # msg4 RAM-full on copy
-        (0x48018fd, ['No data here.', 'Cannot copy.']),                        # msg5 no-data on copy
-        (0x480190d, ['Erase this', 'save data?', '    Yes  No']),              # msg6 delete-confirm (Yes col4 / No col9 to sit just after the cursor)
-        (0x480191d, ['Backup RAM', 'is too full.', 'Erase files,', 'then restart.']),  # msg7 RAM-insufficient
-        (0x480192d, ['A BIOS error', 'occurred.', 'Please reset.']),           # msg8 BIOS-error
+    # the option box is narrow (widened below); the 6 dialog boxes are already wide (~13 chars/line).
+    option = (0x48018ad, ['Start', 'Copy', 'Delete'])
+    dialogs = [
+        (0x48018dd, ['Copy slot has', 'data. Erase', 'it to copy.']),                  # msg3
+        (0x48018ed, ['Backup RAM is', 'full. Erase', 'a file.']),                      # msg4 (trimmed)
+        (0x48018fd, ['No data.', 'Cannot copy.']),                                     # msg5 (trimmed)
+        (0x480190d, ['Erase this', 'save data?', '    Yes  No']),                      # msg6 (Yes col4 / No col9)
+        (0x480191d, ['Backup RAM', 'is full.', 'Erase files,', 'then restart.']),      # msg7 (trimmed)
+        (0x480192d, ['A BIOS error.', 'Please reset.']),                              # msg8 (trimmed)
     ]
-    BASE_DISC, BASE_LOG, FREE = 0x2be1a60, 0x4a60, 1440   # verified-free bank-0x68 slack (write-bp)
+    # cold-safe homes in bank 0x69 (disc 0x4801000, org $6000):
+    # ALL strings go into the 6 freed JP dialog strings = 430 contiguous bytes at $69BF (disc
+    # 0x48019bf). That region is genuinely free at RUNTIME (display-only string data; confirmed by
+    # reading it back live). The earlier 40-byte "gap" at $79CD was zero on disc but is a runtime
+    # glyph/BG STAGING buffer -> putting the option there showed as BG garbage and ate the text.
+    # "zero on disc" != "free at runtime". Dialogs are trimmed a few chars to leave room for the option.
+    REGION_DISC, REGION_CAP = 0x48019bf, 430
+    def log(d):
+        return 0x6000 + (d - 0x4801000)
     if cooked[0x48018ad:0x48018af] != b'\x77\x69':        # sanity: option entry pointer = $6977
         raise SystemExit('save-menu option entry pointer not as expected')
-    if any(cooked[BASE_DISC:BASE_DISC + FREE]):           # the relocation home must be clear
-        raise SystemExit('save-menu relocation space at 0x%x is not free' % BASE_DISC)
     patches, off = [], 0
-    for entry, lines in items:
+    for entry, lines in [option] + dialogs:               # pack option + dialogs into the freed region
         blob = msg(lines)
-        addr = BASE_LOG + off
-        patches.append((BASE_DISC + off, blob))                    # English string in free space
-        patches.append((entry, bytes([addr & 0xff, addr >> 8])))   # repoint the entry's string ptr
+        if off + len(blob) > REGION_CAP:
+            raise SystemExit('save-menu strings overflow bank-0x69 region (%d > %d)' % (off + len(blob), REGION_CAP))
+        d = REGION_DISC + off
+        patches.append((d, blob))                                          # English string (overwrites freed JP)
+        patches.append((entry, bytes([log(d) & 0xff, log(d) >> 8])))       # repoint the descriptor
         off += len(blob)
     # widen ONLY the option box (dialog boxes are already wide): row stride MUST match the width
     patches.append((0x48018b5, b'\x40\x01'))     # option box row stride 0x0060 -> 0x0140 ($8D*0x20)
     patches.append((0x48018b7, b'\x0d'))         # option box width param 0x06 -> 0x0d ($8D = 10)
-
-    # --- "TrickyBit Translations" credit: BORDERLESS white text at the bottom. $64A7 always draws a
-    # blue box, so don't use it. Instead use pre-rendered 8x8 tiles (plane0=plane3=glyph -> color 9
-    # = white on color 0 = transparent in palette 2; from tools/alshark/gen_credit.py), DMA them to
-    # free VRAM, and write the BAT row directly. Hook the once-per-render JSR $634E at $6107.
-    ctiles = open(os.path.join(ROOT, 'script', 'savemenu_credit.bin'), 'rb').read()
-    n = len(ctiles) // 32                               # tile count (1 row, 8px tall)
-    TILE_VRAM = 0x7000                                  # free VRAM (tile 0x700, after DATA-2, before staging 0x72c)
-    TNO, ROW = TILE_VRAM >> 4, 26                       # tile number 0x700; bottom screen row (tune)
-    bat = ROW * 32 + (32 - n) // 2                      # centered BAT word address
-    cbat = b''.join(bytes([(TNO + i) & 0xff, ((TNO + i) >> 8) | 0x20]) for i in range(n))  # palette 2
-    cti_off, cba_off = off, off + len(ctiles)
-    cwr_off = cba_off + len(cbat)
-    cti_log, cba_log, cwr_log = BASE_LOG + cti_off, BASE_LOG + cba_off, BASE_LOG + cwr_off
-    wrap = bytes([0x20, 0x4e, 0x63,                                          # JSR $634E (orig DATA render)
-                  0xa9, 0x00, 0xa2, TILE_VRAM >> 8, 0x20, 0xae, 0xe0,        # MAWR = TILE_VRAM
-                  0xe3, cti_log & 0xff, cti_log >> 8, 0x02, 0x00, len(ctiles) & 0xff, len(ctiles) >> 8,  # TIA tiles->VRAM
-                  0xa9, bat & 0xff, 0xa2, bat >> 8, 0x20, 0xae, 0xe0,        # MAWR = BAT row
-                  0xe3, cba_log & 0xff, cba_log >> 8, 0x02, 0x00, len(cbat) & 0xff, len(cbat) >> 8,  # TIA bat->VRAM
-                  0x60])                                                     # RTS
-    off = cwr_off + len(wrap)
-    if off > FREE:
-        raise SystemExit('save-menu data (%d bytes) exceeds free space (%d)' % (off, FREE))
-    if cooked[0x4801107:0x480110a] != b'\x20\x4e\x63':   # sanity: $6107 = JSR $634E (hook target)
-        raise SystemExit('save-menu credit hook site not as expected')
-    patches.append((BASE_DISC + cti_off, ctiles))
-    patches.append((BASE_DISC + cba_off, cbat))
-    patches.append((BASE_DISC + cwr_off, wrap))
-    patches.append((0x4801108, bytes([cwr_log & 0xff, cwr_log >> 8])))   # $6107 JSR $634E -> JSR wrap
     return patches
 
 

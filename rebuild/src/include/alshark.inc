@@ -53,15 +53,6 @@
 .define itemLoopAdv    $41E5 ; CLC of the item +12 advance; overwrite with JMP itemAdvTramp
 .define itemLoopRejoin $41EC ; original high-byte handling (CLA/ADC $01/STA $01/BRA $41B7)
 .define itemAdvTramp   $5F53 ; slack trampoline after nameAdvTramp (16 bytes from $5F43)
-; member-picker name loop ($40C0, reads the $412A name copy via the $411E offset table) has the same
-; FIXED +12 advance at $410F but was never hooked -> picker names monospaced. Redirect to a trampoline
-; (placed in the $5CC0 slack after menu_label_char, since the $5F18 region is full).
-.define pickerLoopAdv  $410F ; CLC of the picker +12 advance; overwrite with JMP pickerAdvTramp
-.define pickerLoopTop  $40E1 ; the picker loop top (BRA target)
-; a 4th name loop ($427E, renders the selected entry of a runtime string list at $7AD6 via the name
-; converter $587E) has the same FIXED +12 advance at $42AC, also unhooked -> same monospaced bug.
-.define picker2LoopAdv $42AC ; CLC of the 4th-loop +12 advance; overwrite with JMP picker2AdvTramp
-.define picker2LoopTop $427E ; the 4th loop top (BRA target)
 ; render-hook scratch in the PROVEN-safe slack (the fontpatch region; $5F60+ is engine BSS)
 .define glyphFlag     $5F40 ; 1 = current glyph is ours (ASCII), 0 = let BIOS draw it
 .define glyphIdx      $5F41 ; ASCII index (char - 0x20) of the current glyph
