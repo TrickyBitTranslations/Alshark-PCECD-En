@@ -140,6 +140,12 @@ rh_loop:
 .ORG itemLoopAdv - $4000         ; $41E5 (was CLC / LDA #$0C / ADC $00 ...)
   jmp itemAdvTramp
 
+; member-picker advance ($410F): same fixed +12, redirect to a slack trampoline (Equip/Status
+; <Whose?> picker + Plan->Formation names render proportionally). Only this loop; the 4th loop
+; $42AC is a generic renderer, left unhooked (that blind hook was reverted).
+.ORG pickerLoopAdv - $4000       ; $410F (was CLC / LDA #$0C / ADC $00 ...)
+  jmp pickerAdvTramp
+
 .ORG $5F18 - $4000               ; proven-safe slack, after render_hook (now ends ~$5F17)
 name_conv:
   lda (scriptPtr)                ; the name byte ($16 = name-table pointer)
@@ -225,3 +231,16 @@ ml_1byte:
   jmp menuLabel1byte             ; $57B5 (original digit / half-width path)
 ml_2byte:
   jmp menuLabel2byte             ; $5790 (original SJIS 2-byte path)
+
+; ---- member-picker name advance trampoline (slack, right after menu_label_char): $00 += menuWidth
+; (VWF) then loop back to the picker top ($40E1). Redirected from $410F. Same proven pattern as the
+; name/item advance. Verified: Equip/Status <Whose?> picker + Plan->Formation names render proportional.
+pickerAdvTramp:
+  clc
+  lda $00
+  adc menuWidth                  ; $00 += this glyph's real width instead of the fixed +12
+  sta $00
+  cla
+  adc $01
+  sta $01
+  jmp pickerLoopTop              ; $40E1

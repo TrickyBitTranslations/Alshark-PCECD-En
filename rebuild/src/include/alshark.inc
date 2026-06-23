@@ -53,6 +53,12 @@
 .define itemLoopAdv    $41E5 ; CLC of the item +12 advance; overwrite with JMP itemAdvTramp
 .define itemLoopRejoin $41EC ; original high-byte handling (CLA/ADC $01/STA $01/BRA $41B7)
 .define itemAdvTramp   $5F53 ; slack trampoline after nameAdvTramp (16 bytes from $5F43)
+; member-picker name loop ($40C0, reads the bank-6D name copy $412A via offset table $411E) has the
+; SAME fixed +12 advance at $410F -> monospaced picker names. Hook it like name/item (Equip/Status
+; <Whose?> picker + Plan->Formation; verified VWF in-game). NB: the 4th loop ($4282/$42AC) is a
+; GENERIC runtime-string renderer, NOT a picker - do NOT hook it (that blind hook was reverted).
+.define pickerLoopAdv  $410F ; CLC of the picker +12 advance; overwrite with JMP pickerAdvTramp
+.define pickerLoopTop  $40E1 ; the picker loop top (BRA target)
 ; render-hook scratch in the PROVEN-safe slack (the fontpatch region; $5F60+ is engine BSS)
 .define glyphFlag     $5F40 ; 1 = current glyph is ours (ASCII), 0 = let BIOS draw it
 .define glyphIdx      $5F41 ; ASCII index (char - 0x20) of the current glyph
