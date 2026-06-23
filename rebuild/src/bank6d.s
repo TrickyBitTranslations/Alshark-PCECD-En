@@ -140,6 +140,16 @@ rh_loop:
 .ORG itemLoopAdv - $4000         ; $41E5 (was CLC / LDA #$0C / ADC $00 ...)
   jmp itemAdvTramp
 
+; member-picker name loop ($40C0, reads the bank-6D name copy at $412A via the per-member offset
+; table at $411E) - the <Whose?>/<To whom?> party-member pickers. Like name/item it advances its
+; pixel-X by a FIXED +12 (at $410F), but this loop was never hooked, so picker names came out
+; monospaced/spread. Redirect to a slack trampoline that advances by the real glyph width (menuWidth).
+.ORG pickerLoopAdv - $4000       ; $410F (was CLC / LDA #$0C / ADC $00 ...)
+  jmp pickerAdvTramp
+
+.ORG picker2LoopAdv - $4000      ; $42AC: the 4th name loop's +12 advance -> proportional
+  jmp picker2AdvTramp
+
 .ORG $5F18 - $4000               ; proven-safe slack, after render_hook (now ends ~$5F17)
 name_conv:
   lda (scriptPtr)                ; the name byte ($16 = name-table pointer)
@@ -225,3 +235,27 @@ ml_1byte:
   jmp menuLabel1byte             ; $57B5 (original digit / half-width path)
 ml_2byte:
   jmp menuLabel2byte             ; $5790 (original SJIS 2-byte path)
+
+; ---- member-picker name advance trampoline (in the $5CC0 slack, after menu_label_char): the picker
+; loop's render saves/restores the pen around JSR $4FD9 and then advances $00 by a fixed +12; replace
+; that with += menuWidth so names pack proportionally. Same pattern as nameAdvTramp/itemAdvTramp.
+pickerAdvTramp:
+  clc
+  lda $00
+  adc menuWidth                  ; $00 += this glyph's real width instead of the fixed +12
+  sta $00
+  cla
+  adc $01
+  sta $01
+  jmp pickerLoopTop              ; $40E1 (picker loop top)
+
+; ---- 4th name loop advance trampoline (slack): same VWF fix for the runtime-string-list picker.
+picker2AdvTramp:
+  clc
+  lda $00
+  adc menuWidth                  ; $00 += this glyph's real width instead of the fixed +12
+  sta $00
+  cla
+  adc $01
+  sta $01
+  jmp picker2LoopTop             ; $427E (4th loop top)
