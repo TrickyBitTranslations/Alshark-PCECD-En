@@ -23,11 +23,12 @@ OUT = ROOT / "site" / "data"
 PAGE = 0x2000                         # a block loads into one 8KB logical page
 CODECS = {"cutscene.tsv": dialogcodec}    # else tier-1 textcodec
 
-# Files hidden from the site and dropped from all stats. TENTATIVE - not permanent.
-# system1.tsv ("Map & Event") is Japanese *Might & Magic* event text (Gold currency,
-# Fountainhead/Greywind/ogres), not Alshark - almost certainly dead data on the disc.
-# Pending a playthrough to confirm nothing of it shows in-game. To re-include, remove it here.
-EXCLUDE = {"system1.tsv"}
+# Files hidden from the site and dropped from all stats. (None currently.)
+# NB: system1.tsv ("Map & Event", 940 strings) IS real in-game text - dungeon/quest/event
+# descriptions (e.g. Blackwind Castle, the Fountainhead quest), extracted but not yet
+# translated. It is SHOWN and COUNTED, not hidden. (The earlier "Might & Magic dead data"
+# call was wrong.)
+EXCLUDE = set()
 
 
 def block_used(codec, entries):
