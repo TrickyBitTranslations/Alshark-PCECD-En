@@ -51,11 +51,12 @@ def tier_for(tsv_path):
 
 
 def load_blocks(tsv_path):
-    """{base:int -> [(english, raw_bytes)] in entry order}. File order is entry order."""
+    """{base:int -> [(english, raw_bytes, str_off)] in entry order}. File order is entry order;
+    str_off carries each entry's original offset so non-monotonic blocks round-trip exactly."""
     out = collections.OrderedDict()
     for r in tsv.read(tsv_path):
         out.setdefault(int(r['block_off'], 16), []).append(
-            (r.get('english', ''), bytes.fromhex(r['raw_hex'])))
+            (r.get('english', ''), bytes.fromhex(r['raw_hex']), int(r['str_off'], 16)))
     return out
 
 
@@ -77,9 +78,10 @@ def build(work, tsv_path):
     cooked = open(os.path.join(work, 'track02.iso'), 'rb').read()
     patches, flagged = [], []
     for base, items in sorted(load_blocks(tsv_path).items()):
-        orig = rebuild([raw for _, raw in items])
+        offs = [so for _, _, so in items]
+        orig = rebuild([raw for _, raw, _ in items], offs)
         assert cooked[base:base + len(orig)] == orig, f"block {base:#x} not as extracted"
-        new = rebuild([entry_bytes(en, raw, codec, auto_term) for en, raw in items])
+        new = rebuild([entry_bytes(en, raw, codec, auto_term) for en, raw, _ in items], offs)
         if new == orig:
             continue
         limit = budget_for(budgets, tsv_path, base)
@@ -128,7 +130,7 @@ def main():
         bad = 0
         for base, items in sorted(load_blocks(args.tsv).items()):
             new = 2 * len(items) + sum(
-                len(entry_bytes(en, raw, codec, auto_term)) for en, raw in items)
+                len(entry_bytes(en, raw, codec, auto_term)) for en, raw, _ in items)
             limit = budget_for(budgets, args.tsv, base)
             if new > limit:
                 print(f"OVERFLOW block {base:08x}: {new} bytes > {limit} budget")
