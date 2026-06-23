@@ -23,12 +23,13 @@ OUT = ROOT / "site" / "data"
 PAGE = 0x2000                         # a block loads into one 8KB logical page
 CODECS = {"cutscene.tsv": dialogcodec}    # else tier-1 textcodec
 
-# Files hidden from the site and dropped from all stats. (None currently.)
-# NB: system1.tsv ("Map & Event", 940 strings) IS real in-game text - dungeon/quest/event
-# descriptions (e.g. Blackwind Castle, the Fountainhead quest), extracted but not yet
-# translated. It is SHOWN and COUNTED, not hidden. (The earlier "Might & Magic dead data"
-# call was wrong.)
-EXCLUDE = set()
+# Files hidden from the site and dropped from all stats.
+# system1.tsv (839 lines) is leftover MIGHT & MAGIC III: ISLES OF TERRA text, NOT Alshark.
+# Right Stuff / Victor also did the M&M III PC Engine CD port, so its whole script sits dead on
+# this disc. Proven by content: Sheltem x17, Terra x8, Fountainhead, Greywind, orcs, gargoyles,
+# Gold currency, "exp" - and ZERO Alshark proper nouns (Sion / Zolias / meteor / Credits) across
+# all 839 lines. These blocks are not loaded by Alshark. Do NOT translate it; keep it hidden.
+EXCLUDE = {"system1.tsv"}
 
 
 def block_used(codec, entries):
