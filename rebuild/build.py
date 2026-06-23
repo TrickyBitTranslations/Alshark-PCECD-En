@@ -427,31 +427,35 @@ def selftest():
 
 
 def title_credit_patch(cooked):
-    """Add 'TrickyBit Translations' to the title screen, in the empty gap just ABOVE the (C) lines.
-    The staff-credits text (which also draws the title's copyright) is at disc 0x4805000 (bank 0x6B,
-    loaded on every path to the title): full-width SJIS, CR/LF (0d 0a) line breaks, 0x1a end marker.
-    The '(C)RIGHT STUFF' line is preceded by filler blank lines; replace 3 of them (right before that
-    line) with the two-line credit + a blank line. Net zero lines, so the copyright keeps its screen
-    position and the credit lands in the visible gap above it; the block grows into the ~6KB of free
-    space after the 0x1a end marker. (Appending AFTER the (C) rendered off the bottom edge; the
-    save-menu bottom had no cold-safe room - see noredist/docs/findings/savemenu-banks.md.)"""
-    def fw(s):
-        return ''.join((chr(ord(c) + 0xFEE0) if 0x21 <= ord(c) <= 0x7e else ('　' if c == ' ' else c))
-                       for c in s).encode('shift_jis')
-    rt = cooked.find(fw('RIGHT'))
-    if rt < 0:
-        raise SystemExit('title-credit: (C)RIGHT STUFF line not found')
-    line_start = rt - 12                       # the "　　（Ｃ）　" leading before RIGHT
-    if cooked[line_start - 6:line_start] != b'\x0d\x0a' * 3:
-        raise SystemExit('title-credit: expected filler CRLFs before the (C) line')
-    end = cooked.find(b'\x1a', rt)
-    if end < 0:
-        raise SystemExit('title-credit: block end marker not found')
-    credit = fw('   TrickyBit') + b'\x0d\x0a' + fw('  Translations') + b'\x0d\x0a' + b'\x0d\x0a'
-    tail = bytes(cooked[line_start:end + 1])   # (C)RIGHT ... ,INC. ... 0x1a (re-emitted after the credit)
-    if any(cooked[end + 1:end + 1 + (len(credit) - 6)]):
-        raise SystemExit('title-credit: free space after end marker is not clear')
-    return [(line_start - 6, credit + tail)]   # 3 filler blanks -> credit (net 0 lines); grows into free space
+    """Add a 'TrickyBit' translator credit to the title screen as BG tiles - no code hook.
+    The title routine (bank 0x69 $6000, both warm + post-death paths) uploads its BG tilemap from
+    $72CD -> VRAM $0000 (0x700 B, 32x28) and its BG tiles from $79CD -> VRAM $1000 (0x2300 B, spanning
+    into bank 0x6A). The baked copyright is tiles 0x1D5-0x1F9 on BAT rows 22 + 24; tiles 0x1FA+ are
+    free and BAT rows 25-27 are blank. So we drop the pre-rendered credit glyph tiles
+    (script/title_credit.bin: 4bpp, all four planes = the glyph -> color 15 white in palette 0,
+    matching the copyright) into the free tile slots and write their tile numbers into a blank BAT
+    row - both regions the title already uploads. Cold-safe: it rides the exact data that draws the
+    (verified-present) copyright on every path to the title. Regenerate the tiles with
+    tools/alshark/gen_title_credit.py."""
+    blob = open(os.path.join(ROOT, 'script', 'title_credit.bin'), 'rb').read()
+    n = len(blob) // 32
+    if n == 0 or len(blob) % 32:
+        raise SystemExit('title-credit: bad tile blob (%d bytes)' % len(blob))
+    TILE0 = 0x1FA                              # first free BG tile after the copyright (last is 0x1F9)
+    TILE_DISC = 0x480490D                      # disc offset of tile 0x1FA in the BG-tile source ($79CD)
+    BAT_DISC = 0x48022CD                       # BAT source ($72CD bank 0x69) -> VRAM $0000
+    ROW, NCOL = 26, 32                         # blank BAT row below the copyright; tilemap is 32 wide
+    if any(cooked[TILE_DISC:TILE_DISC + n * 32]):
+        raise SystemExit('title-credit: BG tile slots 0x%X+ are not free' % TILE0)
+    row = cooked[BAT_DISC + ROW * 64:BAT_DISC + ROW * 64 + 64]
+    if any((row[i] | (row[i + 1] << 8)) not in (0x0000, 0x0100) for i in range(0, 64, 2)):
+        raise SystemExit('title-credit: BAT row %d is not blank' % ROW)
+    col = (NCOL - n) // 2                      # center the credit
+    patches = [(TILE_DISC, blob)]              # the glyph tiles
+    for i in range(n):                         # the BAT row: palette 0 | tile number, per column
+        e = TILE0 + i
+        patches.append((BAT_DISC + ROW * 64 + (col + i) * 2, bytes([e & 0xff, e >> 8])))
+    return patches
 
 
 def main():
@@ -482,7 +486,7 @@ def main():
     patches += location_patch(cooked)  # English town-entry banners (relocated + proportional)
     patches += save_menu_patch(cooked)  # English boot save-menu option buttons (Start/Copy/Delete)
     patches += formation_patch(cooked)  # English in-game formation (party-order) menu
-    patches += title_credit_patch(cooked)  # 'TrickyBit Translations' in the staff credits / title (C) roll
+    patches += title_credit_patch(cooked)  # 'TrickyBit' translator credit on the title (BG tiles)
     import reinsert               # splice English from cutscene.tsv into the #-engine blocks
     cut, flagged = reinsert.build(args.work, os.path.join(ROOT, 'script', 'cutscene.tsv'))
     for base, o, n in flagged:
