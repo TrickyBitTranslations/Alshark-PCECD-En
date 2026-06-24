@@ -45,6 +45,17 @@
   jmp $3CA0                       ; form_name_copy lives in boot.s WRAM loader slack ($3CA0); this
                                  ; bank's tail slack ($BF7B) is full, WRAM is reachable here (MPR1=F8)
 
+; ---- formation "placed" mark ($A369): when a member is assigned to <New>, $A369 redraws their
+;      <Current> name DIMMED (palette 7) at $A3AC, then the white <New> copy at $A3CB. That dim copy
+;      is drawn by $3063 and lands OFFSET from the original name (which the template drew via the
+;      $5748 menu drawer) - different drawer + proportional font - so you get a black-over-white
+;      double image instead of a clean dim. Suppress the dim draw (NOP the JSR); the placed member
+;      still appears in <New>, and <Current> stays clean. ----
+.ORG $A3AC - $A000               ; was: JSR $3063 (dim placed-mark draw)
+  nop
+  nop
+  nop
+
 .ORG $BF7B - $A000               ; bank-tail slack (verified: no code reads/writes it)
 banner_hook:
   lda $C02E                      ; replicate the TII the original did ($C02E -> $2016)
