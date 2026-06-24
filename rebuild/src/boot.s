@@ -115,3 +115,26 @@ chn_lp:
   rts
 hud_idx:
   .incbin "incbin/hud_en_idx.bin"
+
+; ---- NUL->space party-name copy for the Plan->Formation list. Bank 0x6B's per-member loop
+; (6B:$A26B) copies a FIXED 8 bytes of the name into the list template at ($78); our English names
+; are NUL-padded (short) so it drags NULs mid-template and the menu-label drawer ($5748) treats NUL
+; as end-of-string -> only the 1st member shows. JP names fill 8 bytes with a trailing full-width
+; space (no NUL), so JP is fine. Bank 0x6B's own tail slack is full (banner), so the routine lives
+; here in the loader free-slack (WRAM, MPR1=F8, mapped during the copy; combat-stable like the font/
+; HUD hooks above). bank6b.s jmps here; we map NUL->space and rejoin the original at $A276 (which
+; writes the row 0x0D + advances to the next slot, reloading A/X/Y - no need to preserve them). ----
+.ORG $1CA0                        ; WRAM $3CA0 (free space inside the 255-byte $3BC6 loader-slack run)
+form_name_copy:
+  ldx #$08
+  cly
+fnc_loop:
+  lda ($20),y
+  bne fnc_keep
+  lda #$20                       ; NUL -> space
+fnc_keep:
+  sta ($78),y
+  iny
+  dex
+  bne fnc_loop
+  jmp $A276

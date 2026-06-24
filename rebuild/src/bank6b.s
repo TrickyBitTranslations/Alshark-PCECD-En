@@ -36,6 +36,15 @@
 .ORG $AB90 - $A000               ; was: CLC / LDA #$0C / ADC $00 ...
   jmp banner_adv
 
+; ---- formation party-name copy ($A26B): the per-member loop copies a FIXED 8 bytes of the name
+;      from ($20) into the list template at ($78). Our English names are NUL-padded (short), so the
+;      copy drags NUL bytes mid-template; the menu-label drawer ($5748) treats NUL as end-of-string
+;      and stops after the first member (only Sion shows). JP names fill 8 bytes with a trailing
+;      full-width space (no NUL), so JP is fine. Redirect to a copy that maps NUL -> space. ----
+.ORG $A26B - $A000               ; was: LDX #$08 / CLY (head of the 8-byte copy loop)
+  jmp $3CA0                       ; form_name_copy lives in boot.s WRAM loader slack ($3CA0); this
+                                 ; bank's tail slack ($BF7B) is full, WRAM is reachable here (MPR1=F8)
+
 .ORG $BF7B - $A000               ; bank-tail slack (verified: no code reads/writes it)
 banner_hook:
   lda $C02E                      ; replicate the TII the original did ($C02E -> $2016)
