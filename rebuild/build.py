@@ -354,10 +354,10 @@ def formation_patch(cooked):
     segments IN PLACE, padded with spaces (a 0x00 pad would terminate the block and hide the columns)."""
     import alshark.menucodec as menucodec
     segs = [
-        (0xb3f9, '隊列を変更します。', 'Change formation.'),  # 隊列を変更します。
+        (0xb3f9, '隊列を変更します。', 'Formation'),           # title; kept short + single-word so the confirm prompt (drawn over it) fully covers it
         (0xb426, '＜現隊列＞', '<Current>'),                                  # ＜現隊列＞
         (0xb433, '＜新隊列＞', '<New>'),                                      # ＜新隊列＞
-        (0xb4a8, 'これでよろしいですか？', 'Is this OK?'),                    # confirm prompt
+        (0xb4a8, 'これでよろしいですか？', 'Confirmation?'),                  # confirm prompt; single word (no spaces) so it cleanly covers the "Formation" title it draws over (spaces don't clear)
     ]
     patches = []
     for off, jp, en in segs:
