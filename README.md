@@ -63,5 +63,27 @@ Needs Python 3 and `chdman` (`mame-tools`, or `brew install rom-tools`).
 python3 tools/cook.py            # CHD -> work/track02.iso
 python3 tools/export_script.py   # -> script/system1.tsv + cutscene.tsv
 # fill in the english column, then:
-python3 tools/reinsert.py --chd  # -> build/Alshark (patched).chd
+python3 tools/reinsert.py --chd  # -> build/Alshark (patched).chd  (script tiers only)
 ```
+
+## Releases
+
+The **complete** build (engine/UI asm patches + custom font + all script tiers) is
+`rebuild/build.py` - it applies the bank patches and splices in `cutscene.tsv`.
+`rebuild/release.py` wraps it to publish an **xdelta patch of the changed bytes only** -
+never the game. Players bring their own JP Alshark CD, apply the patch, and play.
+
+```sh
+python rebuild/release.py --check                # validate translations (no game data)
+python rebuild/release.py                         # build the EN CD -> rebuild/build/
+python rebuild/release.py --release --tag v0.1    # build + xdelta + publish a GitHub release
+```
+
+The ~160 KB patch (`dist/alshark-en.xdelta`) is made with `xdelta3` from `extracted/Alshark.bin`
+(JP) to `rebuild/build/Alshark.bin` (EN), and published alongside our `.cue` and the JP file's
+SHA-256. Release notes are gathered from `Release-note:` trailers on commits since the last tag,
+so opt a change into the notes with e.g.:
+
+    Release-note: Battle menus and item names are now in English
+
+Needs `xdelta3` (`sudo apt-get install -y xdelta3`) and a logged-in `gh`.
