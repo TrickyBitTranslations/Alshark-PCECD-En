@@ -26,6 +26,7 @@ HUC = os.path.join(ROOT, 'rebuild', 'tools', 'huc6280dis.py')
 # name: (cooked_start, length, logical_org)
 BANKS = {'6a': (0x9000, 0x2000, 0x4000), '6b': (0xb000, 0x2000, 0x6000), '6d': (0x15000, 0x2000, 0x4000),
          # #-engine / cutscene player (same banks, but mapped to a different MPR slot here):
+         '68': (0x5000, 0x2000, 0x4000),   # bank 0x68 @ MPR2 ($4000): anime image processor $4128
          '69': (0x7000, 0x2000, 0x6000),   # bank 0x69 @ MPR3 ($6000): player entry $7F0A, dispatch $7F84
          '6a8': (0x9000, 0x2000, 0x8000)}  # bank 0x6A @ MPR4 ($8000): # handler $81BB, script reader $9911
 
