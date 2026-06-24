@@ -70,8 +70,7 @@ python3 tools/reinsert.py --chd  # -> build/Alshark (patched).chd  (script tiers
 
 The **complete** build (engine/UI asm patches + custom font + all script tiers) is
 `rebuild/build.py` - it applies the bank patches and splices in `cutscene.tsv`.
-`rebuild/release.py` wraps it to publish an **xdelta patch of the changed bytes only** -
-never the game. Players bring their own JP Alshark CD, apply the patch, and play.
+`rebuild/release.py` wraps it to publish an **xdelta patch of the changed bytes only**.
 
 ```sh
 python rebuild/release.py --check                # validate translations (no game data)
