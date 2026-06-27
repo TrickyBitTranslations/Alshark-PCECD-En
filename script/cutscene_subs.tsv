@@ -1,0 +1,21 @@
+# Anime-cutscene subtitles. recno_hex (6 hex of $FE$FD$FC, the voice line's CD recno) <TAB> English.
+# The renderer latches the live recno when $FD==$76 (voice/ADPCM region) and expands the matching line
+# from a 1bpp font into VRAM tiles on the fly. Crater voice lines are contiguous from $707600 ($FE
+# increments per line). All-caps (8px subset font). Placeholders below - the team replaces the text.
+# $747600 = "A NEW JOURNEY" (confirmed on screen); the rest are dummy until the transcript arrives.
+707600	LINE 01
+717600	LINE 02
+727600	LINE 03
+737600	LINE 04
+747600	A NEW JOURNEY
+757600	LINE 06
+767600	LINE 07
+777600	LINE 08
+787600	LINE 09
+797600	LINE 10
+7A7600	LINE 11
+7B7600	LINE 12
+7C7600	LINE 13
+7D7600	LINE 14
+7E7600	LINE 15
+7F7600	LINE 16
