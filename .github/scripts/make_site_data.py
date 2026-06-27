@@ -29,7 +29,12 @@ CODECS = {"cutscene.tsv": dialogcodec}    # else tier-1 textcodec
 # this disc. Proven by content: Sheltem x17, Terra x8, Fountainhead, Greywind, orcs, gargoyles,
 # Gold currency, "exp" - and ZERO Alshark proper nouns (Sion / Zolias / meteor / Credits) across
 # all 839 lines. These blocks are not loaded by Alshark. Do NOT translate it; keep it hidden.
-EXCLUDE = {"system1.tsv"}
+#
+# cutscene_subs.tsv is the anime-cutscene subtitle surface: a different schema entirely
+# (recno_hex<TAB>English, comment-headed - no block_off/raw_hex), built straight into the
+# subtitle blob by rebuild/build.py. It has no block/pointer layout for this script to size,
+# so skip it here rather than parse it with the standard columns.
+EXCLUDE = {"system1.tsv", "cutscene_subs.tsv"}
 
 
 def block_used(codec, entries):
