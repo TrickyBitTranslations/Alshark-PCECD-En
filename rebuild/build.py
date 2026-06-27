@@ -29,18 +29,25 @@ TRACK2 = 3590
 # Original banks the asm .BACKGROUNDs, carved from the cooked disc into incbin/ at build time
 # (game bytes - never committed): (incbin file, cooked offset, length).
 CARVE = [('bank6d.bin', 0x15000, 0x2000), ('boot.bin', 0x00000, 0x2000),
-         ('bank6b.bin', 0x0b000, 0x2000)]
+         ('bank6b.bin', 0x0b000, 0x2000), ('bank68.bin', 0x2be1000, 0x2000)]
 
 # asm source (in src/) -> cooked disc offset of the bank's first byte.
 BANKS = [
     ('bank6d.s', 0x15000),   # #-engine render/conversion bank ($4000-$5FFF): VWF render hook
     ('boot.s',   0x00000),   # boot/WRAM image ($2000-$3FFF): per-transition font reload
     ('bank6b.s', 0x0b000),   # field banner bank ($A000-$BFFF): proportional location-name banner
+    ('bank68.s', 0x2be1000), # anime cutscene PLAYER ($4000-$5FFF, recno $57C2): IRQ vblank-path hook
 ]
 
 # raw blobs spliced onto disc: (cooked offset, incbin file). The VWF font (committed asset).
 FONT_OFF = 0xa1a000            # cooked; = abs LBA $00223A, loaded to card bank 0x7F $CFA0
-BLOBS = [(FONT_OFF, 'vwf_glyphs.bin'), (FONT_OFF + 0x5f0, 'vwf_widths.bin')]  # 1520B glyphs
+# Anime-cutscene subtitle blob: the FULL recno/play-ordered line table, spliced sector-aligned at the
+# disc free pool (0x9dd906 region). recno = cooked/2048 = 0x9de000/2048 = 0x13BC; bank68.s CD_READs it
+# once at cutscene init (before music) into card bank 0x7D, lifting the resident ~160B table cap. See
+# noredist/docs/findings/cutscene-player.md "STREAMED-SUBTITLE BUILD PHASE".
+SUBS_BLOB_OFF = 0x9de000       # cooked; sector-aligned (0x9de000/2048 = 0x13BC); 0x7D dest, 8KB free
+BLOBS = [(FONT_OFF, 'vwf_glyphs.bin'), (FONT_OFF + 0x5f0, 'vwf_widths.bin'),  # 1520B glyphs
+         (SUBS_BLOB_OFF, 'cutscene_subs_blob.bin')]
 
 
 def carve(cooked):
@@ -49,6 +56,7 @@ def carve(cooked):
     for name, off, ln in CARVE:
         open(os.path.join(HERE, 'incbin', name), 'wb').write(cooked[off:off + ln])
     gen_hud_idx()                  # incbin/hud_en_idx.bin for boot.s copy_hud_names (must precede assembly)
+    gen_cutscene_text()            # incbin/cutscene_subs_blob.bin (font + line table, spliced on disc at 0x9DE000)
 
 
 def blob_patches():
@@ -187,6 +195,82 @@ def gen_hud_idx():
         raise SystemExit('HUD name table is %d bytes, expected 144' % len(blob))
     idx = bytes(blob[i] for i in range(0, 144, 2))  # drop the $70 palette byte -> 72 indices
     open(os.path.join(HERE, 'incbin', 'hud_en_idx.bin'), 'wb').write(idx)
+
+
+# Anime-cutscene subtitle text. build.py pre-renders each line to a proportional 1bpp pixel strip and packs
+# the play-ordered strips into the blob streamed to card bank 0x7D (the runtime expands them to VRAM tiles).
+SUBS_UNDER_OFF = 0x1F00         # 0x7D runtime scratch (image cells saved from under the band); table must stay below
+SUBS_MAX_TILES = 30            # one line spans the free tile gap $7C5-$7E2 (30 tiles); centred in the 32-col band
+
+
+def _vwf_widths(glyphs):
+    """Per-glyph advance width (ink width + 1px gap) for the 95 sub_glyphs (ASCII $20-$7E, 8 rows each, 1bpp,
+    bit 0x80=leftmost). A blank glyph (space) advances 3px."""
+    w = []
+    for i in range(len(glyphs) // 8):
+        g = glyphs[i * 8:i * 8 + 8]
+        ink = max((c + 1 for row in g for c in range(8) if row & (0x80 >> c)), default=0)
+        w.append(ink + 1 if ink else 3)
+    return w
+
+
+def _vwf_strip(text, glyphs, widths):
+    """Pre-render a subtitle line to a proportional 1bpp pixel strip: place each glyph at a pixel cursor,
+    advancing by its width, then slice into 8x8 tiles. Returns (n_tiles, strip_bytes), n_tiles*8 bytes,
+    tile-major then row (strip[t*8+r] = row r of tile t, bit 0x80=leftmost)."""
+    total = sum(widths[min(max(ord(c) - 0x20, 0), len(widths) - 1)] for c in text)
+    n_tiles = min(SUBS_MAX_TILES, max(1, (total + 7) // 8))
+    W = n_tiles * 8
+    pix = [bytearray(W) for _ in range(8)]               # pix[row][col] = 0/1
+    x = 0
+    for ch in text:
+        i = min(max(ord(ch) - 0x20, 0), len(widths) - 1)
+        g = glyphs[i * 8:i * 8 + 8]
+        for r in range(8):
+            for c in range(8):
+                if g[r] & (0x80 >> c) and x + c < W:
+                    pix[r][x + c] = 1
+        x += widths[i]
+    strip = bytearray()
+    for t in range(n_tiles):
+        for r in range(8):
+            byte = 0
+            for c in range(8):
+                if pix[r][t * 8 + c]:
+                    byte |= (0x80 >> c)
+            strip.append(byte)
+    return n_tiles, bytes(strip)
+
+
+def gen_cutscene_text():
+    """From script/cutscene_subs.tsv (recno_hex<TAB>line), build the streamed subtitle blob loaded into card
+    bank 0x7D (verified free during the cutscene). Layout in 0x7D (= $A000 when MPR-swapped in):
+      $A000 ($0000): the play-ordered line table - per line: n_tiles (1 B) then the PROPORTIONAL pixel strip
+                     (n_tiles*8 B, 1bpp pre-rendered); terminator n_tiles=0. vblank_hook walks to the current
+                     line by play-count, copies its strip out, and expands the 1bpp rows into 4bpp VRAM tiles.
+      $BF00 ($1F00): runtime scratch (not baked) - the image BAT cells saved from under the band, so the band
+                     is drawn non-destructively (restored, not cleared-to-black, when it moves).
+    Spliced on disc at SUBS_BLOB_OFF, CD_READ once at cutscene init. Play order = ascending recno (crater
+    voice clips are contiguous, so recno sorts = clip order)."""
+    glyphs = open(os.path.join(HERE, 'incbin', 'sub_glyphs.bin'), 'rb').read()   # 95 glyphs x 8 (subfont.py)
+    widths = _vwf_widths(glyphs)
+    rows = []
+    for ln in open(os.path.join(ROOT, 'script', 'cutscene_subs.tsv'), encoding='utf-8'):
+        ln = ln.rstrip('\n')
+        if not ln or ln.lstrip().startswith('#') or '\t' not in ln:
+            continue
+        k, text = ln.split('\t', 1)
+        rows.append((int(k, 16), text))                  # recno = play ORDER (subtitle keyed by play count)
+    rows.sort()                                          # ascending recno = play order (= clip order)
+    table = bytearray()
+    for recno, text in rows:
+        n_tiles, strip = _vwf_strip(text, glyphs, widths)
+        table += bytes([n_tiles]) + strip
+    table += bytes(1)                                    # terminator (n_tiles = 0)
+    if len(table) > SUBS_UNDER_OFF:                      # the table must stay clear of the 0x7D under-buffer
+        raise SystemExit('cutscene subtitle table %d B overruns the 0x7D under-buffer at %#x'
+                         % (len(table), SUBS_UNDER_OFF))
+    open(os.path.join(HERE, 'incbin', 'cutscene_subs_blob.bin'), 'wb').write(table)
 
 
 def hud_patch(cooked):

@@ -138,3 +138,14 @@ fnc_keep:
   dex
   bne fnc_loop
   jmp $A276
+
+; ---- anime-cutscene subtitle hook (UNIVERSAL, via a DISC PATCH of the shared player code) ----
+; The cutscene player (bank 0x68: the $467A VDC-IRQ handler etc.) is a SINGLE copy on disc at recno
+; $57C2 (cooked 0x2BE1000), loaded to $4000 for EVERY anime cutscene - so bank68.s patches it directly.
+; No runtime hook-install (the $2202-wrap, $3ACC/$7F0A code hooks, and TIMER watchdog all failed:
+; per-cutscene bundled code at non-fixed offsets, IRQ2 never fires, the System Card doesn't route the
+; timer IRQ to $2204). bank68.s redirects the IRQ handler's vblank path ($4689 = the INC $2241
+; frame-counter bump) to vblank_hook below; we do per-frame subtitle work, replay INC $2241, and
+; continue at $468C - running in the cutscene's own VDC IRQ, every frame, for all anime cutscenes.
+; See noredist/docs/findings/cutscene-player.md. The renderer (vblank_hook) and its glyph tiles now
+; live in bank68.s (the player's own slack, mapped during cutscenes) - nothing for it is needed here.
