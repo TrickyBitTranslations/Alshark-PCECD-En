@@ -70,34 +70,44 @@ def blob_patches():
 NAME_TBL = 0x784066
 
 
-# The menu reads weapon/armor/item names from a HARDCODED base pointer (original $7157 = the
-# offset of entry 28, the first item, right after the Japanese cast) loaded at code $4191/$4204
-# in bank 0x6D. Our English cast names are longer, so the item region shifts; we repoint that
-# base to entry 28's actual logical address. The cast itself is read from $7066 (table start,
-# scan-indexed) so it needs no fix-up. Both sites: A9 <lo> 85 16 A9 <hi> 85 17.
+# The menu reads weapon/armor/item names from a HARDCODED base pointer (original $7157, which
+# points at entry 27 - the "------" item-ID-0 placeholder; item IDs in the game data are numbered
+# relative to it) loaded at code $4191/$4204 in bank 0x6D. Our English cast names are longer, so the
+# item region shifts; we repoint that base to entry 27's actual logical address. (Earlier this said
+# entry 28 and was off by one - it shifted EVERY item name back by one entry, first item -> blank.)
+# The cast is read from $7066 (table start, scan-indexed) so it needs no fix-up. A9 <lo> 85 16 A9 <hi> 85 17.
 ITEM_BASE_SITES = (0x191, 0x204)   # bank-0x6D offsets of the LDA #lo of each item-base load
 BANK6D_OFF = 0x15000               # cooked offset of bank 0x6D
+
+# The SHOP / buy menu reads item names through a SEPARATE base load in bank 0x6A (cooked 0x9a76), which
+# maps the name table at MPR6 ($C000-$DFFF), so its pointer is the $Dxxx form of the same base
+# ($D066 + off_item = item_base + $6000). Original $D157 (un-repointed) = entry 26 in our longer table,
+# so the shop list (and the item it actually sells) was shifted -1. Repoint it too. Same byte pattern.
+SHOP_BASE_SITE = 0x9a76            # cooked offset of bank 0x6A's item-name base load (A9 <lo> 85 16 A9 <hi> 85 17)
 
 
 def name_patch(cooked):
     import tsv
     rows = list(tsv.read(os.path.join(ROOT, 'script', 'names.tsv')))
     blob = bytearray()
-    off28 = None
+    off_item = None
     for k, r in enumerate(rows):
-        if k == 28:
-            off28 = len(blob)               # byte offset of the first item entry in the table
+        if k == 27:
+            off_item = len(blob)            # byte offset of the item-base entry (orig $7157 = entry 27)
         en = r.get('english', '')
         blob += (en.encode('latin-1') if en else bytes.fromhex(r['raw_hex']))
         blob += b'\x00'
     if NAME_TBL + len(blob) > 0x785000:
         raise SystemExit('name table overflow: %d > %d' % (len(blob), 0x785000 - NAME_TBL))
     patches = [(NAME_TBL, bytes(blob))]
-    item_base = 0x7066 + off28              # table base $7066 (MPR3) + first-item offset
+    item_base = 0x7066 + off_item           # table base $7066 (MPR3) + item-base entry offset
     lo, hi = item_base & 0xff, item_base >> 8
     for site in ITEM_BASE_SITES:
         patches.append((BANK6D_OFF + site + 1, bytes([lo])))   # LDA #lo operand
         patches.append((BANK6D_OFF + site + 5, bytes([hi])))   # LDA #hi operand
+    shop_base = item_base + 0x6000          # bank 0x6A maps the table at MPR6 ($Cxxx), not MPR3 ($7xxx)
+    patches.append((SHOP_BASE_SITE + 1, bytes([shop_base & 0xff])))   # LDA #lo operand
+    patches.append((SHOP_BASE_SITE + 5, bytes([shop_base >> 8])))     # LDA #hi operand
     return patches
 
 
@@ -157,17 +167,29 @@ def battle_patch(cooked):
 # name table and the HUD names - a translator edits names.tsv only. ASCII, padded with 0x00.
 PARTY_ARRAY = 0x19afb
 
+# The level-up / battle name window (bank 0x6F routine @ $8A97) copies LEN_TBL[$8AEF] bytes of the name
+# from the array, then pads to 8 with $01. Those lengths are the JAPANESE byte-counts, so our shorter
+# English names OVER-copy and drag the array's NUL padding into the result string -> the $5748 drawer
+# hits the NUL and the level-up window terminates right after the name (only the name shows). Rewrite the
+# length table with the English byte-lengths. The offset table @ 0x19ae3 maps each of the 12 slots to its
+# array entry (= byte offset / 9), so names with multiple slots stay consistent.
+NAME_OFF_TBL = 0x19ae3
+NAME_LEN_TBL = 0x19aef
+
 
 def party_array_patch(cooked):
     from alshark import cast
+    names = list(cast.party_names(ROOT))
     patches = []
-    for i, name in enumerate(cast.party_names(ROOT)):
+    for i, name in enumerate(names):
         off = PARTY_ARRAY + i * 9
         if len(name) > 8:
             raise SystemExit('party name %r > 8 bytes for the array field' % name)
         if cooked[off + 8] != 0x00:
             raise SystemExit('party array 0x%x not as expected' % off)
         patches.append((off, name.encode('latin-1').ljust(8, b'\x00')))
+    off_tbl = cooked[NAME_OFF_TBL:NAME_OFF_TBL + 12]        # slot -> array entry (offset / 9)
+    patches.append((NAME_LEN_TBL, bytes(len(names[b // 9]) for b in off_tbl)))
     return patches
 
 
@@ -328,7 +350,8 @@ def assemble(src):
     obj = os.path.join('build', name + '.o')
     out = os.path.join('build', name + '.bin')
     link = os.path.join('build', name + '.link')
-    _run(['wla-huc6280', '-k', '-I', 'incbin', '-o', obj, os.path.join('src', src)])
+    cmd = ['wla-huc6280', '-k', '-I', 'incbin', '-o', obj, os.path.join('src', src)]
+    _run(cmd)
     with open(os.path.join(HERE, link), 'w') as f:
         f.write('[objects]\n%s\n' % obj)
     _run(['wlalink', '-b', link, out])
