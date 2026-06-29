@@ -31,6 +31,22 @@
 .ORG $14E3                        ; disc 0x14E3 == WRAM $34E3
   jsr my_read
 
+; ---- new-game state-init fix: stop the init copying our loader-slack code onto the save state ----
+; The init ($3B40) does TAI (zero $269D-$2F57, which covers the WHOLE template destination $2829-$2C8D)
+; then TII $3B53,$2829,#$0465 (copy the new-game template back over it). Our code at $3BC6-$3CC4 lives in
+; that template's zero region, so the copy paints it onto the fresh inventory ($28F9). But the TAI already
+; zeroed everything, and the template before the real data ($3CC5+) is just a 2-byte header ($2829=$0131)
+; plus zeros - so we replace the one TII with: copy ONLY the real data, then write the header back. Now
+; $282B-$299A (inventory included) just keeps the TAI's zeros and our code is never copied. The extra
+; instructions spill into the now-dead template head ($3B53+), which nothing reads. Works in boot AND
+; new-game (pure WRAM, no bank). See noredist/docs/findings/inventory-corruption.md.
+.ORG $1B4B                        ; disc 0x1B4B == WRAM $3B4B (the init's template-copy TII)
+  tii $3CC5, $299B, 755           ; copy only the real init data $3CC5-$3FB7 -> $299B-$2C8D (skip $2829-$299A)
+  lda #$31
+  sta $2829                       ; restore header lo
+  inc $282A                       ; $282A is TAI-zeroed -> $01, giving the stock header $0131
+  rts
+
 ; ---- my_read + font_load (disc 0x1BC6 == WRAM $3BC6, free loader slack) ----
 .ORG $1BC6                        ; WRAM $3BC6
 my_read:
