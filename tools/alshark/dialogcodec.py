@@ -26,6 +26,25 @@ FULL_PX = 12                         # engine full-width advance (6A:$8115 += $0
 BOX_PX = 216                         # dialogue box width: 18 full-width cells x 12 px
 _WTOK = re.compile(r'<[0-9a-fA-F]{2}>|[#%$@<>]|\s+|[^\s#%$@<>]+')
 
+# Ops that reset the render pen to the left margin (a TRUE line break), used by merge() to
+# decide where the carried line-px restarts at 0 and by the line-width simulator
+# (check_linewidth.py). CRUX of the cutscene word-wrap fix: consecutive glyph runs separated by
+# a NON-reset op share one physical line and the engine hard-wraps at the box edge, so merge()
+# must carry the pen across them and break at the box boundary itself. Conservative set - only
+# boundaries with clear evidence are listed; everything else (incl. #<00>, the % codes, bare
+# <XX> control bytes) defaults to NON-resetting (the run flows straight on).
+#   2304 #<04>  title/name bar start  - physically separate window from the body
+#   2305 #<05>  body text start       - new box body (task-confirmed reset)
+#   2306 #<06>  break code            - dialogue-spacing-jams.md (in-game confirmed)
+#   235f #_     break code            - dialogue-spacing-jams.md (in-game confirmed)
+#   233e #>     break code            - dialogue-spacing-jams.md (in-game confirmed)
+# NOT a reset: 2300 #<00> - empirically the engine flows straight through it (the palm-reading
+# bug); it is deliberately excluded so two #<00>-joined runs share a line and wrap at the edge.
+RESET_OPS = frozenset({
+    bytes.fromhex('2304'), bytes.fromhex('2305'), bytes.fromhex('2306'),
+    bytes.fromhex('235f'), bytes.fromhex('233e'),
+})
+
 
 def _cpx(c):
     o = ord(c)
@@ -36,11 +55,17 @@ def _wpx(seg):
     return sum(_cpx(c) for c in seg)
 
 
-def wrap(s, width=BOX_PX, name_w=36):
+def wrap(s, width=BOX_PX, name_w=36, start_px=0, return_px=False):
     """Insert @ line-breaks at word boundaries so each rendered line fits the box (px); the
     engine otherwise hard-wraps mid-word. Markup (<XX>, # % < >) counts as zero width,
     $ name inserts as an approximate px width, <05> (text start) and an existing @ reset the
     line. A line already under width keeps any author-placed @, so manual wrapping wins.
+
+    start_px seeds the first line's pen so a run can CONTINUE the previous run's physical line
+    (used by merge() to flow text across non-breaking ops like #<00> - see RESET_OPS). When the
+    continued run's first word would overflow, wrap inserts the @ at that boundary, which becomes
+    the break between the two runs. return_px=True returns (string, end_px) where end_px is the
+    pen px of the final line, so the caller can carry it into the next run.
 
     Anti-widow: when a greedy auto-break leaves a single word alone on a line, the last word of
     the line above is pulled down to join it (if both still fit), so proper nouns like
@@ -48,7 +73,10 @@ def wrap(s, width=BOX_PX, name_w=36):
     # Build lines as token lists. Each line records the separator BEFORE it ('@' or '' for the
     # first line / a <05> reset), its visible px, visible word count, and whether the break that
     # started it was an AUTO wrap (the only kind the anti-widow pass is allowed to rebalance).
-    lines = [{'sep': '', 'toks': [], 'px': 0, 'words': 0, 'auto': False}]
+    # The first line is seeded with start_px (the carried pen from a continued run): it counts
+    # toward width (so the first word can break) but holds no tokens, so the anti-widow guard
+    # (prev['words'] >= 2) never reaches into the previous run's text.
+    lines = [{'sep': '', 'toks': [], 'px': start_px, 'words': 0, 'auto': False}]
     space = ''
 
     def cur():
@@ -62,7 +90,10 @@ def wrap(s, width=BOX_PX, name_w=36):
             newline('@', False); space = ''
         elif a == '$':
             c = cur()
-            if space and c['px']:
+            if c['px'] and c['px'] + _wpx(space) + name_w > width:
+                newline('@', True); space = ''   # a $ name insert that overflows breaks first
+                c = cur()
+            elif space and c['px']:
                 c['toks'].append(space); c['px'] += _wpx(space)
             space = ''
             c['toks'].append('$'); c['px'] += name_w; c['words'] += 1
@@ -108,7 +139,10 @@ def wrap(s, width=BOX_PX, name_w=36):
         ln['toks'] = [word, gap] + ln['toks']
         ln['px'] += _wpx(word) + _wpx(gap); ln['words'] += 1
 
-    return ''.join(ln['sep'] + ''.join(ln['toks']) for ln in lines)
+    out = ''.join(ln['sep'] + ''.join(ln['toks']) for ln in lines)
+    if return_px:
+        return out, lines[-1]['px']
+    return out
 
 
 def _zero_w(t):
@@ -182,6 +216,19 @@ def _encode_raw(s):
 
 def encode(s):
     return _encode_raw(wrap(s))
+
+
+def _encode_run(s, start_px):
+    """Wrap a single glyph run CONTINUING the previous run's line at start_px, encode it, and
+    return (bytes, end_px). end_px is the pen px at the end of the run, threaded into the next
+    run by merge(). A break inserted in the run's first line lands as a leading @, which is the
+    break between the carried line and this run - exactly the cross-run wrap the engine needs."""
+    if s and not s.strip():          # a run that is ONLY whitespace is a structural byte the engine
+        return _encode_raw(s), start_px + _wpx(s)   # navigates by (e.g. the palm-reading choice's
+                                     # 0x20 between %<02> and <1f>), NOT display text - keep verbatim.
+                                     # (Trailing spaces ON text runs stay droppable - they're padding.)
+    wrapped, end_px = wrap(s, start_px=start_px, return_px=True)
+    return _encode_raw(wrapped), end_px
 
 
 # --- cutscene merge ------------------------------------------------------------------
@@ -276,9 +323,14 @@ def merge(english, raw):
                          % (n_dlg, len(en_dlg)))
     out = bytearray()
     di = 0
+    pen = 0                          # carried line position (px) across glyph runs
     for t, d in raw_segs:
         if t == 'op':
             out += d
+            if d in RESET_OPS:       # true line break: the next run starts at the left margin
+                pen = 0
         else:
-            out += encode(decode(en_dlg[di])); di += 1   # pixel word-wrap each glyph run
+            enc, pen = _encode_run(decode(en_dlg[di]), pen)
+            out += enc
+            di += 1
     return bytes(out)
