@@ -299,16 +299,32 @@ def merge(english, raw):
     if len(en_dlg) != n_dlg:
         raise ValueError('cutscene merge: %d glyph runs in raw, %d in english'
                          % (n_dlg, len(en_dlg)))
+    en_dec = [decode(d) for d in en_dlg]
     out = bytearray()
     di = 0
     pen = 0                          # carried line position (px) across glyph runs
+    hold = False                     # last run ended in a space wrap() dropped; re-emit if the line continues
     for t, d in raw_segs:
         if t == 'op':
+            # wrap() drops a run's trailing space. When the run continues on the SAME physical line
+            # (joined to the next run by a NON-reset op, e.g. the highlight #<03> around an item name),
+            # that space is real and must survive or the words jam ("That" + "Canned Food"). Re-emit it
+            # BEFORE the inline op (uncolored, matching the hand-authored "this #<03>Camp Set" cases),
+            # unless it is a true line break (invisible -> drop) or the next run already leads with a space.
+            if hold:
+                hold = False
+                # emit only when a VISIBLE next run continues this line: skip at a true break, at
+                # end-of-entry, or when the next run is empty / whitespace / already leads with a space
+                # (those would render a redundant / trailing space).
+                if (d not in RESET_OPS and di < len(en_dec)
+                        and en_dec[di][:1] != ' ' and en_dec[di].strip()):
+                    out += b' '; pen += _cpx(' ')
             out += d
             if d in RESET_OPS:       # true line break: the next run starts at the left margin
                 pen = 0
         else:
-            enc, pen = _encode_run(decode(en_dlg[di]), pen)
+            en = en_dec[di]; di += 1
+            enc, pen = _encode_run(en, pen)
             out += enc
-            di += 1
+            hold = bool(enc) and en[-1:] == ' '
     return bytes(out)
