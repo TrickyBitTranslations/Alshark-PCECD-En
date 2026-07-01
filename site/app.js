@@ -320,6 +320,16 @@ function linesTable(file, block, lines) {
       a.title = "Open suggestion(s) for this line";
       act.appendChild(a);
     }
+    if (file === "cutscene.tsv" && l.en) {
+      const pv = document.createElement("a");
+      pv.className = "preview";
+      pv.href = `preview.html?id=${block}:${l.id}&file=${encodeURIComponent(file)}`;
+      pv.target = "_blank";
+      pv.rel = "noopener";
+      pv.textContent = "Preview";
+      pv.title = "See how this line renders in the game dialogue box";
+      act.appendChild(pv);
+    }
     const s = document.createElement("a");
     s.className = "suggest";
     s.href = suggestUrl(file, block, l);

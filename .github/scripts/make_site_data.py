@@ -105,6 +105,15 @@ def main():
     (OUT / "script.json").write_text(
         json.dumps(files, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
+    # render.json: precomputed in-game line layout for the dialogue preview (cutscene lines only,
+    # via the shared engine width model in alshark.render). The site preview fetches this.
+    import export_render_model
+    from alshark import render as _render
+    rlines, _, _ = export_render_model.build(str(ROOT / "script" / "cutscene.tsv"))
+    (OUT / "render.json").write_text(
+        json.dumps({"meta": _render.model_meta(), "lines": rlines},
+                   ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+
     total = sum(t["lines"] for t in tally.values())
     done = sum(t["done"] for t in tally.values())
     human = sum(t["human"] for t in tally.values())

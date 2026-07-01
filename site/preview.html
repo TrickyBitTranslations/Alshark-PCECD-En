@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alshark - dialogue preview</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* ---- in-game dialogue box approximation (see screenshots: solid blue fill, thin lighter
+   border, white proportional text; the box is 216 px = 18 full-width cells wide). Line breaks
+   are exact (computed by the real engine width model); glyph shapes are web-font approximate. */
+:root { --sc: 2.6; }                        /* px -> screen scale */
+.pv-wrap { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+.pv-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+.pv-head h1 { font-size:1.1rem; margin:0; }
+.pv-head .muted { color:var(--dim,#8a93a3); font-size:.85rem; }
+.pv-note { background:#2a2f3a; border-left:3px solid #6b7cff; padding:8px 12px; border-radius:4px;
+           font-size:.85rem; margin:12px 0; }
+.pv-stage { background:#101318; padding:calc(10px * var(--sc)) calc(8px * var(--sc));
+            border-radius:6px; display:flex; flex-direction:column; gap:calc(6px * var(--sc)); }
+.dlg-box {
+  width: calc(216px * var(--sc));
+  box-sizing: content-box;
+  background:#1030c0;                        /* royal-blue window fill */
+  border: calc(1px * var(--sc)) solid #6f8cff;
+  box-shadow: 0 0 0 calc(1px * var(--sc)) #0a1560, 0 2px 8px rgba(0,0,0,.5);
+  padding: calc(6px * var(--sc)) calc(6px * var(--sc));
+  color:#fff;
+  font-family: "Courier New", ui-monospace, monospace;  /* placeholder glyphs; widths are enforced per-char */
+}
+.dlg-line { display:flex; align-items:flex-end; height: calc(12px * var(--sc));
+            white-space:nowrap; line-height:1; }
+.dlg-line.over { outline: calc(1px * var(--sc)) dashed #ff5b5b; outline-offset: 1px; }
+.glyph { display:inline-block; overflow:visible; text-align:left;
+         font-size: calc(8px * var(--sc)); }
+.dlg-box .name { color:#ffe36b; }            /* highlight color for the speaker name bar */
+.pv-src { margin-top:20px; font-size:.85rem; }
+.pv-src table { border-collapse:collapse; width:100%; }
+.pv-src th { text-align:left; color:var(--dim,#8a93a3); padding:4px 10px 4px 0; vertical-align:top; white-space:nowrap; }
+.pv-src td { padding:4px 0; }
+.pv-ruler { color:var(--dim,#8a93a3); font-size:.75rem; margin-left:calc(6px*var(--sc)); }
+.pv-actions { margin-top:16px; display:flex; gap:12px; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+<div class="pv-wrap">
+  <div class="pv-head">
+    <h1>Dialogue preview</h1>
+    <span class="muted" id="pv-id"></span>
+  </div>
+  <div id="pv-body"><p class="dim">Loading…</p></div>
+</div>
+<script src="preview.js"></script>
+</body>
+</html>

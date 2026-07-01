@@ -108,13 +108,18 @@ td.sp { width: 110px; color: var(--gold); font-size: 13px; white-space: nowrap; 
 td.jp { width: 38%; white-space: pre-line; }
 td.en { white-space: pre-line; color: var(--text); }
 tr.todo td.en { color: var(--dim); }
-td.act { width: 150px; text-align: right; white-space: nowrap; }
+td.act { width: 220px; text-align: right; white-space: nowrap; }
 
 a.suggest {
   display: inline-block; padding: 3px 10px; border-radius: 5px;
   border: 1px solid var(--gold-dim); font-size: 12px; margin-left: 6px;
 }
 a.suggest:hover { background: var(--gold-dim); color: #fff; text-decoration: none; }
+a.preview {
+  display: inline-block; padding: 3px 10px; border-radius: 5px;
+  border: 1px solid #6f8cff; color: #9fb2ff; font-size: 12px; margin-left: 6px;
+}
+a.preview:hover { background: #6f8cff; color: #fff; text-decoration: none; }
 a.sug { font-size: 12px; padding: 3px 8px; border-radius: 5px; border: 1px solid; }
 .tok { color: #e26a5a; }                 /* name tokens, like the in-game highlight */
 .tok.box-title {
