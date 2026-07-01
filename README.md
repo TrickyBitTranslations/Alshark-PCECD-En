@@ -1,5 +1,7 @@
 # Alshark - English fan translation (work in progress)
 
+[![Discord](https://img.shields.io/badge/Discord-Join%20the%20server-5865F2?logo=discord&logoColor=white)](https://discord.gg/EZV2RQjCfH)
+
 **UPDATE: 07/01/26** - I'll keep releasing early alpha versions over the next
 few weeks. These are NOT stable, will likely invalidate the BRAM save, and
 will undoubtedly have bugs. Use at your own risk!
