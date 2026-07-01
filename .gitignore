@@ -22,6 +22,7 @@ rebuild/incbin/*.bin
 !rebuild/incbin/vwf_glyphs.bin
 !rebuild/incbin/vwf_widths.bin
 !rebuild/incbin/sub_glyphs.bin
+!rebuild/incbin/hud_glyphs.bin
 
 # Python
 __pycache__/
