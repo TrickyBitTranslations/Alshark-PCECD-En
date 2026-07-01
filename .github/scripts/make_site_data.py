@@ -109,9 +109,9 @@ def main():
     # via the shared engine width model in alshark.render). The site preview fetches this.
     import export_render_model
     from alshark import render as _render
-    rlines, _, _ = export_render_model.build(str(ROOT / "script" / "cutscene.tsv"))
+    rlines, rraws, _, _ = export_render_model.build(str(ROOT / "script" / "cutscene.tsv"))
     (OUT / "render.json").write_text(
-        json.dumps({"meta": _render.model_meta(), "lines": rlines},
+        json.dumps({"meta": _render.model_meta(), "lines": rlines, "raws": rraws},
                    ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
     total = sum(t["lines"] for t in tally.values())

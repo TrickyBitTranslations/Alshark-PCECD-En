@@ -74,9 +74,36 @@ def layout(english, raw, width=dc.BOX_PX):
     return lines
 
 
+def _sjis_tables():
+    """The non-ASCII chars that appear in cutscene english + their engine bytes, so the JS port
+    encodes/decodes them exactly like the Python codec (Shift-JIS / the single-byte hiragana form) -
+    otherwise its byte boundaries drift and wrap/merge diverge. Derived from the codec, not hardcoded.
+      enc: char -> engine byte hex          (dialogcodec._enc_text)
+      sb:  0xA1-0xDF byte -> decoded char   (single-byte hiragana table)
+      dw:  2-byte SJIS hex -> decoded char  (only the chars that occur)"""
+    chars = set()
+    p = os.path.join(os.path.dirname(__file__), '..', '..', 'script', 'cutscene.tsv')
+    try:
+        for r in tsv.read(p):
+            for ch in (r.get('english') or ''):
+                if ord(ch) > 0x7e:
+                    chars.add(ch)
+    except Exception:
+        pass
+    enc = {ch: dc._enc_text(ch).hex() for ch in chars}
+    sb = {c: dc.decode(bytes([c])) for c in range(0xa1, 0xe0)}
+    dw = {}
+    for ch in chars:
+        b = dc._enc_text(ch)
+        if len(b) == 2:
+            dw[b.hex()] = ch
+    return enc, sb, dw
+
+
 def model_meta():
     """Constants the JS port needs so nothing is hardcoded twice: box width, full-width advance,
-    the ASCII VWF advance table, and the name-insert index->px map."""
+    the ASCII VWF advance table, the name-insert maps, and the non-ASCII byte tables."""
+    enc, sb, dw = _sjis_tables()
     return {
         'boxPx': dc.BOX_PX,
         'fullPx': dc.FULL_PX,
@@ -84,4 +111,5 @@ def model_meta():
         'nameW': dc._name_w_map(),              # {index -> px}
         'nameText': name_text_map(),            # {index -> English name}
         'nameWDefault': 36,
+        'enc': enc, 'sb': sb, 'dw': dw,         # non-ASCII char <-> engine bytes (JS parity)
     }
