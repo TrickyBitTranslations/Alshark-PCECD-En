@@ -51,6 +51,31 @@ def _wpx(seg):
     return sum(_cpx(c) for c in seg)
 
 
+_NAME_W = None
+
+
+def _name_w_map():
+    """{name-table index -> rendered px} for `$<XX>` inserts, from script/names.tsv (the runtime
+    name inserted is that English name). wrap() uses the REAL width so it breaks lines correctly -
+    a name wider than the old flat 36px estimate (e.g. $<07>='Scrap Joe'=52px) otherwise makes wrap
+    pack a line that then hard-wraps in the engine, leaving a stray near-blank line. Cached; a
+    missing index falls back to wrap()'s name_w default."""
+    global _NAME_W
+    if _NAME_W is None:
+        _NAME_W = {}
+        try:
+            import os
+            import tsv
+            p = os.path.join(os.path.dirname(__file__), '..', '..', 'script', 'names.tsv')
+            for r in tsv.read(p):
+                en = (r.get('english') or '').strip()
+                if en:
+                    _NAME_W[int(r['str_off'])] = _wpx(en)
+        except Exception:
+            pass
+    return _NAME_W
+
+
 def wrap(s, width=BOX_PX, name_w=36, start_px=0, return_px=False):
     """Insert @ line-breaks at word boundaries so each rendered line fits the box (px); the engine
     otherwise hard-wraps mid-word. Markup (<XX>, # % < >) is zero-width, $ name inserts use an
@@ -75,18 +100,21 @@ def wrap(s, width=BOX_PX, name_w=36, start_px=0, return_px=False):
     def newline(sep, auto):
         lines.append({'sep': sep, 'toks': [], 'px': 0, 'words': 0, 'auto': auto})
 
-    for a in _WTOK.findall(s):
+    toks = _WTOK.findall(s)
+    for ti, a in enumerate(toks):
         if a == '@':
             newline('@', False); space = ''
         elif a == '$':
+            nxt = _TOKEN.fullmatch(toks[ti + 1]) if ti + 1 < len(toks) else None
+            nw = _name_w_map().get(int(nxt.group(1), 16), name_w) if nxt else name_w
             c = cur()
-            if c['px'] and c['px'] + _wpx(space) + name_w > width:
+            if c['px'] and c['px'] + _wpx(space) + nw > width:
                 newline('@', True); space = ''   # a $ name insert that overflows breaks first
                 c = cur()
             elif space and c['px']:
                 c['toks'].append(space); c['px'] += _wpx(space)
             space = ''
-            c['toks'].append('$'); c['px'] += name_w; c['words'] += 1
+            c['toks'].append('$'); c['px'] += nw; c['words'] += 1
         elif _TOKEN.fullmatch(a):
             cur()['toks'].append(a)
             if a == '<05>':              # text-start marker begins a fresh line (no @)
