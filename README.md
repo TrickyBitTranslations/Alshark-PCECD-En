@@ -4,7 +4,8 @@
 
 **UPDATE: 07/01/26** - I'll keep releasing early alpha versions over the next
 few weeks. These are NOT stable, will likely invalidate the BRAM save, and
-will undoubtedly have bugs. Use at your own risk!
+will undoubtedly have bugs. Use at your own risk! [Join the Discord](https://discord.gg/EZV2RQjCfH) 
+to ask questions, get information on new releases, and help with the translation!
 
 Tooling and translation data for an English patch of **Alshark** (アルシャーク), a
 PC Engine Super CD-ROM2 RPG (Right Stuff / Victor Entertainment, 1994).
