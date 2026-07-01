@@ -41,6 +41,17 @@ RESET_OPS = frozenset({
     bytes.fromhex('235f'), bytes.fromhex('233e'),
 })
 
+# Text-level, zero-width, non-pen-moving ops that sit BETWEEN two glyph runs on one line: the #!
+# voice-pause (2321), the flow-through #<00> (2300), and the highlight on/off pair (2303/2301).
+# Japanese needs no space around them; English does, so when a run ends in a visible char and the
+# next starts with one (no space either side), the words jam ("Uncle!!" + "You can't die!").
+# merge() inserts a single space at such a boundary. (% codes / bare <XX> may move the pen or carry
+# data, so they are deliberately excluded.)
+SPACE_OPS = frozenset({
+    bytes.fromhex('2321'), bytes.fromhex('2300'),
+    bytes.fromhex('2303'), bytes.fromhex('2301'),
+})
+
 
 def _cpx(c):
     o = ord(c)
@@ -49,6 +60,12 @@ def _cpx(c):
 
 def _wpx(seg):
     return sum(_cpx(c) for c in seg)
+
+
+def _vis(c):
+    """A decoded char that renders as a visible glyph (letter/digit/punct) - not a space or a
+    markup remnant (#/%/$/</>/@). Used to decide whether two runs would jam at a boundary."""
+    return bool(c) and not c.isspace() and c not in '#%$<>@'
 
 
 _NAME_W = None
@@ -331,28 +348,35 @@ def merge(english, raw):
     out = bytearray()
     di = 0
     pen = 0                          # carried line position (px) across glyph runs
-    hold = False                     # last run ended in a space wrap() dropped; re-emit if the line continues
-    for t, d in raw_segs:
+    last = ''                        # last char of the previous glyph run (for boundary spacing)
+    lead = False                     # prepend a space to the next run (case b), so wrap() sees it
+    for si, (t, d) in enumerate(raw_segs):
         if t == 'op':
-            # wrap() drops a run's trailing space. When the run continues on the SAME physical line
-            # (joined to the next run by a NON-reset op, e.g. the highlight #<03> around an item name),
-            # that space is real and must survive or the words jam ("That" + "Canned Food"). Re-emit it
-            # BEFORE the inline op (uncolored, matching the hand-authored "this #<03>Camp Set" cases),
-            # unless it is a true line break (invisible -> drop) or the next run already leads with a space.
-            if hold:
-                hold = False
-                # emit only when a VISIBLE next run continues this line: skip at a true break, at
-                # end-of-entry, or when the next run is empty / whitespace / already leads with a space
-                # (those would render a redundant / trailing space).
-                if (d not in RESET_OPS and di < len(en_dec)
-                        and en_dec[di][:1] != ' ' and en_dec[di].strip()):
-                    out += b' '; pen += _cpx(' ')
+            # Add a space when an op DIRECTLY joins two glyph runs (raw_segs[si+1] is that run, so
+            # they render adjacent) and English would jam. Only when the next run has visible content
+            # and does not already lead with a space. Two cases:
+            #   (a) the previous run ended in a space wrap() dropped -> restore it before the op (any
+            #       non-reset op), so "That " + #<03> + "Canned Food" stays "That Canned Food".
+            #   (b) the previous run ended visible and the op is a text-level pause/highlight
+            #       (SPACE_OPS) -> the next run needs a leading space: "Uncle!!" + #! + "You" ->
+            #       "Uncle!! You". Threaded as a leading space so wrap() accounts for its width.
+            joins_run = si + 1 < len(raw_segs) and raw_segs[si + 1][0] == 'dlg'
+            if last and joins_run:
+                nxt = en_dec[di]
+                if nxt[:1] != ' ' and nxt.strip():
+                    if last == ' ' and d not in RESET_OPS:
+                        out += b' '; pen += _cpx(' ')
+                    elif d in SPACE_OPS and _vis(last) and _vis(nxt[0]):
+                        lead = True
+            last = ''
             out += d
             if d in RESET_OPS:       # true line break: the next run starts at the left margin
                 pen = 0
         else:
             en = en_dec[di]; di += 1
+            if lead:
+                en = ' ' + en; lead = False
             enc, pen = _encode_run(en, pen)
             out += enc
-            hold = bool(enc) and en[-1:] == ' '
+            last = en[-1] if en else ''
     return bytes(out)
