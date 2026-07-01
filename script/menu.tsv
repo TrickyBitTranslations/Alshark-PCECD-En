@@ -43,7 +43,7 @@ block_off	str_off	speaker	text	raw_hex	english	status
 0xbf71	0x0		＜誰の？＞	8183924e82cc8148818400	<Whose?>	
 0xbf7e	0x0		＜誰に？＞	8183924e82c98148818400	<To whom?>	
 0xbfb3	0x0		ジョー|よっしゃっ！|気合い入れて、パワーアップして|やるか！	83578387815b0d82e682c182b582e182c181490d8b438d8782a293fc82ea82c481418370838f815b83418362837682b582c40d82e282e982a9814900	Joe|All right!|Let's fire up and|power you up!	
-0xbff1	0x0		その特殊能力は今使えない。	82bb82cc93c18eea945c97cd82cd8da18e6782a682c882a2814200	Can't use that|skill now.	
+0xbff1	0x0		その特殊能力は今使えない。	82bb82cc93c18eea945c97cd82cd8da18e6782a682c882a2814200	Can't use that skill now.	
 0xc00e	0x0		空間が閉鎖されていて|テレポートできない！	8bf38ad482aa95c28dbd82b382ea82c482a282c40d8365838c837c815b836782c582ab82c882a2814900	The area is sealed,|can't teleport!	
 0xc03a	0x0		カルには使用できない	834a838b82c982cd8e67977082c582ab82c882a200	Can't use on Kal.	
 0xc061	0x0		話しかける|隊列変更	986282b582a982af82e90d91e097f195cf8d5800	Talk|Formation	

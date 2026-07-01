@@ -92,27 +92,54 @@ SHOP_BASE_SITE = 0x9a76            # cooked offset of bank 0x6A's item-name base
 
 
 def name_patch(cooked):
+    import re
     import tsv
     rows = list(tsv.read(os.path.join(ROOT, 'script', 'names.tsv')))
     blob = bytearray()
-    off_item = None
-    for k, r in enumerate(rows):
-        if k == 27:
-            off_item = len(blob)            # byte offset of the item-base entry (orig $7157 = entry 27)
+    new_off = []                            # entry index -> byte offset in the REBUILT table
+    for r in rows:
+        new_off.append(len(blob))
         en = r.get('english', '')
         blob += (en.encode('latin-1') if en else bytes.fromhex(r['raw_hex']))
         blob += b'\x00'
     if NAME_TBL + len(blob) > 0x785000:
         raise SystemExit('name table overflow: %d > %d' % (len(blob), 0x785000 - NAME_TBL))
     patches = [(NAME_TBL, bytes(blob))]
-    item_base = 0x7066 + off_item           # table base $7066 (MPR3) + item-base entry offset
-    lo, hi = item_base & 0xff, item_base >> 8
-    for site in ITEM_BASE_SITES:
-        patches.append((BANK6D_OFF + site + 1, bytes([lo])))   # LDA #lo operand
-        patches.append((BANK6D_OFF + site + 5, bytes([hi])))   # LDA #hi operand
-    shop_base = item_base + 0x6000          # bank 0x6A maps the table at MPR6 ($Cxxx), not MPR3 ($7xxx)
-    patches.append((SHOP_BASE_SITE + 1, bytes([shop_base & 0xff])))   # LDA #lo operand
-    patches.append((SHOP_BASE_SITE + 5, bytes([shop_base >> 8])))     # LDA #hi operand
+
+    # Repoint EVERY hardcoded base pointer into the name table. The table is scan-indexed from a
+    # per-category base (item ID 0 = entry 27, usable/skill = entry 283, armor = 132, weapons = 52,
+    # ...). Our longer English cast names shift every entry after #25, so any base left pointing at its
+    # ORIGINAL offset now lands on the wrong string -> that category shows blank/garbage names, and the
+    # menu that dereferences it (e.g. Field Skills -> use) reads garbage and crashes. Find the loads
+    # generically ("A9 lo / STA z / A9 hi / STA z+1" with the pointer on a name-table ENTRY START) and
+    # rewrite the immediates to the entry's NEW offset. Same fix the old item/shop repoint did, but for
+    # all of them. (Pointers landing mid-entry are not category bases -> skipped.)
+    old = cooked[NAME_TBL:0x785000]
+    old_start = {}                          # old byte offset -> entry index (entry starts only)
+    ei = 0
+    for i in range(len(old)):
+        if i == 0 or old[i - 1] == 0:
+            old_start[i] = ei
+        if old[i] == 0:
+            ei += 1
+    pat = re.compile(rb'\xA9(.)\x85(.)\xA9(.)\x85(.)', re.DOTALL)
+    for m in pat.finditer(cooked, 0x8000, 0x1F000):       # field/menu/battle code region
+        lo, z1, hi, z2 = m.group(1)[0], m.group(2)[0], m.group(3)[0], m.group(4)[0]
+        if z2 != z1 + 1:                                  # consecutive ZP pair = a 16-bit pointer
+            continue
+        ptr = lo | (hi << 8)
+        base = 0x7066 if 0x7066 <= ptr <= 0x7FFF else (0xD066 if 0xD066 <= ptr <= 0xDFFF else None)
+        if base is None:
+            continue                                      # not in the name-table window (MPR3/MPR6)
+        o = ptr - base
+        if o not in old_start or old_start[o] >= len(new_off):
+            continue                                      # not a category/entry start -> leave it
+        new_ptr = base + new_off[old_start[o]]
+        if new_ptr == ptr:
+            continue                                      # entry #0 etc. - no shift
+        site = m.start()
+        patches.append((site + 1, bytes([new_ptr & 0xFF])))   # LDA #lo operand
+        patches.append((site + 5, bytes([new_ptr >> 8])))     # LDA #hi operand
     return patches
 
 
