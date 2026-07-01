@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """Render 04b-03 at 8px into a fixed 8x8 ASCII glyph set for the anime-cutscene subtitles.
 
-Writes rebuild/incbin/sub_glyphs.bin: 95 glyphs (ASCII 0x20..0x7E), 8 bytes each (one
-row-byte per row, bit 0x80>>x = pixel column x), 1bpp. Same 04b-03 face the battle HUD
-names use (tools/alshark/hudnames.py) so the English text stays consistent, and a true
-8px font so each character is ONE 8x8 BG tile with nothing clipped (the 12px dialogue
-VWF had to be squashed into 8 rows, which shaved the letter bottoms).
+Writes rebuild/incbin/sub_glyphs.bin: 95 glyphs (ASCII 0x20..0x7E), 8 bytes each (one row-byte
+per row, bit 0x80>>x = pixel column x), 1bpp. Same 04b-03 face as the battle HUD names
+(tools/alshark/hudnames.py). A true 8px font puts each character in one 8x8 BG tile with nothing
+clipped (the 12px dialogue VWF, squashed into 8 rows, shaves letter bottoms).
 
-All glyphs share one baseline (a single common vertical shift, not per-glyph), so the
-line sits straight. Caps/ascenders up top, descenders (g j p q y) drop below it.
+All glyphs share one baseline (a single vertical shift, not per-glyph). Caps/ascenders up top,
+descenders (g j p q y) below.
 
   PYTHONPATH=tools python3 tools/alshark/subfont.py        # regenerate sub_glyphs.bin + preview
   then: python rebuild/build.py --chd
