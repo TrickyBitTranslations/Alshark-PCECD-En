@@ -44,11 +44,12 @@ def layout(english, raw, width=dc.BOX_PX):
     blank lines are dropped. Untranslated (blank english) previews the raw as-is."""
     merged = dc.merge(english, raw) if (english and english.strip()) else raw
     names = name_text_map()
+    op04, op05 = bytes.fromhex('2304'), bytes.fromhex('2305')   # title bar start / body start
     lines = []
-    text, px = [], 0
+    text, px, title = [], 0, False
 
     def endline():
-        lines.append({'text': ''.join(text), 'px': px, 'over': px > width})
+        lines.append({'text': ''.join(text), 'px': px, 'over': px > width, 'name': title})
         text.clear()
         return 0
 
@@ -56,6 +57,10 @@ def layout(english, raw, width=dc.BOX_PX):
         if t == 'op':
             if d in dc.RESET_OPS:
                 px = endline()
+            if d == op04:                                    # #<04>..#<05> = the speaker name bar
+                title = True
+            elif d == op05:
+                title = False
             continue
         for m in _NAME.finditer(dc.decode(d)):
             tok = m.group(0)
