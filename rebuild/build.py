@@ -306,10 +306,11 @@ def hud_patch(cooked):
 
 # Field location-name banners (town-entry place names). Each map block's name is an inline
 # half-width-katakana string at block+0x32 in tight slots; English (with suffix) doesn't fit.
-# So we RELOCATE: write [start_x][english\0] into free space in the map block's bank-0x76 page
-# and repoint the map's name pointer at block+0x2E to it. start_x is the precomputed centered left
-# edge (8 + (144 - pixel_width)/2). The bank-0x6B hook (bank6b.s) reads start_x + draws the name
-# proportionally. Names from script/locations.tsv. Pure data here; see docs/battle-text-map.md.
+# So we RELOCATE: write [$01 marker][start_x][english\0] into free space in the map block's
+# bank-0x76 page and repoint the map's name pointer at block+0x2E to it. start_x is the centered
+# left edge (8 + (144 - pixel_width)/2). The $01 marker tags the pointer as ours (no stock name
+# pointer's target starts with $01); the bank-0x6B hook reads start_x + draws proportionally.
+# Names from script/locations.tsv. Pure data here; see docs/battle-text-map.md.
 def location_patch(cooked):
     import tsv
     widths = open(os.path.join(HERE, 'incbin', 'vwf_widths.bin'), 'rb').read()
@@ -335,11 +336,11 @@ def location_patch(cooked):
             else:
                 i += 1
         foff = best[0] + 2                                  # small margin into the free run
-        blob = bytes([8 + (144 - px(en)) // 2]) + en.encode('latin-1') + b'\x00'
+        blob = bytes([0x01, 8 + (144 - px(en)) // 2]) + en.encode('latin-1') + b'\x00'  # [marker][start_x][name\0]
         if best[1] < len(blob) + 2 or foff + len(blob) > 0x2000:
             raise SystemExit('location %r: no room in map block' % en)
         addr = 0xC000 + foff
-        patches.append((base + foff, blob))                # [start_x][name\0] in free space
+        patches.append((base + foff, blob))                # [marker][start_x][name\0] in free space
         patches.append((base + 0x2E, bytes([addr & 0xff, addr >> 8])))  # repoint name pointer
     return patches
 

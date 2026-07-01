@@ -15,9 +15,9 @@ import unicodedata
 LEAD = lambda c: (0x81 <= c <= 0x9F) or (0xE0 <= c <= 0xEF)
 _TOKEN = re.compile(r'<([0-9a-fA-F]{2})>')
 
-# VWF advance widths (px) for ASCII 0x20-0x7E; the render hook advances the pen by these per
-# glyph (Japanese/full-width chars use FULL_PX). fontgen.py regenerates fontwidths.py whenever
-# the font is swapped; the fallback keeps wrap working if it hasn't been generated yet.
+# VWF advance widths (px) for ASCII 0x20-0x7E; the render hook advances the pen by these
+# (full-width chars use FULL_PX). fontgen.py regenerates fontwidths.py when the font is swapped;
+# the fallback is used until then.
 try:
     from alshark.fontwidths import WIDTHS as VWF_WIDTHS
 except ImportError:
@@ -26,20 +26,16 @@ FULL_PX = 12                         # engine full-width advance (6A:$8115 += $0
 BOX_PX = 216                         # dialogue box width: 18 full-width cells x 12 px
 _WTOK = re.compile(r'<[0-9a-fA-F]{2}>|[#%$@<>]|\s+|[^\s#%$@<>]+')
 
-# Ops that reset the render pen to the left margin (a TRUE line break), used by merge() to
-# decide where the carried line-px restarts at 0 and by the line-width simulator
-# (check_linewidth.py). CRUX of the cutscene word-wrap fix: consecutive glyph runs separated by
-# a NON-reset op share one physical line and the engine hard-wraps at the box edge, so merge()
-# must carry the pen across them and break at the box boundary itself. Conservative set - only
-# boundaries with clear evidence are listed; everything else (incl. #<00>, the % codes, bare
-# <XX> control bytes) defaults to NON-resetting (the run flows straight on).
-#   2304 #<04>  title/name bar start  - physically separate window from the body
-#   2305 #<05>  body text start       - new box body (task-confirmed reset)
-#   2306 #<06>  break code            - dialogue-spacing-jams.md (in-game confirmed)
-#   235f #_     break code            - dialogue-spacing-jams.md (in-game confirmed)
-#   233e #>     break code            - dialogue-spacing-jams.md (in-game confirmed)
-# NOT a reset: 2300 #<00> - empirically the engine flows straight through it (the palm-reading
-# bug); it is deliberately excluded so two #<00>-joined runs share a line and wrap at the edge.
+# Ops that reset the render pen to the left margin (a true line break). merge() restarts the
+# carried line-px at 0 on these. Runs joined by a non-reset op share one physical line and the
+# engine hard-wraps at the box edge. Anything not listed (incl. #<00>, % codes, bare <XX>) does
+# not reset.
+#   2304 #<04>  title/name bar
+#   2305 #<05>  body text start
+#   2306 #<06>  break
+#   235f #_     break
+#   233e #>     break
+# #<00> (2300) does NOT reset - the engine flows straight through it.
 RESET_OPS = frozenset({
     bytes.fromhex('2304'), bytes.fromhex('2305'), bytes.fromhex('2306'),
     bytes.fromhex('235f'), bytes.fromhex('233e'),
@@ -56,26 +52,20 @@ def _wpx(seg):
 
 
 def wrap(s, width=BOX_PX, name_w=36, start_px=0, return_px=False):
-    """Insert @ line-breaks at word boundaries so each rendered line fits the box (px); the
-    engine otherwise hard-wraps mid-word. Markup (<XX>, # % < >) counts as zero width,
-    $ name inserts as an approximate px width, <05> (text start) and an existing @ reset the
-    line. A line already under width keeps any author-placed @, so manual wrapping wins.
+    """Insert @ line-breaks at word boundaries so each rendered line fits the box (px); the engine
+    otherwise hard-wraps mid-word. Markup (<XX>, # % < >) is zero-width, $ name inserts use an
+    approximate width, <05> and a literal @ reset the line; an author @ on an under-width line is kept.
 
-    start_px seeds the first line's pen so a run can CONTINUE the previous run's physical line
-    (used by merge() to flow text across non-breaking ops like #<00> - see RESET_OPS). When the
-    continued run's first word would overflow, wrap inserts the @ at that boundary, which becomes
-    the break between the two runs. return_px=True returns (string, end_px) where end_px is the
-    pen px of the final line, so the caller can carry it into the next run.
+    start_px seeds the first line's pen so a run continues the previous run's physical line (merge()
+    threads text across non-breaking ops like #<00>); an overflow on that first line lands the @ as a
+    leading break. return_px=True also returns the final line's pen px.
 
-    Anti-widow: when a greedy auto-break leaves a single word alone on a line, the last word of
-    the line above is pulled down to join it (if both still fit), so proper nouns like
-    "Saxon Canyon" don't split. This only moves an @ and a space, so the byte count is unchanged."""
-    # Build lines as token lists. Each line records the separator BEFORE it ('@' or '' for the
-    # first line / a <05> reset), its visible px, visible word count, and whether the break that
-    # started it was an AUTO wrap (the only kind the anti-widow pass is allowed to rebalance).
-    # The first line is seeded with start_px (the carried pen from a continued run): it counts
-    # toward width (so the first word can break) but holds no tokens, so the anti-widow guard
-    # (prev['words'] >= 2) never reaches into the previous run's text.
+    Anti-widow: a lone auto-wrapped word pulls the previous line's last word down to join it if both
+    still fit; only an @ and a space move, so the byte count is unchanged."""
+    # Each line: separator before it ('@', or '' for the first line / a <05> reset), visible px,
+    # word count, and whether it began with an auto wrap (anti-widow rebalances only those). The
+    # first line is seeded with start_px (the carried pen) but holds no tokens, so anti-widow
+    # (prev['words'] >= 2) never reaches into the previous run.
     lines = [{'sep': '', 'toks': [], 'px': start_px, 'words': 0, 'auto': False}]
     space = ''
 
@@ -146,7 +136,7 @@ def wrap(s, width=BOX_PX, name_w=36, start_px=0, return_px=False):
 
 
 def _zero_w(t):
-    """A wrap token that occupies no line width (markup / control), so it isn't a 'word'."""
+    """A wrap token with no line width (markup / control)."""
     return t in ('#', '%', '<', '>') or bool(_TOKEN.fullmatch(t))
 
 
@@ -155,9 +145,8 @@ def _sb_hira(b):
     return ''.join(chr(ord(c) - 0x60) if 0x30A1 <= ord(c) <= 0x30F6 else c for c in full)
 
 
-# reverse map: hiragana letter (or dakuten mark) -> its single-byte code, so encode is the
-# inverse of decode for hiragana. Only the kana slots are remapped; punctuation in the
-# 0xA1-0xA5 range stays as its 2-byte Shift-JIS form (that is how the source stores it).
+# reverse map: hiragana (or dakuten mark) -> its single-byte code, the inverse of decode. Only
+# kana slots are remapped; 0xA1-0xA5 punctuation stays 2-byte Shift-JIS, as the source stores it.
 _SB = {}
 for _b in range(0xA1, 0xE0):
     _s = _sb_hira(_b)
@@ -219,43 +208,32 @@ def encode(s):
 
 
 def _encode_run(s, start_px):
-    """Wrap a single glyph run CONTINUING the previous run's line at start_px, encode it, and
-    return (bytes, end_px). end_px is the pen px at the end of the run, threaded into the next
-    run by merge(). A break inserted in the run's first line lands as a leading @, which is the
-    break between the carried line and this run - exactly the cross-run wrap the engine needs."""
-    if s and not s.strip():          # a run that is ONLY whitespace is a structural byte the engine
-        return _encode_raw(s), start_px + _wpx(s)   # navigates by (e.g. the palm-reading choice's
-                                     # 0x20 between %<02> and <1f>), NOT display text - keep verbatim.
-                                     # (Trailing spaces ON text runs stay droppable - they're padding.)
+    """Wrap a glyph run continuing the previous run's line at start_px, encode it, return
+    (bytes, end_px). A break in the run's first line lands as a leading @, threading the wrap
+    across runs."""
+    if s and not s.strip():          # whole-whitespace run = a structural code byte (e.g. the
+        return _encode_raw(s), start_px + _wpx(s)   # choice 0x20 between %<02> and <1f>) - keep it
     wrapped, end_px = wrap(s, start_px=start_px, return_px=True)
     return _encode_raw(wrapped), end_px
 
 
 # --- cutscene merge ------------------------------------------------------------------
-# Scripted #-engine cutscenes carry control codes the interpreter navigates by: box `#`
-# commands (2 bytes, or 5 for the CD-stream seek `#< XX 00 YY`), variable-length `%` codes,
-# and inline `$` name inserts / `@` newlines. Those code bytes are NOT all round-trippable
-# through the markup (a `#<` CD recno byte in 0xA1-0xDF decodes as a hiragana), so re-encoding
-# a whole entry corrupts them. merge() keeps every control code byte from the original `raw`
-# verbatim and substitutes only the glyph runs from `english`. A glyph run is any maximal run
-# of drawable bytes (text + inline `$`/`@`) BETWEEN control codes - the interpreter has no
-# text-length field, so a run may follow ANY command (#<05>, #!, #_, ...) and be any length.
+# #-engine entries carry control codes the interpreter walks by: box `#` commands (2 bytes, 5 for
+# the CD-stream seek `#< XX 00 YY`), variable-length `%` codes, inline `$` name inserts and `@`
+# newlines. Those bytes aren't all round-trippable through the markup (a `#<` recno in 0xA1-0xDF
+# decodes as hiragana), so merge() keeps every code byte from `raw` verbatim and swaps in only the
+# glyph runs from `english`. A glyph run = a maximal run of drawable bytes (text + inline `$`/`@`)
+# between codes; there is no length field, so it may follow any command and be any length.
 # See noredist/docs/findings/cutscene-engine.md.
 
 def _pct_len(d, i):
-    """Byte length of the `%`(0x25) code at d[i] (subcommand + params). Conservative: only the
-    verified subcommands; raises on an unhandled one (so it's measured + added, never silently
-    corrupting). Length-prefixed codes (`% S L <L bytes>`) are 3 + L."""
+    """Byte length of the `%`(0x25) code at d[i] (subcommand + params). Raises on an unknown
+    subcommand. Length-prefixed codes (`% S L <L bytes>`) are 3 + L."""
     s = d[i + 1]
     if s >= 0x80:                          # box terminator (e.g. %<ff>), no params
         return 2
-    # inline-length / relative-skip handlers: % S L <L bytes> (handler reads L, then L more).
-    # 0x10/0x11/0x12 (inline-glyph display - shop item/price) and 0x21/0x25/0x26 are ALSO
-    # length-prefixed: the L byte is the data byte count, so length = 3 + L. (The handler renders
-    # those L bytes as a variable number of 1/2-byte glyphs - that glyph COUNT is not the byte
-    # length, which is what made these look uncrackable - but the byte length is plain 3+L.)
-    # Verified: re-encode round-trips byte-exact for 67/70 such rows; the other 3 only drop a
-    # trailing pad space. Cracking these unlocks the shop / inn / item-get dialogue.
+    # length-prefixed: `% S L <L bytes>`, length = 3 + L. The L bytes render as a variable number
+    # of 1/2-byte glyphs, but the byte length is plain 3 + L. (0x10-0x12 are inline-glyph display.)
     if s in (0x04, 0x05, 0x07, 0x08, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x19, 0x1a,
              0x1c, 0x1d, 0x21, 0x25, 0x26):
         return 3 + d[i + 2]

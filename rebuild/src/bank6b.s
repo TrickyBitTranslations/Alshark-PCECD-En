@@ -4,9 +4,12 @@
 ; for our RELOCATED maps, and leave every other map (overworld, etc.) running the original code.
 ;
 ; Source: location_patch (build.py) relocates each translated map's English name into free space
-; in the map block (the page loaded to bank 0x76 at $C000) as [start_x][name\0], and repoints the
-; map's name pointer at $C02E to it. start_x = precomputed centered left edge (8 + (144-width)/2).
-; Un-relocated maps keep the default pointer $C032, which we use as the discriminator.
+; in the map block (the page loaded to bank 0x76 at $C000) as [$01][start_x][name\0], and repoints
+; the map's name pointer at $C02E to it. start_x = centered left edge (8 + (144-width)/2).
+; Discriminator: deref $C02E and test the first byte for the $01 marker. A stock pointer's target
+; starts with start_x ($08-$50) or an SJIS lead ($81+), never $01, so every un-relocated map
+; (overworld included) falls through to the original code. (The old "$C02E == $C032" test mis-fired
+; on maps whose stock name pointer wasn't $C032 - they took our path and sprayed glyphs on the map.)
 ;
 ; Both hooks live in the proven-safe slack at $BF7B (133 bytes).
 
@@ -58,22 +61,19 @@
 
 .ORG $BF7B - $A000               ; bank-tail slack (verified: no code reads/writes it)
 banner_hook:
-  lda $C02E                      ; replicate the TII the original did ($C02E -> $2016)
-  sta $2016
-  lda $C02F
-  sta $2017
-  lda $C02E                      ; discriminator: un-relocated maps keep the default $C032
-  cmp #$32
-  bne bh_reloc
-  lda $C02F
-  cmp #$C0
-  bne bh_reloc
-  jmp $AB27                      ; not ours -> run the original banner code, fully intact
-bh_reloc:
-  lda $C02E                      ; our relocated pointer -> [start_x][name\0]
-  sta scriptPtr
+  lda $C02E                      ; name pointer -> scriptPtr ($16/$17 = $2016/$2017); this also
+  sta scriptPtr                  ; replicates the TII the original did ($C02E -> $2016)
   lda $C02F
   sta $17
+  lda (scriptPtr)                ; deref the pointer: first byte of the target data
+  cmp #$01                       ; our marker? a stock pointer's first byte is start_x ($08-$50)
+  bne bh_orig                    ; or an SJIS lead ($81+), never $01
+  lda #$01
+  sta.w banner_flag                ; ours -> banner_adv advances proportionally
+  inc scriptPtr                  ; skip the marker -> start_x
+  bne bh_m1
+  inc $17
+bh_m1:
   lda (scriptPtr)                ; start_x = precomputed centered left edge
   sta $00
   stz $01
@@ -91,25 +91,15 @@ bh_nohi:
   lda #$0F
   sta $2745
   jmp $AB62                      ; into the existing per-char draw loop
+bh_orig:
+  stz.w banner_flag                ; not ours -> banner_adv uses the original +12 advance
+  jmp $AB27                      ; run the original banner code, fully intact
 
 banner_adv:
-  lda $C02E                      ; same discriminator
-  cmp #$32
-  bne ba_reloc
-  lda $C02F
-  cmp #$C0
-  bne ba_reloc
-  clc                            ; not ours -> original fixed +12 advance
-  lda #$0C
-  adc $00
-  sta $00
-  cla
-  adc $01
-  sta $01
-  jmp $AB62
-ba_reloc:
-  tma #$04                       ; menuWidth ($5F42) is bank 0x6D; the draw dispatch restored
-  pha                            ; MPR2 to the field bank, so page bank 0x6D ($2682) back in
+  lda.w banner_flag                ; set once by banner_hook: 1 = ours, 0 = stock
+  beq ba_orig
+  tma #$04                       ; ours -> proportional. menuWidth ($5F42) is bank 0x6D; the draw
+  pha                            ; dispatch restored MPR2 to the field bank, so page 0x6D ($2682) back
   lda $2682
   tam #$04
   lda menuWidth                  ; real width of the glyph just drawn
@@ -124,3 +114,14 @@ ba_reloc:
   adc $01
   sta $01
   jmp $AB62
+ba_orig:
+  clc                            ; stock -> original fixed +12 advance
+  lda #$0C
+  adc $00
+  sta $00
+  cla
+  adc $01
+  sta $01
+  jmp $AB62
+
+banner_flag: .db $00             ; 1 = current map is ours (proportional), 0 = stock (+12)
