@@ -2,9 +2,9 @@ name: validate-translations
 
 on:
   push:
-    paths: ["script/**", "tools/**"]
+    paths: ["script/**", "tools/**", "site/render.js"]
   pull_request:
-    paths: ["script/**", "tools/**"]
+    paths: ["script/**", "tools/**", "site/render.js"]
   workflow_dispatch:
 
 jobs:
@@ -15,7 +15,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
       - name: Fit-check the script (no game dump needed; uses raw_hex in the TSV)
         run: |
           python tools/reinsert.py --check --tsv script/system1.tsv
           python tools/reinsert.py --check --tsv script/cutscene.tsv
+      - name: Dialogue preview render conformance (Python model == site/render.js)
+        run: python tools/test_render_conformance.py

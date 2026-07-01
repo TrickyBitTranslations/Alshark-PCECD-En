@@ -39,6 +39,19 @@ def control_codes(s):
     return Counter(t for t in re.findall(r"<[0-9a-fA-F]{2}>", s) if t not in EXEMPT)
 
 
+def preview_link(tsv_name, block_s, str_s, text):
+    """Link to the in-game dialogue preview of this exact suggestion (cutscene lines only). The
+    site's render.js renders the proposed text (base64) against the line's raw bytes."""
+    if tsv_name != "cutscene.tsv":
+        return None
+    import base64
+    repo = os.environ.get("GITHUB_REPOSITORY", "TrickyBitTranslations/Alshark-PCECD-En")
+    owner, name = repo.split("/", 1)
+    en = base64.urlsafe_b64encode(text.encode("utf-8")).decode()
+    return (f"https://{owner.lower()}.github.io/{name}/preview.html"
+            f"?id={block_s}:{str_s}&en={en}")
+
+
 def main():
     fields = parse_form(os.environ.get("ISSUE_BODY", ""))
     try:
@@ -96,6 +109,9 @@ def main():
         for p in problems:
             print(f"- {p}")
         print(f"\n**Original:** {target['text']}")
+        link = preview_link(tsv_name, block_s, str_s, text)
+        if link:
+            print(f"\n[▶ Preview how it renders](%s) (a full line-gauge turns red)" % link)
         print("\nSee CONTRIBUTING.md for the markup and length rules. "
               "Edit the issue to re-run validation.")
         sys.exit(1)
@@ -103,6 +119,9 @@ def main():
     print("### :white_check_mark: Suggestion is valid\n")
     print(f"`{tsv_name}` block `{block_s}` line `{str_s}`:\n\n```\n{text}\n```")
     print(f"\n**Original:** {target['text']}")
+    link = preview_link(tsv_name, block_s, str_s, text)
+    if link:
+        print(f"\n[▶ Preview how it renders in the game box]({link})")
     print("\nA maintainer can apply it with a `/apply` comment.")
 
 

@@ -3,34 +3,28 @@
      ?id=<block>:<str_off>   line to preview (from data/render.json, precomputed by the Python
                              engine model so line breaks match the game exactly)
      ?file=cutscene.tsv      (default) for the "back to review" link
-     ?en=<base64>            an edited/recommended translation (live). Phase 2 (needs render.js);
-                             for now we show the committed line and a note.
-   Each utterance renders as its own blue box; every glyph is an inline-block of its real VWF
-   advance width, so the horizontal fit is accurate even though the glyph shapes are a web font. */
+     ?en=<base64>            an edited/recommended translation (live, via render.js + the line's raw)
+   Each utterance renders as its own blue box. Glyph shapes are a web font (approximate); the line
+   BREAKS are exact, and a per-line gauge shows the real in-game px vs the 216px box so fit is true. */
 "use strict";
 
-const REPO = "TrickyBitTranslations/Alshark-PCECD-En";
 const P = new URLSearchParams(location.search);
-
-function charPx(ch, meta) {
-  const o = ch.codePointAt(0);
-  return (o >= 0x20 && o <= 0x7e) ? meta.widths[o - 0x20] : meta.fullPx;
-}
 
 function renderLine(line, meta) {
   const el = document.createElement("div");
   el.className = "dlg-line" + (line.over ? " over" : "");
-  for (const ch of line.text) {
-    const g = document.createElement("span");
-    g.className = "glyph";
-    g.style.width = `calc(${charPx(ch, meta)}px * var(--sc))`;
-    g.textContent = ch === " " ? " " : ch;
-    el.appendChild(g);
-  }
-  const r = document.createElement("span");
-  r.className = "pv-ruler";
-  r.textContent = `${line.px}px`;
-  el.appendChild(r);
+  const txt = document.createElement("span");
+  txt.className = "dlg-text";
+  txt.textContent = line.text;
+  el.appendChild(txt);
+  const gauge = document.createElement("span");
+  gauge.className = "dlg-gauge";
+  gauge.title = line.px + " / " + meta.boxPx + " px";
+  const fill = document.createElement("i");
+  fill.style.width = Math.min(100, 100 * line.px / meta.boxPx) + "%";
+  if (line.px > meta.boxPx) fill.classList.add("over");
+  gauge.appendChild(fill);
+  el.appendChild(gauge);
   return el;
 }
 
@@ -65,37 +59,58 @@ function note(msg) {
   return n;
 }
 
+function decodeB64(s) {
+  try { return decodeURIComponent(escape(atob(s.replace(/-/g, "+").replace(/_/g, "/")))); }
+  catch { return null; }
+}
+
 async function boot() {
   const body = document.getElementById("pv-body");
   const id = P.get("id");
   const file = P.get("file") || "cutscene.tsv";
-  document.getElementById("pv-id").textContent = id ? `${file} · ${id}` : "";
-  if (!id) { body.innerHTML = `<p class="dim">No <code>?id=block:str_off</code> given.</p>`; return; }
+  document.getElementById("pv-id").textContent = id ? file + " · " + id : "";
+  if (!id) { body.innerHTML = "<p class=\"dim\">No <code>?id=block:str_off</code> given.</p>"; return; }
 
-  let render;
-  try { render = await fetch("data/render.json").then(r => r.json()); }
-  catch { body.innerHTML = `<p class="dim">Couldn't load render data.</p>`; return; }
+  let data;
+  try { data = await fetch("data/render.json").then(r => r.json()); }
+  catch { body.innerHTML = "<p class=\"dim\">Couldn't load render data.</p>"; return; }
 
-  const lines = render.lines[id];
+  const meta = data.meta;
+  let lines = data.lines[id];
   body.innerHTML = "";
-  if (P.get("en")) {
-    body.appendChild(note(
-      "<b>Live preview</b> of edited text is coming next (it needs the JS renderer, " +
-      "<code>render.js</code>). Showing the <i>committed</i> line below for now."));
+
+  // live preview of an edited/recommended translation
+  const enB64 = P.get("en");
+  if (enB64 && window.Render) {
+    const en = decodeB64(enB64);
+    const rawHex = (data.raws || {})[id];
+    if (en != null && rawHex) {
+      try {
+        lines = window.Render.layout(en, window.Render.bytesFromHex(rawHex), meta);
+        body.appendChild(note("<b>Live preview</b> of a recommended translation."));
+      } catch (e) {
+        body.appendChild(note("Couldn't render this edit: <code>" + String(e.message || e) +
+          "</code>. The code sequence (<code>#</code>/<code>%</code>/<code>$</code>) must match the original line."));
+      }
+    } else if (en != null) {
+      body.appendChild(note("No raw bytes for <code>" + id + "</code> to render an edit against; showing the committed line."));
+    }
   }
+
   if (!lines) {
-    body.appendChild(note(`No rendered preview for <code>${id}</code> — it may be untranslated or ` +
-      `not a cutscene line. Only translated <code>cutscene.tsv</code> lines are previewable.`));
+    body.appendChild(note("No rendered preview for <code>" + id + "</code> — it may be untranslated or " +
+      "not a cutscene line. Only translated <code>cutscene.tsv</code> lines are previewable."));
     return;
   }
-  body.appendChild(renderStage(lines, render.meta));
+  body.appendChild(renderStage(lines, meta));
 
   const actions = document.createElement("div");
   actions.className = "pv-actions";
-  const [block] = id.split(":");
+  const block = id.split(":")[0];
   actions.innerHTML =
-    `<a href="index.html#/${file}/${block}">← back to this scene</a>` +
-    ` <span class="muted">box width ${render.meta.boxPx}px · ${lines.filter(l=>l.text).length} text rows</span>`;
+    "<a href=\"index.html#/" + file + "/" + block + "\">← back to this scene</a>" +
+    " <span class=\"muted\">box width " + meta.boxPx + "px · " +
+    lines.filter(l => l.text).length + " text rows</span>";
   body.appendChild(actions);
 }
 
