@@ -12,7 +12,7 @@ const P = new URLSearchParams(location.search);
 
 function renderLine(line, meta) {
   const el = document.createElement("div");
-  el.className = "dlg-line" + (line.over ? " over" : "");
+  el.className = "dlg-line" + (line.over ? " over" : "") + (line.name ? " name" : "");
   const txt = document.createElement("span");
   txt.className = "dlg-text";
   txt.textContent = line.text;

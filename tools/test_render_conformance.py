@@ -24,7 +24,7 @@ def norm(model):
     if model is None:
         return None
     return [{'text': ''.join(c if ord(c) < 128 else '?' for c in ln['text']),
-             'px': ln['px'], 'over': ln['over']} for ln in model]
+             'px': ln['px'], 'over': ln['over'], 'name': ln['name']} for ln in model]
 
 
 def main():

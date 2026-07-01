@@ -203,10 +203,15 @@
     const merged = (english && english.trim()) ? merge(english, raw, meta) : raw;
     const names = meta.nameText || {};
     const lines = [];
-    let text = "", px = 0;
-    const end = () => { lines.push({ text, px, over: px > width }); text = ""; px = 0; };
+    let text = "", px = 0, title = false;
+    const end = () => { lines.push({ text, px, over: px > width, name: title }); text = ""; px = 0; };
     for (const seg of tokenize(merged)) {
-      if (seg[0] === "op") { if (RESET.has(hexOf(seg[1]))) end(); continue; }
+      if (seg[0] === "op") {
+        const h = hexOf(seg[1]);
+        if (RESET.has(h)) end();
+        if (h === "2304") title = true; else if (h === "2305") title = false;   // #<04>..#<05> = name bar
+        continue;
+      }
       const s = decode(seg[1], meta); let m;
       NAME.lastIndex = 0;
       while ((m = NAME.exec(s))) {
