@@ -46,7 +46,12 @@ FONT_OFF = 0xa1a000            # cooked; = abs LBA $00223A, loaded to card bank 
 # once at cutscene init (before music) into card bank 0x7D, lifting the resident ~160B table cap. See
 # noredist/docs/findings/cutscene-player.md "STREAMED-SUBTITLE BUILD PHASE".
 SUBS_BLOB_OFF = 0x9de000       # cooked; sector-aligned (0x9de000/2048 = 0x13BC); 0x7D dest, 8KB free
+# Battle HUD name glyphs (256B, 32 tiles x 8 plane0 bytes; hudnames.py). Rides the font asset's disc
+# sector so font_load carries it into bank 0x7F at $CFA0+0x680 (= card $D620); boot.s blit_hud_glyphs
+# streams it to free VRAM $7E00 each transition. Kept inside the 2048B font sector (0x680+256 < 0x800).
+HUD_GLYPHS_OFF = FONT_OFF + 0x680   # card $CFA0 + 0x680 = $D620 (boot.s blit source)
 BLOBS = [(FONT_OFF, 'vwf_glyphs.bin'), (FONT_OFF + 0x5f0, 'vwf_widths.bin'),  # 1520B glyphs
+         (HUD_GLYPHS_OFF, 'hud_glyphs.bin'),
          (SUBS_BLOB_OFF, 'cutscene_subs_blob.bin')]
 
 
@@ -296,12 +301,13 @@ def gen_cutscene_text():
 
 
 def hud_patch(cooked):
-    import json
-    patches = []
-    for off, hx in json.load(open(os.path.join(ROOT, 'script', 'hud_names_patch.json'))):
-        if off < 0x3b000:
-            patches.append((off, bytes.fromhex(hx)))   # English font glyphs -> spare disc font slots
-    return patches
+    # The English HUD-name glyphs are NO LONGER spliced into the $2000 font sheet (disc 0x39000):
+    # its "spare" slots $C0-$EB are the enemy/party SHADOW sprites, so injecting there painted our
+    # glyph over the shadow = the enemy "white box" bug. The glyphs now live in rebuild/incbin/
+    # hud_glyphs.bin (spliced via BLOBS onto the bank-0x7F font asset) and boot.s blit_hud_glyphs
+    # streams them to free VRAM $7E00; gen_hud_idx()/copy_hud_names carry the name-table refs.
+    # Nothing to splice here anymore. See noredist/docs/findings/enemy-shadow-tile-corruption.md.
+    return []
 
 
 # Field location-name banners (town-entry place names). Each map block's name is an inline

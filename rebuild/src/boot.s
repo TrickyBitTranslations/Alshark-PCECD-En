@@ -47,6 +47,69 @@
   inc $282A                       ; $282A is TAI-zeroed -> $01, giving the stock header $0131
   rts
 
+; ---- blit_hud_glyphs: stream the relocated battle-HUD name glyphs to free VRAM $7E00.
+; The glyphs must NOT live in the $2000 font page ($C0-$EB there are the enemy/party SHADOW
+; sprites - injecting painted our glyph over the shadow = the enemy "white box" bug). Instead
+; hudnames.py emits a 32-tile plane0 blob (rebuild/incbin/hud_glyphs.bin) that rides the bank-0x7F
+; font asset (loaded to $CFA0+0x680 = $D620). This runs from my_read while MPR6=0x7F: for each of
+; 32 tiles it writes 16 VRAM words - plane0 row + $FF (plane1), rows 0-7 twice (planes 2&3 = 0&1) -
+; matching the katakana glyph format. VRAM $7E0-$7FF is above the HUD font's used range and is never
+; cleared by battle (verified). copy_hud_names points the name table at these tiles (high byte $75).
+; See noredist/docs/findings/enemy-shadow-tile-corruption.md.
+.ORG $1B60                        ; WRAM $3B60 (free run $3B5B-$3BC4, ahead of the loader slack)
+blit_hud_glyphs:
+  lda $16
+  pha
+  lda $17
+  pha                             ; preserve the loader's $16/$17
+  lda #$00
+  sta $F7
+  sta.w $0000                     ; select VDC reg 0 (MAWR)  (.W = absolute VDC port, not ZP $2000)
+  stz.w $0002                     ; MAWR lo = $00
+  lda #$7E
+  sta.w $0003                     ; MAWR hi = $7E -> VRAM write addr = $7E00
+  lda #$02
+  sta $F7
+  sta.w $0000                     ; select VDC reg 2 (VWR)
+  lda #$20
+  sta $16
+  lda #$D6
+  sta $17                         ; $16/$17 = $D620 (glyph blob in bank 0x7F)
+  ldx #$20                        ; 32 tiles
+bhg_tile:
+  cly
+bhg_lo:
+  lda ($16),y
+  sta.w $0002                     ; VWR lo = plane0 row
+  lda #$FF
+  sta.w $0003                     ; VWR hi = $FF -> write word, VDC auto-increments MAWR
+  iny
+  cpy #$08
+  bne bhg_lo
+  cly
+bhg_hi:
+  lda ($16),y
+  sta.w $0002                     ; planes 2&3 = copy of planes 0&1
+  lda #$FF
+  sta.w $0003
+  iny
+  cpy #$08
+  bne bhg_hi
+  lda $16
+  clc
+  adc #$08
+  sta $16                         ; advance to next tile's 8 plane0 bytes
+  bcc bhg_next
+  inc $17
+bhg_next:
+  dex
+  bne bhg_tile
+  pla
+  sta $17
+  pla
+  sta $16                         ; restore $16/$17
+  rts
+
 ; ---- my_read + font_load (disc 0x1BC6 == WRAM $3BC6, free loader slack) ----
 .ORG $1BC6                        ; WRAM $3BC6
 my_read:
@@ -67,6 +130,7 @@ ms_sv:
   beq mr_have                     ; font still present
   jsr font_load                   ; buffer was wiped -> re-copy the font in
 mr_have:
+  jsr blit_hud_glyphs             ; MPR6 still 0x7F: stream HUD glyphs from 0x7F -> VRAM $7E00
   pla
   tam #$40                        ; restore MPR6
   jsr copy_hud_names              ; refresh the English battle-HUD name table in $690A (bank 0x78)
@@ -120,10 +184,16 @@ chn_lp:
   asl a                          ; A = X*2 = dest offset into the 144-byte table
   tay
   lda.w hud_idx,x
-  sta $690A,y                     ; tile-ref low byte = glyph index
-  lda #$70
+  sta $690A,y                     ; tile-ref low byte = glyph tile
+  cmp #$6F                        ; the blank-space tile ($26F) keeps high $70; real glyphs use $75
+  beq chn_sp
+  lda #$75                        ; -> draw's +2 builds BAT $77xx = tile $7xx (relocated glyph VRAM)
+  bra chn_hi
+chn_sp:
+  lda #$70                        ; -> draw's +2 builds BAT $72xx = tile $26F (stock blank)
+chn_hi:
   iny
-  sta $690A,y                     ; tile-ref high byte = palette $70
+  sta $690A,y                     ; tile-ref high byte
   dex
   bpl chn_lp
   pla
