@@ -7,6 +7,7 @@ rows that overflow.
 Run from repo root:  python3 tools/alshark/check_linewidth.py
 """
 import csv
+import re
 import sys
 import os
 
@@ -42,15 +43,20 @@ def line_pxs(entry):
             if _op_resets(d):
                 endline()
             continue
-        # dlg run: decode to chars, advance pen per glyph, break on @, hard-wrap at BOX_PX
-        for ch in dc.decode(d):
-            if ch == '@':
+        # dlg run: walk tokens, advance pen per glyph, break on @, hard-wrap at BOX_PX. A `$<XX>`
+        # name insert advances by the REAL rendered name width (matches wrap()); bare `<XX>` markup
+        # and #/%/</>/$ are zero-width.
+        for m in re.finditer(r'\$<([0-9a-fA-F]{2})>|<[0-9a-fA-F]{2}>|.', dc.decode(d)):
+            tok = m.group(0)
+            if tok == '@':
                 endline()
                 continue
-            if ch in ('#', '%', '$', '<', '>'):
-                # markup that survived into a dlg run counts as zero width ($ name handled below)
-                continue
-            w = dc._cpx(ch)
+            if tok[:2] == '$<':
+                w = dc._name_w_map().get(int(m.group(1), 16), 36)
+            elif tok[0] == '<' or tok in ('#', '%', '$', '>'):
+                continue                       # zero-width markup
+            else:
+                w = dc._cpx(tok)
             if pen + w > dc.BOX_PX:
                 # engine hard-wraps here
                 overflowed = True
