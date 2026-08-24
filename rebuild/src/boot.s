@@ -49,11 +49,12 @@
 
 ; ---- blit_hud_glyphs: stream the relocated battle-HUD name glyphs to free VRAM $7E00.
 ; The glyphs must not live in the $2000 font page ($C0-$EB there are the enemy/party shadow
-; sprites - injecting painted our glyph over the shadow = the enemy "white box" bug). Instead
+; sprites).
 ; hudnames.py emits a 32-tile plane0 blob (rebuild/incbin/hud_glyphs.bin) that rides the bank-0x7F
 ; font asset (loaded to $CFA0+0x680 = $D620). This runs from my_read while MPR6=0x7F: for each of
 ; 32 tiles it writes 16 VRAM words - plane0 row + $FF (plane1), rows 0-7 twice (planes 2&3 = 0&1) -
 ; matching the katakana glyph format. copy_hud_names points the name table at these tiles (high byte $75).
+
 .ORG $1B60                        ; WRAM $3B60 (free run $3B5B-$3BC4, ahead of the loader slack)
 blit_hud_glyphs:
   lda $16
@@ -231,5 +232,3 @@ fnc_keep:
 ; timer IRQ to $2204). bank68.s redirects the IRQ handler's vblank path ($4689 = the INC $2241
 ; frame-counter bump) to vblank_hook below; we do per-frame subtitle work, replay INC $2241, and
 ; continue at $468C - running in the cutscene's own VDC IRQ, every frame, for all anime cutscenes.
-; The renderer (vblank_hook) and its glyph tiles now
-; live in bank68.s (the player's own slack, mapped during cutscenes) - nothing for it is needed here.
