@@ -15,12 +15,6 @@
 ; copies the current line's strip to strip_buf $4D00; vblank_hook expands it into 4bpp VRAM tiles. build.py
 ; emits cutscene_subs_blob.bin (VWF strips, mixed case; spliced on disc at 0x9DE000 = recno $13BC). The band
 ; is drawn non-destructively: the image cells under it are saved and restored when it moves.
-;
-; Slack: save_under/restore_under/probe $4C60 ; strip_buf $4D00 ; vblank_hook $4A60.. ; vh_fetch $4E20 ;
-;        my_after_read+do_blob_load $4E7E/$4ED4 ; scratch $4EA0-$4EAC ; rcr_next $4EAD ; my_rcr $4EB0 ; pl_inc $4FF0.
-; Scratch: $4EA0 n_tiles, $4EA1 copy-count, $4EA5 play_counter, $4EA7 probe-temp, $4EA8 width64, $4EA9/$4EAA split BYR
-;          (band region pixel-row, read by my_rcr at the raster split), $4EAB/$4EAC under_row ($FFFF=none),
-;          $4EAD/$4EAE rcr_next.
 
 .MEMORYMAP
   DEFAULTSLOT 0
