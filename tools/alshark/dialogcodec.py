@@ -12,6 +12,8 @@ renders 0x20-0x7E as text, and encode() word-wraps it to the dialogue box. Avoid
 import re
 import unicodedata
 
+from alshark import textcodec
+
 LEAD = lambda c: (0x81 <= c <= 0x9F) or (0xE0 <= c <= 0xEF)
 _TOKEN = re.compile(r'<([0-9a-fA-F]{2})>')
 
@@ -207,10 +209,12 @@ def decode(b):
     while i < len(b):
         c = b[i]
         if LEAD(c) and i + 1 < len(b):
+            pair = b[i:i + 2]
             try:
-                out.append(b[i:i + 2].decode('shift_jis'))
+                out.append(pair.decode('shift_jis'))
             except UnicodeDecodeError:
-                out.append('<%02x><%02x>' % (c, b[i + 1]))
+                ch = textcodec.NEC_ROW.get(pair)
+                out.append(ch if ch is not None else '<%02x><%02x>' % (c, b[i + 1]))
             i += 2
         elif 0xA1 <= c <= 0xDF:
             out.append(_sb_hira(c))
@@ -230,7 +234,7 @@ def _enc_text(seg):
         if ch in _SB:
             out.append(_SB[ch])          # hiragana -> single-byte (engine form)
         else:
-            out += ch.encode('shift_jis')
+            out += textcodec.sjis_encode(ch)
     return bytes(out)
 
 
