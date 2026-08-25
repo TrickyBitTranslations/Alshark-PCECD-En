@@ -1,20 +1,20 @@
 ; Alshark anime-cutscene subtitle engine - patched into the bank 0x68 cutscene player (cooked
 ; 0x2BE1000 = recno $57C2, loaded to $4000-$5FFF @ MPR2 for every anime cutscene).
 ;
-; display: a raster split shows the band at the bottom. The band lives in an off-screen BAT row, placed
-; just above the visible window each frame (tracks the scroll); the split re-points BYR at it for the
-; bottom ~16 scanlines. Image cells the band covers are saved and restored when it moves. Hooks (over the
-; player's dormant RCR split, handler $46ED gated by $2F=0, RCR=0):
+; Display: a raster split shows the band at the bottom. The band lives in an off-screen BAT row,
+; placed just above the visible window each frame (tracks the scroll); the split re-points BYR at it
+; for the bottom ~16 scanlines. Image cells the band covers are saved and restored when it moves.
+; Hooks sit over the player's dormant RCR split (handler $46ED, gated by $2F=0, RCR=0):
 ;   - $4689 (vblank path) -> vblank_hook: build the band, save/restore the image under it, arm reg6.
 ;   - $46ED (RCR dispatch) -> my_rcr: at the split line, point BYR at the band region (BG only).
 ;
-; The vblank path starts at $4689 with INC $2241 (the frame counter the main loop polls). pl_inc ($4318)
-; bumps play_counter once per voice clip so the subtitle is PLAY-timed. The whole blob = a play-ordered
-; table @ $A000 (per line: n_tiles + a pre-rendered proportional 1bpp pixel strip, terminator n_tiles=0)
-; streams from card bank 0x7D - do_blob_load CD_READs it once per cutscene; vh_fetch MPR-swaps 0x7D in,
-; copies the current line's strip to strip_buf $4D00; vblank_hook expands it into 4bpp VRAM tiles. build.py
-; emits cutscene_subs_blob.bin (VWF strips, mixed case; spliced on disc at 0x9DE000 = recno $13BC). The band
-; is drawn non-destructively: the image cells under it are saved and restored when it moves.
+; The vblank path starts at $4689 with INC $2241 (the frame counter the main loop polls). pl_inc
+; ($4318) bumps play_counter once per voice clip, so the subtitle is play-timed. The blob is a
+; play-ordered table @ $A000 - per line, n_tiles plus a pre-rendered proportional 1bpp pixel strip,
+; terminated by n_tiles=0 - streamed from card bank 0x7D: do_blob_load CD_READs it once per cutscene,
+; vh_fetch MPR-swaps 0x7D in and copies the current line's strip to strip_buf $4D00, vblank_hook
+; expands it into 4bpp VRAM tiles. build.py emits cutscene_subs_blob.bin (VWF strips, mixed case),
+; spliced on disc at 0x9DE000 = recno $13BC.
 
 .MEMORYMAP
   DEFAULTSLOT 0
@@ -317,7 +317,7 @@ vh_bwmask:
   pha
   lda #$7D
   tam #$20                       ; MPR5 = bank 0x7D
-  ; regenerate the glyph tiles every frame (scene images clobber our tile region): expand the pre-rendered
+  ; regenerate the glyph tiles every frame (scene images clobber the tile region): expand the pre-rendered
   ; 1bpp proportional strip (strip_buf $4D00, n_tiles*8 bytes) into 4bpp VRAM tiles $7C5+ (color 15, all 4
   ; planes = the strip row). One tile = 8 rows; $7C5-$7E2 = 30 tiles free. (strip_buf is bank 0x68, so this
   ; needs no 0x7D map - it just rides in the window.)

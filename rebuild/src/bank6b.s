@@ -1,7 +1,7 @@
 ; Alshark location-name banner - bank 0x6B (field town-entry banner draw at $AB0B).
-; The banner already renders in our VWF font, but with a FIXED 12px cell: the per-char advance
-; ($AB91: pen += 12) and the centering ($AB34: ((12 - charcount)/2)*12). We make it proportional
-; for our relocated maps, and leave every other map (overworld, etc.) running the original code.
+; The banner already renders in the VWF font, but with a fixed 12px cell: the per-char advance
+; ($AB91: pen += 12) and the centering ($AB34: ((12 - charcount)/2)*12). Relocated maps get a
+; proportional draw; every other map (overworld, etc.) keeps the original code.
 ;
 ; Source: location_patch (build.py) relocates each translated map's English name into free space
 ; in the map block (the page loaded to bank 0x76 at $C000) as [$01][start_x][name\0], and repoints
@@ -10,7 +10,7 @@
 ; starts with start_x ($08-$50) or an SJIS lead ($81+), never $01, so every un-relocated map
 ; (overworld included) falls through to the original code.
 ;
-; Both hooks live in the safe slack at $BF7B (133 bytes).
+; Both hooks live in the slack at $BF7B (133 bytes).
 
 .MEMORYMAP
   DEFAULTSLOT 0

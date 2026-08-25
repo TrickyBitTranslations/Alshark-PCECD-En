@@ -13,16 +13,12 @@ import re
 LEAD = lambda c: (0x81 <= c <= 0x9F) or (0xE0 <= c <= 0xEF)
 _TOKEN = re.compile(r'<([0-9a-fA-F]{2})>')
 
-# Row 13 (0x8740-0x879C) is NEC's special-character row: roman numerals, circled digits,
-# unit abbreviations, No./TEL. Python's shift_jis omits it, so those bytes used to surface
-# in the TSV as two <XX> tokens - which reads as mojibake to a translator, and made the
-# suggestion validator demand that half a character be "preserved unchanged".
-#
-# cp932 has the row, but is not a safe blanket swap: it also remaps wave dash and minus
-# (54 rows across the TSVs), breaking their byte-exact round-trip. So take from cp932 only
-# the pairs shift_jis cannot decode AND whose character shift_jis cannot re-encode. That
-# excludes row 13's duplicates of JIS row 2 (the math symbols), which have two possible
-# encodings and so stay escaped - one byte sequence per character, round-trip preserved.
+# Row 13 (0x8740-0x879C) is NEC's special-character row: roman numerals, circled digits, unit
+# abbreviations, No./TEL. Python's shift_jis omits it, so those bytes surface as two <XX> tokens.
+# cp932 has the row but also remaps wave dash and minus, so it is not a safe blanket swap; take
+# only the pairs shift_jis cannot decode whose character it also cannot re-encode. That leaves out
+# row 13's duplicates of JIS row 2, which have two possible encodings - every adopted character
+# has exactly one, so the round-trip holds.
 NEC_ROW = {}
 for _lo in range(0x40, 0x9D):
     _pair = bytes((0x87, _lo))

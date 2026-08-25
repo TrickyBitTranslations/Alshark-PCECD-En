@@ -1,10 +1,10 @@
 ; Alshark dialogue overlay - bank 0x6D (#-engine render/conversion bank).
 ; Card RAM bank 0x6D maps to logical $4000-$5FFF (MPR2); on disc this page is cooked
-; offset 0x15000-0x17000. Only $5E81-$5F5E of the slack is safe (the shipped
-; fontpatch lives there and runs); $5F60+ is engine BSS. So all our code/data stays in
-; $5E81-$5F5E. We drop the ASCII->SJIS table (set a fixed fullwidth code instead - the
-; render hook overrides the glyph bitmap, and the cell/advance is the same for any
-; fullwidth char) to make room for the render hook in the safe region.
+; offset 0x15000-0x17000. Only $5E81-$5F5E of the slack is safe (the shipped fontpatch lives
+; there and runs); $5F60+ is engine BSS, so all injected code and data stays in $5E81-$5F5E.
+; The ASCII->SJIS table is dropped in favour of a fixed fullwidth code - the render hook
+; overrides the glyph bitmap and the cell/advance is the same for any fullwidth char - to make
+; room for the render hook in the safe region.
 
 .MEMORYMAP
   DEFAULTSLOT 0
@@ -134,7 +134,7 @@ rh_loop:
   tam #$08
   rts
 
-; item-read glyph advance ($41E5): same +12 with no spare bytes after its branch -> redirect to its
+; item-read glyph advance ($41E5): same +12 with no spare bytes after its branch, so redirect it to
 ; its own slack trampoline as well. English item names then advance proportionally and fit
 ; (loop $41B7 reads/converts/draws each glyph).
 .ORG itemLoopAdv - $4000         ; $41E5 (was CLC / LDA #$0C / ADC $00 ...)

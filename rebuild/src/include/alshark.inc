@@ -36,13 +36,13 @@
 ; VWF advance: the engine tracks cumulative text X in $273F, advancing +$0C/char at 6A:$8115
 .define penX          $273F ; engine cumulative text X (work RAM, always mapped)
 .define boxAdv        $0C   ; engine's fixed per-char advance (fullwidth = 12 px)
-; Menu name VWF: the menu name-read loop ($4057) advances its pixel-X ($00) by a FIXED +12 per
+; Menu name VWF: the menu name-read loop ($4057) advances its pixel-X ($00) by a fixed +12 per
 ; glyph at $40AE (CLC / LDA #$0C / ADC $00 / STA $00), so long English names overrun the slot into
-; BG VRAM. render_hook stashes the glyph width to menuWidth; we re-emit $40AE to advance $00 by
-; menuWidth instead (proportional). The name-read routine is menu-only (cutscene names use 6A:$7FE4)
-; and dialogue/cutscene never read menuWidth, so this is scoped to menu names.
+; BG VRAM. render_hook stashes the glyph width to menuWidth, and $40AE is re-emitted to advance $00
+; by menuWidth instead. The name-read routine serves menus only (cutscene names use 6A:$7FE4) and
+; dialogue/cutscene never read menuWidth, so this is scoped to menu names.
 .define nameLoopTop   $4080 ; top of the menu name-draw loop (BRA target)
-.define nameLoopAdv   $40AE ; the fixed +12 advance; we redirect to a slack trampoline (an inline
+.define nameLoopAdv   $40AE ; the fixed +12 advance; redirected to a slack trampoline (an inline
                             ; re-emit here is +3 bytes vs the original and overruns the loop's exit
                             ; at $40BC = PLA/TAM #$08/RTS, turning it into JMP $4080 = infinite loop)
 .define nameLoopExit  $40BC ; the loop's exit (orig PLA/TAM #$08/RTS); BEQ at $4082 targets it
@@ -54,9 +54,9 @@
 .define itemLoopRejoin $41EC ; original high-byte handling (CLA/ADC $01/STA $01/BRA $41B7)
 .define itemAdvTramp   $5F53 ; slack trampoline after nameAdvTramp (16 bytes from $5F43)
 ; member-picker name loop ($40C0, reads the bank-6D name copy $412A via offset table $411E) has the
-; same fixed +12 advance at $410F -> monospaced picker names. Hook it like name/item (Equip/Status
-; <Whose?> picker + Plan->Formation). The 4th loop ($4282/$42AC) is a generic runtime-string
-; renderer rather than a picker, and must not be hooked.
+; same fixed +12 advance at $410F -> monospaced picker names. Hooked like name/item; it serves the
+; Equip/Status <Whose?> picker and Plan->Formation. The 4th loop ($4282/$42AC) is a generic
+; runtime-string renderer rather than a picker, and must not be hooked.
 .define pickerLoopAdv  $410F ; CLC of the picker +12 advance; overwrite with JMP pickerAdvTramp
 .define pickerLoopTop  $40E1 ; the picker loop top (BRA target)
 ; render-hook scratch in the safe slack (the fontpatch region; $5F60+ is engine BSS)

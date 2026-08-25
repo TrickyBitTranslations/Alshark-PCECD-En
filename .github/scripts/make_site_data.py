@@ -24,11 +24,11 @@ PAGE = 0x2000                         # a block loads into one 8KB logical page
 CODECS = {"cutscene.tsv": dialogcodec}    # else tier-1 textcodec
 
 # Files hidden from the site and dropped from all stats.
-# system1.tsv (839 lines) is leftover MIGHT & MAGIC III: ISLES OF TERRA text, not Alshark.
+# system1.tsv (839 lines) is leftover Might & Magic III: Isles of Terra text, not Alshark.
 # Right Stuff / Victor also did the M&M III PC Engine CD port, so its whole script sits dead on
 # this disc. Proven by content: Sheltem x17, Terra x8, Fountainhead, Greywind, orcs, gargoyles,
 # Gold currency, "exp" - and ZERO Alshark proper nouns (Sion / Zolias / meteor / Credits) across
-# all 839 lines. These blocks are not loaded by Alshark. Do not translate it; keep it hidden.
+# all 839 lines. These blocks are not loaded by Alshark; leave it untranslated and hidden.
 #
 # cutscene_subs.tsv is the anime-cutscene subtitle surface: a different schema entirely
 # (recno_hex<TAB>English, comment-headed - no block_off/raw_hex), built straight into the

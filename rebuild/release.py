@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Build the Alshark English CD and publish an xdelta release patch.
 
-The release ships an **xdelta patch** (only the changed bytes - not the game) plus our
-.cue. Players bring their own JP Alshark CD (raw 2352-byte .bin matching the published
-SHA-256), apply the patch, and play. No copyrighted data is distributed.
+The release ships an xdelta patch (only the changed bytes, not the game) plus the .cue.
+Players bring their own JP Alshark CD (raw 2352-byte .bin matching the published SHA-256),
+apply the patch, and play. No copyrighted data is distributed.
 
 Usage:
   python rebuild/release.py --check                 # validate translations (no game data needed)
@@ -125,7 +125,7 @@ def main():
     # the patch carries only the changed bytes, not the game - safe to publish
     step('patch: xdelta3 JP -> EN delta')
     run(['xdelta3', '-e', '-f', '-s', JP_BIN, EN_BIN, PATCH])
-    shutil.copyfile(EN_CUE, CUE_OUT)            # our cue (FILE "Alshark.bin"), not game data
+    shutil.copyfile(EN_CUE, CUE_OUT)            # the patched cue (FILE "Alshark.bin"), not game data
     jp_hash = sha256(JP_BIN)
     print('  patch: %s (%d bytes)' % (PATCH, os.path.getsize(PATCH)))
 

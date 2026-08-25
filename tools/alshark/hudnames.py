@@ -3,12 +3,11 @@
 
 The battle HUD (right panel) shows party names as a table of 8x8 font tile-refs at
 cooked 0x3f790a (8 tiles/member), referencing an 8x8 half-width font (VRAM tile 0x200 +
-index) that only has katakana. We render each name proportionally, slice it into 8x8
-tiles, and point the name table at relocated tiles in free VRAM $7E00 (tiles $7E0+).
+index) that only has katakana. Each name is rendered proportionally, sliced into 8x8
+tiles, and the name table pointed at relocated tiles in free VRAM $7E00 (tiles $7E0+).
 
-The glyphs must not go in the $2000 font page: its spare-looking slots $C0-$EB are the
-enemy/party shadow sprites (empty plane0, oval in planes 2&3), so injecting there paints
-our glyph over the shadow -> the enemy "white box" bug. Instead the 8-bytes-per-tile
+The glyphs cannot go in the $2000 font page: its spare-looking slots $C0-$EB are the
+enemy/party shadow sprites (empty plane0, oval in planes 2&3). Instead the 8-bytes-per-tile
 plane0 blob is emitted to rebuild/incbin/hud_glyphs.bin (rides the bank-0x7F font asset)
 and boot.s blit_hud_glyphs streams it to VRAM $7E00 each transition. The name-table refs
 carry high byte $75 (real glyph -> BAT $77xx = tile $7xx after the draw's +2) or $70 for
@@ -17,8 +16,8 @@ the blank-space tile $26F.
   PYTHONPATH=tools python3 tools/alshark/hudnames.py            # regenerate with config below
   then: python rebuild/build.py --chd
 
-To change the look: edit FONT / PX / NAMES below and re-run. The glyphs are 8x8 (cells are
-tiny) so a crisp 8px pixel font + ALL-CAPS reads best. Each tile is 8 plane0 bytes
+To change the look, edit FONT / PX / NAMES below and re-run. The cells are 8x8, so a crisp
+8px pixel font in all caps reads best. Each tile is 8 plane0 bytes
 (bit set = foreground); the blit synthesizes plane1=$FF and duplicates into planes 2&3.
 """
 import json

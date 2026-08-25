@@ -198,7 +198,7 @@ def battle_patch(cooked):
 PARTY_ARRAY = 0x19afb
 
 # The level-up / battle name window (bank 0x6F routine @ $8A97) copies LEN_TBL[$8AEF] bytes of the name
-# from the array, then pads to 8 with $01. Those lengths are the japanese byte-counts, so our shorter
+# from the array, then pads to 8 with $01. Those lengths are the Japanese byte-counts, so the shorter
 # English names OVER-copy and drag the array's NUL padding into the result string -> the $5748 drawer
 # hits the NUL and the level-up window terminates right after the name (only the name shows). Rewrite the
 # length table with the English byte-lengths. The offset table @ 0x19ae3 maps each of the 12 slots to its
@@ -223,15 +223,14 @@ def party_array_patch(cooked):
     return patches
 
 
-# Battle HUD party names (right panel). The names are a table of 8x8 font tile-refs (8 per
-# member) referencing an 8x8 half-width font (disc 0x39000, VRAM tile 0x200+index, katakana only).
-# script/hud_names_patch.json (built by tools/alshark/hudnames.py) injects English 8x8 glyphs into
-# spare font slots AND holds the English tile-ref table.
+# Battle HUD party names (right panel): a table of 8x8 font tile-refs, 8 per member, into the
+# half-width font at disc 0x39000 (VRAM tile 0x200+index, katakana only). hudnames.py builds
+# script/hud_names_patch.json: English 8x8 glyphs for spare font slots plus the tile-ref table.
 #
 # The draw reads its name table at $690A (bank 0x78), loaded from disc 0x3f790a - which the field
 # shares, so patching it on disc corrupts the field. boot.s copy_hud_names overwrites the card copy
-# at every font reload instead. hud_patch here only injects the
-# font glyphs; gen_hud_idx() builds the 72 glyph indices boot.s copies in.
+# at every font reload instead. hud_patch here only injects the glyphs; gen_hud_idx() builds the
+# 72 indices boot.s copies in.
 def gen_hud_idx():
     """Write incbin/hud_en_idx.bin: 72 font-glyph indices (9 members x 8 tiles) for boot.s."""
     import json
@@ -292,7 +291,7 @@ def _vwf_strip(text, glyphs, widths):
 
 def gen_cutscene_text():
     """From script/cutscene_subs.tsv (recno_hex<TAB>line), build the streamed subtitle blob loaded into card
-    bank 0x7D. Layout in 0x7D (= $A000 when MPR-swapped in):
+    bank 0x7D, which is free during the cutscene. Layout in 0x7D (= $A000 when MPR-swapped in):
       $A000 ($0000): the play-ordered line table - per line: n_tiles (1 B) then the proportional pixel strip
                      (n_tiles*8 B, 1bpp pre-rendered); terminator n_tiles=0. vblank_hook walks to the current
                      line by play-count, copies its strip out, and expands the 1bpp rows into 4bpp VRAM tiles.
@@ -322,18 +321,17 @@ def gen_cutscene_text():
 
 
 def hud_patch(cooked):
-    # The English HUD-name glyphs are NO LONGER spliced into the $2000 font sheet (disc 0x39000):
-    # its "spare" slots $C0-$EB are the enemy/party shadow sprites, so injecting there painted our
-    # glyph over the shadow = the enemy "white box" bug. The glyphs now live in rebuild/incbin/
-    # hud_glyphs.bin (spliced via BLOBS onto the bank-0x7F font asset) and boot.s blit_hud_glyphs
-    # streams them to free VRAM $7E00; gen_hud_idx()/copy_hud_names carry the name-table refs.
-    # Nothing to splice here anymore.
+    # The HUD-name glyphs are not spliced into the $2000 font sheet (disc 0x39000): its
+    # spare-looking slots $C0-$EB are the enemy/party shadow sprites. They live in
+    # rebuild/incbin/hud_glyphs.bin instead (spliced via BLOBS onto the bank-0x7F font asset), and
+    # boot.s blit_hud_glyphs streams them to free VRAM $7E00; gen_hud_idx()/copy_hud_names carry
+    # the name-table refs. Nothing to splice here.
     return []
 
 
 # Field location-name banners (town-entry place names). Each map block's name is an inline
 # half-width-katakana string at block+0x32 in tight slots; English (with suffix) doesn't fit.
-# So we relocate: write [$01 marker][start_x][english\0] into free space in the map block's
+# So relocate them: write [$01 marker][start_x][english\0] into free space in the map block's
 # bank-0x76 page and repoint the map's name pointer at block+0x2E to it. start_x is the centered
 # left edge (8 + (144 - pixel_width)/2). The $01 marker tags the pointer as ours (no stock name
 # pointer's target starts with $01); the bank-0x6B hook reads start_x + draws proportionally.
@@ -424,10 +422,10 @@ def save_menu_patch(cooked):
     pack into that region. A 40B disc-zero gap at $79CD is not usable - it is a runtime glyph/BG
     staging buffer.
 
-    The option box still needs widening to fit "Start/Copy/Delete"; those two descriptor bytes
+    The option box also needs widening to fit "Start/Copy/Delete"; those two descriptor bytes
     (0x48018b5/b7) live in bank 0x69, so they are cold-safe. Two dialogs are trimmed a few chars to
-    fit the 430B region. The "TrickyBit" credit is not here - its 384B of pre-baked tiles do not fit
-    bank 0x69, so it must be re-rendered from the menu font (Stage 2), not DMA'd as tiles.
+    fit the 430B region. The "TrickyBit" credit is not here: its 384B of pre-baked tiles do not fit
+    bank 0x69, so it is re-rendered from the menu font rather than DMA'd as tiles.
     """
     def fw(s):                                   # ASCII -> full-width SJIS (this menu has no half-width)
         out = []
@@ -454,7 +452,7 @@ def save_menu_patch(cooked):
         (0x480192d, ['A BIOS error.', 'Please reset.']),                              # msg8 (trimmed)
     ]
     # cold-safe homes in bank 0x69 (disc 0x4801000, org $6000):
-    # all strings go into the 6 freed JP dialog strings = 430 contiguous bytes at $69BF (disc
+    # All strings go into the 6 freed JP dialog strings = 430 contiguous bytes at $69BF (disc
     # 0x48019bf), which holds display-only string data and is free at runtime. The 40-byte gap at
     # $79CD is zero on disc but is a runtime glyph/BG staging buffer, so it is not usable. Dialogs
     # are trimmed a few chars to leave room for the option.
@@ -472,7 +470,7 @@ def save_menu_patch(cooked):
         patches.append((d, blob))                                          # English string (overwrites freed JP)
         patches.append((entry, bytes([log(d) & 0xff, log(d) >> 8])))       # repoint the descriptor
         off += len(blob)
-    # widen only the option box (dialog boxes are already wide): row stride must match the width
+    # widen just the option box (dialog boxes are already wide): row stride must match the width
     patches.append((0x48018b5, b'\x40\x01'))     # option box row stride 0x0060 -> 0x0140 ($8D*0x20)
     patches.append((0x48018b7, b'\x0d'))         # option box width param 0x06 -> 0x0d ($8D = 10)
     return patches
@@ -482,8 +480,8 @@ def formation_patch(cooked):
     """In-game formation (party-order) menu (the "Plan" submenu) at cooked 0xb3f9. It's drawn by the
     bank-0x6D VWF loop like the other field menus, but export_menu.py's run finder skips it: the block
     interleaves SJIS glyphs with raw ASCII spaces (0x20) and slot digits (0x31-0x35), which break run
-    detection. The full-width spaces position the two columns, so translate only the three text
-    segments IN PLACE, padded with spaces (a 0x00 pad would terminate the block and hide the columns)."""
+    detection. The full-width spaces position the two columns, so only the three text segments are
+    translated, in place, padded with spaces (a 0x00 pad would terminate the block and hide the columns)."""
     import alshark.menucodec as menucodec
     segs = [
         (0xb3f9, '隊列を変更します。', 'Formation'),           # title; kept short + single-word so the confirm prompt (drawn over it) fully covers it
@@ -564,12 +562,11 @@ def title_credit_patch(cooked):
     The title routine (bank 0x69 $6000, both warm + post-death paths) uploads its BG tilemap from
     $72CD -> VRAM $0000 (0x700 B, 32x28) and its BG tiles from $79CD -> VRAM $1000 (0x2300 B, spanning
     into bank 0x6A). The baked copyright is tiles 0x1D5-0x1F9 on BAT rows 22 + 24; tiles 0x1FA+ are
-    free and BAT rows 25-27 are blank. So we drop the pre-rendered credit glyph tiles
-    (script/title_credit.bin: 4bpp, all four planes = the glyph -> color 15 white in palette 0,
-    matching the copyright) into the free tile slots and write their tile numbers into a blank BAT
-    row - both regions the title already uploads. Cold-safe: it rides the exact data that draws the
- copyright on every path to the title. Regenerate the tiles with
-    tools/alshark/gen_title_credit.py."""
+    free and BAT rows 25-27 are blank. The pre-rendered credit glyph tiles (script/title_credit.bin:
+    4bpp, all four planes = the glyph -> color 15 white in palette 0, matching the copyright) go into
+    the free tile slots, and their tile numbers into a blank BAT row - both regions the title already
+    uploads. Cold-safe: it rides the same data that draws the copyright on every path to the title.
+    Regenerate the tiles with tools/alshark/gen_title_credit.py."""
     blob = open(os.path.join(ROOT, 'script', 'title_credit.bin'), 'rb').read()
     n = len(blob) // 32
     if n == 0 or len(blob) % 32:

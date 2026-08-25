@@ -1,16 +1,16 @@
 ; Alshark boot/WRAM image - disc cooked 0x0000-0x2000, loaded to WRAM $2000-$3FFF.
-; NOTE: the low part of this image (the IPL boot program, ~disc 0x0-0x800, incl the $2Bxx
-; vsync handler at disc 0x326) is CHECKSUMMED by the System Card - patching it = "load
-; error". The $34xx loader region (disc 0x14xx) is loaded later by the game, not checksummed,
-; so it is safe to patch.
+; The low part of this image (the IPL boot program, ~disc 0x0-0x800, including the $2Bxx vsync
+; handler at disc 0x326) is checksummed by the System Card - patching it gives a "load error".
+; The $34xx loader region (disc 0x14xx) is loaded later by the game and is not checksummed, so
+; it is safe to patch.
 ;
-; Placement: card RAM has no permanently-free bank (every bank reloads on transitions).
-; Bank 0x7F's tail ($CFA0+) is a scene-load staging buffer: wiped during a transition's
-; load, free for the rest of the scene. We re-copy our VWF font into it after a transition.
-; We do it by hooking the resident loader's CD read ($34E3 = JSR $E009), which fires on the
-; engine/area/map loads that wipe the buffer. The font read runs SEQUENTIALLY right after
-; the loader's own read (CD idle -> no deadlock, no IRQ), gated by a marker so it only
-; re-copies when the buffer was actually wiped. Font baked at cooked 0xa1a000 (recno $1434).
+; Placement: card RAM has no permanently-free bank (every bank reloads on transitions). Bank
+; 0x7F's tail ($CFA0+) is a scene-load staging buffer: wiped during a transition's load, free
+; for the rest of the scene. The VWF font is re-copied into it after a transition by hooking the
+; resident loader's CD read ($34E3 = JSR $E009), which fires on the engine/area/map loads that
+; wipe the buffer. The font read runs right after the loader's own read (CD idle, so no deadlock
+; and no IRQ), gated by a marker so it only re-copies when the buffer was actually wiped. Font
+; baked at cooked 0xa1a000 (recno $1434).
 
 .MEMORYMAP
   DEFAULTSLOT 0
@@ -31,15 +31,15 @@
 .ORG $14E3                        ; disc 0x14E3 == WRAM $34E3
   jsr my_read
 
-; ---- new-game state-init fix: stop the init copying our loader-slack code onto the save state ----
-; The init ($3B40) does TAI (zero $269D-$2F57, which covers the WHOLE template destination $2829-$2C8D)
-; then TII $3B53,$2829,#$0465 (copy the new-game template back over it). Our code at $3BC6-$3CC4 lives in
-; that template's zero region, so the copy paints it onto the fresh inventory ($28F9). But the TAI already
-; zeroed everything, and the template before the real data ($3CC5+) is just a 2-byte header ($2829=$0131)
-; plus zeros - so we replace the one TII with: copy only the real data, then write the header back. Now
-; $282B-$299A (inventory included) just keeps the TAI's zeros and our code is never copied. The extra
-; instructions spill into the now-dead template head ($3B53+), which nothing reads. Works in boot AND
-; new-game (pure WRAM, no bank).
+; ---- new-game state-init fix: stop the init copying loader-slack code onto the save state ----
+; The init ($3B40) does TAI (zero $269D-$2F57, covering the whole template destination $2829-$2C8D)
+; then TII $3B53,$2829,#$0465 (copy the new-game template back over it). The injected code at
+; $3BC6-$3CC4 lives in that template's zero region, so the copy painted it onto the fresh inventory
+; ($28F9). The TAI already zeroed everything, and the template before the real data ($3CC5+) is just
+; a 2-byte header ($2829=$0131) plus zeros, so the one TII becomes: copy only the real data, then
+; write the header back. $282B-$299A (inventory included) keeps the TAI's zeros. The extra
+; instructions spill into the now-dead template head ($3B53+), which nothing reads. Works in boot
+; and new-game (pure WRAM, no bank).
 .ORG $1B4B                        ; disc 0x1B4B == WRAM $3B4B (the init's template-copy TII)
   tii $3CC5, $299B, 755           ; copy only the real init data $3CC5-$3FB7 -> $299B-$2C8D (skip $2829-$299A)
   lda #$31
@@ -48,12 +48,12 @@
   rts
 
 ; ---- blit_hud_glyphs: stream the relocated battle-HUD name glyphs to free VRAM $7E00.
-; The glyphs must not live in the $2000 font page ($C0-$EB there are the enemy/party shadow
-; sprites).
-; hudnames.py emits a 32-tile plane0 blob (rebuild/incbin/hud_glyphs.bin) that rides the bank-0x7F
-; font asset (loaded to $CFA0+0x680 = $D620). This runs from my_read while MPR6=0x7F: for each of
-; 32 tiles it writes 16 VRAM words - plane0 row + $FF (plane1), rows 0-7 twice (planes 2&3 = 0&1) -
-; matching the katakana glyph format. copy_hud_names points the name table at these tiles (high byte $75).
+; The glyphs cannot live in the $2000 font page - slots $C0-$EB there are the enemy/party shadow
+; sprites. hudnames.py emits a 32-tile plane0 blob (rebuild/incbin/hud_glyphs.bin) that rides the
+; bank-0x7F font asset (loaded to $CFA0+0x680 = $D620). This runs from my_read while MPR6=0x7F: for
+; each of 32 tiles it writes 16 VRAM words - plane0 row + $FF (plane1), rows 0-7 twice (planes 2&3
+; = 0&1) - matching the katakana glyph format. copy_hud_names points the name table at these tiles
+; (high byte $75).
 
 .ORG $1B60                        ; WRAM $3B60 (free run $3B5B-$3BC4, ahead of the loader slack)
 blit_hud_glyphs:
@@ -226,7 +226,7 @@ fnc_keep:
 
 ; ---- anime-cutscene subtitle hook (UNIVERSAL, via a DISC PATCH of the shared player code) ----
 ; The cutscene player (bank 0x68: the $467A VDC-IRQ handler etc.) is a SINGLE copy on disc at recno
-; $57C2 (cooked 0x2BE1000), loaded to $4000 for every anime cutscene - so bank68.s patches it directly.
+; $57C2 (cooked 0x2BE1000), loaded to $4000 for every anime cutscene, so bank68.s patches it directly.
 ; No runtime hook-install (the $2202-wrap, $3ACC/$7F0A code hooks, and TIMER watchdog all failed:
 ; per-cutscene bundled code at non-fixed offsets, IRQ2 never fires, the System Card doesn't route the
 ; timer IRQ to $2204). bank68.s redirects the IRQ handler's vblank path ($4689 = the INC $2241
