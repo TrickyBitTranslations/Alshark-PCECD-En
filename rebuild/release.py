@@ -11,6 +11,8 @@ Usage:
   python rebuild/release.py --release --tag v1.0     # build + make the xdelta + publish a GitHub release
   python rebuild/release.py --release --tag v1.0 --intro "First playable release!"
   python rebuild/release.py --release --tag v1.0 --intro-file notes/v1.0.md
+  python rebuild/release.py --release --tag v1.0 --prerelease     # mark it a pre-release
+  python rebuild/release.py --release --tag v1.0 --no-publish     # build dist/ only
 
 Release notes are pulled from "Release-note:" trailers on commits since the previous tag,
 so only commits that opt in show up - e.g. add to a commit message:
@@ -85,6 +87,10 @@ def main():
     ap.add_argument('--tag', help='release tag, e.g. v1.0')
     ap.add_argument('--intro', help='text to put above the auto notes')
     ap.add_argument('--intro-file', help='file whose contents go above the auto notes')
+    ap.add_argument('--prerelease', action='store_true',
+                    help='mark the GitHub release as a pre-release')
+    ap.add_argument('--no-publish', action='store_true',
+                    help='build the patch and notes into dist/, but do not publish')
     args = ap.parse_args()
 
     if args.check:
@@ -113,11 +119,13 @@ def main():
     if not args.tag:
         print('Release needs a tag:  python rebuild/release.py --release --tag v1.0', file=sys.stderr)
         sys.exit(1)
-    for t in ('xdelta3', 'gh'):
+    tools = ('xdelta3',) if args.no_publish else ('xdelta3', 'gh')
+    for t in tools:
         if not shutil.which(t):
             print('%s not found (xdelta3: sudo apt-get install -y xdelta3).' % t, file=sys.stderr)
             sys.exit(1)
-    if subprocess.run(['gh', 'auth', 'status'], capture_output=True).returncode != 0:
+    if not args.no_publish and subprocess.run(['gh', 'auth', 'status'],
+                                              capture_output=True).returncode != 0:
         print("gh isn't logged in. Run: gh auth login   (or set GH_TOKEN)", file=sys.stderr)
         sys.exit(1)
 
@@ -154,9 +162,29 @@ def main():
     notes_file = os.path.join(DIST, 'notes.md')
     open(notes_file, 'w', encoding='utf-8').write('\n'.join(body) + '\n')
 
+    cmd = ['gh', 'release', 'create', args.tag, PATCH, CUE_OUT,
+           '--title', args.tag, '--notes-file', notes_file]
+    if args.prerelease:
+        cmd.append('--prerelease')
+
+    if args.no_publish:
+        print('\nPATCH READY (not published)')
+        print('  %s' % PATCH)
+        print('  %s' % CUE_OUT)
+        print('  %s' % notes_file)
+        print('  publish with: %s' % ' '.join(cmd))
+        return
+
     step('publish: gh release %s' % args.tag)
-    run(['gh', 'release', 'create', args.tag, PATCH, CUE_OUT,
-         '--title', args.tag, '--notes-file', notes_file], cwd=ROOT)
+    if subprocess.run(cmd, cwd=ROOT).returncode != 0:
+        # the build and the patch are fine; only the upload failed. Say so, and
+        # leave dist/ in place so it can be retried or uploaded by hand.
+        print('\nPUBLISH FAILED - the patch itself is built and valid:', file=sys.stderr)
+        print('  %s' % PATCH, file=sys.stderr)
+        print('  %s' % CUE_OUT, file=sys.stderr)
+        print('  %s' % notes_file, file=sys.stderr)
+        print('  retry with: %s' % ' '.join(cmd), file=sys.stderr)
+        sys.exit(1)
     print('\nRELEASED %s' % args.tag)
     print('  notes from Release-note: trailers (%s)' % rng)
 
