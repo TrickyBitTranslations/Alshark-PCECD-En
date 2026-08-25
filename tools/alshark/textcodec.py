@@ -6,7 +6,7 @@ written as <XX> (hex), matching the markup convention; text is kept faithful bot
 who want it. Every row also keeps raw_hex, so untranslated lines round-trip exactly.
 
 The #/$/% style line-break and name codes are left as raw <XX> for now; promote them to
-\\n / \\p / {NAME} once the control grammar is documented (see docs/markup.md).
+\\n / \\p / {NAME} once the control grammar is fully documented (see docs/markup.md).
 """
 import re
 
