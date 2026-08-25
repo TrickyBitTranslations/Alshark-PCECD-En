@@ -25,7 +25,7 @@ block_off	str_off	speaker	text	raw_hex	english	status
 0x784066	23		バいデん	836fb28366dd	Biden	
 0x784066	24		ガドもす・バいデん	834b8368d3bd8145836fb28366dd	Gadmos Biden	
 0x784066	25		いーる・こせ王	b2b0d98145babe89a4	King Yle	
-0x784066	26		ザーて・こせ<87><55>世	8355b0c38145babe875590a2		
+0x784066	26		ザーて・こせ<87><55>世	8355b0c38145babe875590a2	Zaate Kose II	human
 0x784066	27		−−−−−−	817c817c817c817c817c817c		
 0x784066	28		あいすにードる	b1b2bdc6b08368d9	Ice Needle	
 0x784066	29		すたんなっくる	bdc0ddc5afb8d9	Stun Knuckle	
@@ -341,7 +341,7 @@ block_off	str_off	speaker	text	raw_hex	english	status
 0x784066	339					
 0x784066	340		のーまるえんジん	c9b0cfd9b4dd8357dd	Normal Engine	
 0x784066	341		Ｊ−Ｓえんジん	8269817c8272b4dd8357dd	J-S Engine	
-0x784066	342		あるゴー<87><58>	b1d98353b08758		
+0x784066	342		あるゴー<87><58>	b1d98353b08758	Argo V	human
 0x784066	343		プらズま	8376d78359cf	Plasma	
 0x784066	344		Ｇ−いおん	8266817cb2b5dd	G-Ion	
 0x784066	345		ＮＥＧＡ−Ｊ	826d826482668260817c8269	NEGA-J	
